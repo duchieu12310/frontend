@@ -1,4 +1,4 @@
-
+Cài Version node.js mình sử dụng là 16.20.0:
 
 Các bước cài đặt: (chế độ development)
 1. clone code
