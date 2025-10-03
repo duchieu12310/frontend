@@ -29,7 +29,7 @@ const CompanyCard = (props: IProps) => {
     }, [current, pageSize, filter, sortQuery]);
 
     const fetchCompany = async () => {
-        setIsLoading(true)
+        setIsLoading(true);
         let query = `page=${current}&size=${pageSize}`;
         if (filter) {
             query += `&${filter}`;
@@ -41,28 +41,27 @@ const CompanyCard = (props: IProps) => {
         const res = await callFetchCompany(query);
         if (res && res.data) {
             setDisplayCompany(res.data.result);
-            setTotal(res.data.meta.total)
+            setTotal(res.data.meta.total);
         }
-        setIsLoading(false)
-    }
-
+        setIsLoading(false);
+    };
 
     const handleOnchangePage = (pagination: { current: number, pageSize: number }) => {
         if (pagination && pagination.current !== current) {
-            setCurrent(pagination.current)
+            setCurrent(pagination.current);
         }
         if (pagination && pagination.pageSize !== pageSize) {
-            setPageSize(pagination.pageSize)
+            setPageSize(pagination.pageSize);
             setCurrent(1);
         }
-    }
+    };
 
     const handleViewDetailJob = (item: ICompany) => {
         if (item.name) {
             const slug = convertSlug(item.name);
-            navigate(`/company/${slug}?id=${item.id}`)
+            navigate(`/company/${slug}?id=${item.id}`);
         }
-    }
+    };
 
     return (
         <div className={`${styles["company-section"]}`}>
@@ -83,7 +82,12 @@ const CompanyCard = (props: IProps) => {
                                 <Col span={24} md={6} key={item.id}>
                                     <Card
                                         onClick={() => handleViewDetailJob(item)}
-                                        style={{ height: 350 }}
+                                        style={{
+                                            height: 350,
+                                            borderRadius: 12,
+                                            border: "1px solid #f0f0f0",
+                                            background: "linear-gradient(180deg, #ffffff, #f9f9ff)"
+                                        }}
                                         hoverable
                                         cover={
                                             <div className={styles["card-customize"]} >
@@ -96,13 +100,13 @@ const CompanyCard = (props: IProps) => {
                                         }
                                     >
                                         <Divider />
-                                        <h3 style={{ textAlign: "center" }}>{item.name}</h3>
+                                        <h3 style={{ textAlign: "center", color: "#1890ff" }}>{item.name}</h3>
                                     </Card>
                                 </Col>
                             )
                         })}
 
-                        {(!displayCompany || displayCompany && displayCompany.length === 0)
+                        {(!displayCompany || (displayCompany && displayCompany.length === 0))
                             && !isLoading &&
                             <div className={styles["empty"]}>
                                 <Empty description="Không có dữ liệu" />

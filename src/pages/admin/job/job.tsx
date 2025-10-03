@@ -27,7 +27,7 @@ const JobPage = () => {
         if (id) {
             const res = await callDeleteJob(id);
             if (res && res.data) {
-                message.success('Xóa Job thành công');
+                message.success('Xóa công việc thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -57,7 +57,7 @@ const JobPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Tên Job',
+            title: 'Tên công việc',
             dataIndex: 'name',
             sorter: true,
         },
@@ -71,49 +71,48 @@ const JobPage = () => {
             title: 'Mức lương',
             dataIndex: 'salary',
             sorter: true,
-            render(dom, entity, index, action, schema) {
+            render(dom, entity) {
                 const str = "" + entity.salary;
                 return <>{str?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</>
             },
         },
         {
-            title: 'Level',
+            title: 'Cấp bậc',
             dataIndex: 'level',
-            renderFormItem: (item, props, form) => (
+            renderFormItem: () => (
                 <ProFormSelect
                     showSearch
                     mode="multiple"
                     allowClear
                     valueEnum={{
-                        INTERN: 'INTERN',
-                        FRESHER: 'FRESHER',
-                        JUNIOR: 'JUNIOR',
-                        MIDDLE: 'MIDDLE',
-                        SENIOR: 'SENIOR',
+                        INTERN: 'Thực tập',
+                        FRESHER: 'Mới ra trường',
+                        JUNIOR: 'Nhân viên ít kinh nghiệm',
+                        MIDDLE: 'Nhân viên có kinh nghiệm',
+                        SENIOR: 'Chuyên gia',
                     }}
-                    placeholder="Chọn level"
+                    placeholder="Chọn cấp bậc"
                 />
             ),
         },
         {
             title: 'Trạng thái',
             dataIndex: 'active',
-            render(dom, entity, index, action, schema) {
+            render(dom, entity) {
                 return <>
                     <Tag color={entity.active ? "lime" : "red"} >
-                        {entity.active ? "ACTIVE" : "INACTIVE"}
+                        {entity.active ? "Đang hoạt động" : "Ngừng hoạt động"}
                     </Tag>
                 </>
             },
             hideInSearch: true,
         },
-
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (_, record) => {
                 return (
                     <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -121,11 +120,11 @@ const JobPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (_, record) => {
                 return (
                     <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -133,13 +132,12 @@ const JobPage = () => {
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
-                    < Access
+                    <Access
                         permission={ALL_PERMISSIONS.JOBS.UPDATE}
                         hideChildren
                     >
@@ -148,20 +146,19 @@ const JobPage = () => {
                                 fontSize: 20,
                                 color: '#ffa500',
                             }}
-                            type=""
                             onClick={() => {
                                 navigate(`/admin/job/upsert?id=${entity.id}`)
                             }}
                         />
-                    </Access >
+                    </Access>
                     <Access
                         permission={ALL_PERMISSIONS.JOBS.DELETE}
                         hideChildren
                     >
                         <Popconfirm
                             placement="leftTop"
-                            title={"Xác nhận xóa job"}
-                            description={"Bạn có chắc chắn muốn xóa job này ?"}
+                            title={"Xác nhận xóa công việc"}
+                            description={"Bạn có chắc chắn muốn xóa công việc này?"}
                             onConfirm={() => handleDeleteJob(entity.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
@@ -176,14 +173,12 @@ const JobPage = () => {
                             </span>
                         </Popconfirm>
                     </Access>
-                </Space >
+                </Space>
             ),
-
         },
     ];
 
     const buildQuery = (params: any, sort: any, filter: any) => {
-
         const clone = { ...params };
         let parts = [];
         if (clone.name) parts.push(`name ~ '${clone.name}'`);
@@ -212,12 +207,12 @@ const JobPage = () => {
             for (const field of fields) {
                 if (sort[field]) {
                     sortBy = `sort=${field},${sort[field] === 'ascend' ? 'asc' : 'desc'}`;
-                    break;  // Remove this if you want to handle multiple sort parameters
+                    break;
                 }
             }
         }
 
-        //mặc định sort theo updatedAt
+        // Mặc định sắp xếp theo ngày cập nhật
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
@@ -234,7 +229,7 @@ const JobPage = () => {
             >
                 <DataTable<IJob>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Jobs"
+                    headerTitle="Danh sách công việc"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -250,7 +245,7 @@ const JobPage = () => {
                             pageSize: meta.pageSize,
                             showSizeChanger: true,
                             total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
+                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} dòng</div>) }
                         }
                     }
                     rowSelection={false}
@@ -261,13 +256,13 @@ const JobPage = () => {
                                 type="primary"
                                 onClick={() => navigate('upsert')}
                             >
-                                Thêm mới
+                                Thêm công việc mới
                             </Button>
                         );
                     }}
                 />
             </Access>
-        </div >
+        </div>
     )
 }
 

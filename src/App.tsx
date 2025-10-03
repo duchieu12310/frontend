@@ -30,6 +30,7 @@ import ClientJobDetailPage from './pages/job/detail';
 import ClientCompanyPage from './pages/company';
 import ClientCompanyDetailPage from './pages/company/detail';
 import JobTabs from './pages/admin/job/job.tabs';
+import ClientRegisterCompanyPage from './pages/register-company';
 
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,7 +79,9 @@ export default function App() {
         { path: "job", element: <ClientJobPage /> },
         { path: "job/:id", element: <ClientJobDetailPage /> },
         { path: "company", element: <ClientCompanyPage /> },
-        { path: "company/:id", element: <ClientCompanyDetailPage /> }
+        { path: "company/:id", element: <ClientCompanyDetailPage /> },
+        { path: "register-company", element: <ClientRegisterCompanyPage /> }
+
       ],
     },
 

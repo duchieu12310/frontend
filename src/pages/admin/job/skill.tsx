@@ -1,4 +1,3 @@
-
 import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { ISkill } from "@/types/backend";
@@ -28,7 +27,7 @@ const SkillPage = () => {
         if (id) {
             const res = await callDeleteSkill(id);
             if (res && +res.statusCode === 200) {
-                message.success('Xóa Skill thành công');
+                message.success('Xóa kỹ năng thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -58,30 +57,29 @@ const SkillPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Name',
+            title: 'Tên kỹ năng',
             dataIndex: 'name',
             sorter: true,
         },
 
         {
-            title: 'Created By',
+            title: 'Người tạo',
             dataIndex: 'createdBy',
             hideInSearch: true,
         },
 
         {
-            title: 'Updated By',
+            title: 'Người cập nhật',
             dataIndex: 'updatedBy',
             hideInSearch: true,
         },
 
-
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -89,11 +87,11 @@ const SkillPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -101,19 +99,16 @@ const SkillPage = () => {
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
-
                     <EditOutlined
                         style={{
                             fontSize: 20,
                             color: '#ffa500',
                         }}
-                        type=""
                         onClick={() => {
                             setOpenModal(true);
                             setDataInit(entity);
@@ -122,8 +117,8 @@ const SkillPage = () => {
 
                     <Popconfirm
                         placement="leftTop"
-                        title={"Xác nhận xóa skill"}
-                        description={"Bạn có chắc chắn muốn xóa skill này ?"}
+                        title={"Xác nhận xóa kỹ năng"}
+                        description={"Bạn có chắc chắn muốn xóa kỹ năng này?"}
                         onConfirm={() => handleDeleteSkill(entity.id)}
                         okText="Xác nhận"
                         cancelText="Hủy"
@@ -139,7 +134,6 @@ const SkillPage = () => {
                     </Popconfirm>
                 </Space>
             ),
-
         },
     ];
 
@@ -168,7 +162,7 @@ const SkillPage = () => {
             sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
         }
 
-        //mặc định sort theo updatedAt
+        // mặc định sắp xếp theo ngày cập nhật
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
@@ -182,7 +176,7 @@ const SkillPage = () => {
         <div>
             <DataTable<ISkill>
                 actionRef={tableRef}
-                headerTitle="Danh sách Skill"
+                headerTitle="Danh sách kỹ năng"
                 rowKey="id"
                 loading={isFetching}
                 columns={columns}
@@ -198,7 +192,7 @@ const SkillPage = () => {
                         pageSize: meta.pageSize,
                         showSizeChanger: true,
                         total: meta.total,
-                        showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
+                        showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} dòng</div>) }
                     }
                 }
                 rowSelection={false}
@@ -209,7 +203,7 @@ const SkillPage = () => {
                             type="primary"
                             onClick={() => setOpenModal(true)}
                         >
-                            Thêm mới
+                            Thêm kỹ năng mới
                         </Button>
                     );
                 }}

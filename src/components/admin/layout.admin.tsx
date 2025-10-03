@@ -12,8 +12,7 @@ import {
     ScheduleOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Link } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { callLogout } from 'config/api';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { isMobile } from 'react-device-detect';
@@ -72,45 +71,42 @@ const LayoutAdmin = () => {
 
             const full = [
                 {
-                    label: <Link to='/admin'>Dashboard</Link>,
+                    label: <Link to='/admin'>Bảng điều khiển</Link>,
                     key: '/admin',
                     icon: <AppstoreOutlined />
                 },
                 ...(viewCompany || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/company'>Company</Link>,
+                    label: <Link to='/admin/company'>Công ty</Link>,
                     key: '/admin/company',
                     icon: <BankOutlined />,
                 }] : []),
 
                 ...(viewUser || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/user'>User</Link>,
+                    label: <Link to='/admin/user'>Người dùng</Link>,
                     key: '/admin/user',
                     icon: <UserOutlined />
                 }] : []),
                 ...(viewJob || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/job'>Job</Link>,
+                    label: <Link to='/admin/job'>Công việc</Link>,
                     key: '/admin/job',
                     icon: <ScheduleOutlined />
                 }] : []),
 
                 ...(viewResume || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/resume'>Resume</Link>,
+                    label: <Link to='/admin/resume'>Hồ sơ</Link>,
                     key: '/admin/resume',
                     icon: <AliwangwangOutlined />
                 }] : []),
                 ...(viewPermission || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/permission'>Permission</Link>,
+                    label: <Link to='/admin/permission'>Phân quyền</Link>,
                     key: '/admin/permission',
                     icon: <ApiOutlined />
                 }] : []),
                 ...(viewRole || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/role'>Role</Link>,
+                    label: <Link to='/admin/role'>Vai trò</Link>,
                     key: '/admin/role',
                     icon: <ExceptionOutlined />
                 }] : []),
-
-
-
             ];
 
             setMenuItems(full);
@@ -128,17 +124,6 @@ const LayoutAdmin = () => {
             navigate('/')
         }
     }
-
-    // if (isMobile) {
-    //     items.push({
-    //         label: <label
-    //             style={{ cursor: 'pointer' }}
-    //             onClick={() => handleLogout()}
-    //         >Đăng xuất</label>,
-    //         key: 'logout',
-    //         icon: <LogoutOutlined />
-    //     })
-    // }
 
     const itemsDropdown = [
         {
@@ -167,7 +152,7 @@ const LayoutAdmin = () => {
                         collapsed={collapsed}
                         onCollapse={(value) => setCollapsed(value)}>
                         <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-                            <BugOutlined />  ADMIN
+                            <BugOutlined />  QUẢN TRỊ
                         </div>
                         <Menu
                             selectedKeys={[activeMenu]}
@@ -201,9 +186,8 @@ const LayoutAdmin = () => {
 
                             <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
                                 <Space style={{ cursor: "pointer" }}>
-                                    Welcome {user?.name}
+                                    Xin chào {user?.name}
                                     <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
-
                                 </Space>
                             </Dropdown>
                         </div>
@@ -211,12 +195,8 @@ const LayoutAdmin = () => {
                     <Content style={{ padding: '15px' }}>
                         <Outlet />
                     </Content>
-                    {/* <Footer style={{ padding: 10, textAlign: 'center' }}>
-                        React Typescript series Nest.JS &copy; dh - Made with <HeartTwoTone />
-                    </Footer> */}
                 </Layout>
             </Layout>
-
         </>
     );
 };

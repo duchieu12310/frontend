@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { CodeOutlined, ContactsOutlined, FireOutlined, LogoutOutlined, MenuFoldOutlined, RiseOutlined, TwitterOutlined } from '@ant-design/icons';
+import {
+    CodeOutlined,
+    ContactsOutlined,
+    FireOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    RiseOutlined,
+    TwitterOutlined
+} from '@ant-design/icons';
 import { Avatar, Drawer, Dropdown, MenuProps, Space, message } from 'antd';
 import { Menu, ConfigProvider } from 'antd';
 import styles from '@/styles/client.module.scss';
 import { isMobile } from 'react-device-detect';
 import { FaReact } from 'react-icons/fa';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
@@ -32,22 +39,25 @@ const Header = (props: any) => {
     const items: MenuProps['items'] = [
         {
             label: <Link to={'/'}>Trang Chủ</Link>,
-            key: '/',
+            key: 'home',
             icon: <TwitterOutlined />,
         },
         {
             label: <Link to={'/job'}>Việc Làm IT</Link>,
-            key: '/job',
+            key: 'job',
             icon: <CodeOutlined />,
         },
         {
             label: <Link to={'/company'}>Top Công ty IT</Link>,
-            key: '/company',
+            key: 'company',
             icon: <RiseOutlined />,
+        },
+        {
+            label: <Link to={'/register-company'}>Đăng Kí Công Ty</Link>,
+            key: 'register-company',
+            icon: <ContactsOutlined />,
         }
     ];
-
-
 
     const onClick: MenuProps['onClick'] = (e) => {
         setCurrent(e.key);
@@ -55,7 +65,7 @@ const Header = (props: any) => {
 
     const handleLogout = async () => {
         const res = await callLogout();
-        if (res && res && +res.statusCode === 200) {
+        if (res && +res.statusCode === 200) {
             dispatch(setLogoutAction({}));
             message.success('Đăng xuất thành công');
             navigate('/')
@@ -72,13 +82,10 @@ const Header = (props: any) => {
             icon: <ContactsOutlined />
         },
         ...(user.role?.permissions?.length ? [{
-            label: <Link
-                to={"/admin"}
-            >Trang Quản Trị</Link>,
+            label: <Link to={"/admin"}>Trang Quản Trị</Link>,
             key: 'admin',
             icon: <FireOutlined />
-        },] : []),
-
+        }] : []),
         {
             label: <label
                 style={{ cursor: 'pointer' }}
@@ -96,11 +103,11 @@ const Header = (props: any) => {
             <div className={styles["header-section"]}>
                 <div className={styles["container"]}>
                     {!isMobile ?
-                        <div style={{ display: "flex", gap: 30 }}>
+                        <div style={{ display: "flex", gap: 30, alignItems: "center" }}>
                             <div className={styles['brand']} >
                                 <FaReact onClick={() => navigate('/')} title='dh' />
                             </div>
-                            <div className={styles['top-menu']}>
+                            <div className={styles['top-menu']} style={{ display: "flex", flex: 1, justifyContent: "space-between" }}>
                                 <ConfigProvider
                                     theme={{
                                         token: {
@@ -110,12 +117,12 @@ const Header = (props: any) => {
                                         },
                                     }}
                                 >
-
                                     <Menu
-                                        // onClick={onClick}
                                         selectedKeys={[current]}
                                         mode="horizontal"
                                         items={items}
+                                        overflowedIndicator={null}   // tắt dấu "..."
+                                        style={{ flex: 1, minWidth: 0 }} // 👈 fix chính
                                     />
                                 </ConfigProvider>
                                 <div className={styles['extra']}>
@@ -129,9 +136,7 @@ const Header = (props: any) => {
                                             </Space>
                                         </Dropdown>
                                     }
-
                                 </div>
-
                             </div>
                         </div>
                         :

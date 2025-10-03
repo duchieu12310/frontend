@@ -29,7 +29,7 @@ const CompanyPage = () => {
         if (id) {
             const res = await callDeleteCompany(id);
             if (res && +res.statusCode === 200) {
-                message.success('Xóa Company thành công');
+                message.success('Xóa công ty thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -59,22 +59,22 @@ const CompanyPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Name',
+            title: 'Tên công ty',
             dataIndex: 'name',
             sorter: true,
         },
         {
-            title: 'Address',
+            title: 'Địa chỉ',
             dataIndex: 'address',
             sorter: true,
         },
 
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -82,11 +82,11 @@ const CompanyPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -94,13 +94,12 @@ const CompanyPage = () => {
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
-                    < Access
+                    <Access
                         permission={ALL_PERMISSIONS.COMPANIES.UPDATE}
                         hideChildren
                     >
@@ -109,7 +108,6 @@ const CompanyPage = () => {
                                 fontSize: 20,
                                 color: '#ffa500',
                             }}
-                            type=""
                             onClick={() => {
                                 setOpenModal(true);
                                 setDataInit(entity);
@@ -122,8 +120,8 @@ const CompanyPage = () => {
                     >
                         <Popconfirm
                             placement="leftTop"
-                            title={"Xác nhận xóa company"}
-                            description={"Bạn có chắc chắn muốn xóa company này ?"}
+                            title={"Xác nhận xóa công ty"}
+                            description={"Bạn có chắc chắn muốn xóa công ty này không?"}
                             onConfirm={() => handleDeleteCompany(entity.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
@@ -152,8 +150,6 @@ const CompanyPage = () => {
             filter: ""
         }
 
-
-
         if (clone.name) q.filter = `${sfLike("name", clone.name)}`;
         if (clone.address) {
             q.filter = clone.name ?
@@ -179,7 +175,6 @@ const CompanyPage = () => {
             sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
         }
 
-        //mặc định sort theo updatedAt
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
@@ -196,7 +191,7 @@ const CompanyPage = () => {
             >
                 <DataTable<ICompany>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Công Ty"
+                    headerTitle="Danh sách công ty"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -212,7 +207,7 @@ const CompanyPage = () => {
                             pageSize: meta.pageSize,
                             showSizeChanger: true,
                             total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
+                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} bản ghi</div>) }
                         }
                     }
                     rowSelection={false}

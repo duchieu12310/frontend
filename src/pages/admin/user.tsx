@@ -2,7 +2,7 @@ import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchUser } from "@/redux/slice/userSlide";
 import { IUser } from "@/types/backend";
-import { DeleteOutlined, EditOutlined, PlusOutlined, EyeOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, message, notification } from "antd";
 import { useState, useRef } from 'react';
@@ -31,7 +31,7 @@ const UserPage = () => {
         if (id) {
             const res = await callDeleteUser(id);
             if (+res.statusCode === 200) {
-                message.success('Xóa User thành công');
+                message.success('Xóa người dùng thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -61,7 +61,7 @@ const UserPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Name',
+            title: 'Tên',
             dataIndex: 'name',
             sorter: true,
         },
@@ -72,25 +72,25 @@ const UserPage = () => {
         },
 
         {
-            title: 'Role',
+            title: 'Vai trò',
             dataIndex: ["role", "name"],
             sorter: true,
             hideInSearch: true
         },
 
         {
-            title: 'Company',
+            title: 'Công ty',
             dataIndex: ["company", "name"],
             sorter: true,
             hideInSearch: true
         },
 
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -98,11 +98,11 @@ const UserPage = () => {
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -110,13 +110,12 @@ const UserPage = () => {
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
-                    < Access
+                    <Access
                         permission={ALL_PERMISSIONS.USERS.UPDATE}
                         hideChildren
                     >
@@ -125,7 +124,6 @@ const UserPage = () => {
                                 fontSize: 20,
                                 color: '#ffa500',
                             }}
-                            type=""
                             onClick={() => {
                                 setOpenModal(true);
                                 setDataInit(entity);
@@ -139,8 +137,8 @@ const UserPage = () => {
                     >
                         <Popconfirm
                             placement="leftTop"
-                            title={"Xác nhận xóa user"}
-                            description={"Bạn có chắc chắn muốn xóa user này ?"}
+                            title={"Xác nhận xóa người dùng"}
+                            description={"Bạn có chắc chắn muốn xóa người dùng này ?"}
                             onConfirm={() => handleDeleteUser(entity.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
@@ -157,7 +155,6 @@ const UserPage = () => {
                     </Access>
                 </Space >
             ),
-
         },
     ];
 
@@ -210,7 +207,7 @@ const UserPage = () => {
             >
                 <DataTable<IUser>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Users"
+                    headerTitle="Danh sách người dùng"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -226,7 +223,9 @@ const UserPage = () => {
                             pageSize: meta.pageSize,
                             showSizeChanger: true,
                             total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
+                            showTotal: (total, range) => {
+                                return (<div>{range[0]}-{range[1]} trên {total} bản ghi</div>)
+                            }
                         }
                     }
                     rowSelection={false}

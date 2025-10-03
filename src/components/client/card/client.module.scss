@@ -1,0 +1,53 @@
+.company-section {
+    padding: 20px;
+    background: #fafafa;
+}
+
+.company-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dflex-pc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dflex-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-customize {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    padding: 20px;
+}
+
+:global(.ant-card) {
+    transition: all 0.3s ease;
+}
+
+:global(.ant-card:hover) {
+    border-color: #1890ff !important;
+    box-shadow: 0 6px 16px rgba(24, 144, 255, 0.2);
+    transform: translateY(-4px);
+    cursor: pointer;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+}
+
+.empty {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}

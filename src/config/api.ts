@@ -8,6 +8,20 @@ Module Auth
 export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) => {
     return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address })
 }
+export const callChangePassword = (data: { oldPassword: string; newPassword: string }) => {
+    return axios.put("/api/v1/auth/change-password", data);
+};
+
+export const callUpdateUserInfo = (data: {
+    name?: string;
+    age?: number;
+    gender?: string;
+    address?: string;
+}) => {
+    return axios.put("/api/v1/users", data);
+};
+
+
 
 export const callLogin = (username: string, password: string) => {
     return axios.post<IBackendRes<IAccount>>('/api/v1/auth/login', { username, password })

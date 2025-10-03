@@ -25,14 +25,13 @@ const RolePage = () => {
     const roles = useAppSelector(state => state.role.result);
     const dispatch = useAppDispatch();
 
-
-    //all backend permissions
+    // tất cả quyền từ backend
     const [listPermissions, setListPermissions] = useState<{
         module: string;
         permissions: IPermission[]
     }[] | null>(null);
 
-    //current role
+    // vai trò hiện tại
     const [singleRole, setSingleRole] = useState<IRole | null>(null);
 
     useEffect(() => {
@@ -45,12 +44,11 @@ const RolePage = () => {
         init();
     }, [])
 
-
     const handleDeleteRole = async (id: string | undefined) => {
         if (id) {
             const res = await callDeleteRole(id);
             if (res && res.statusCode === 200) {
-                message.success('Xóa Role thành công');
+                message.success('Xóa vai trò thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -67,10 +65,10 @@ const RolePage = () => {
 
     const columns: ProColumns<IRole>[] = [
         {
-            title: 'Id',
+            title: 'Mã',
             dataIndex: 'id',
             width: 250,
-            render: (text, record, index, action) => {
+            render: (text, record) => {
                 return (
                     <span>
                         {record.id}
@@ -80,28 +78,28 @@ const RolePage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Name',
+            title: 'Tên vai trò',
             dataIndex: 'name',
             sorter: true,
         },
         {
             title: 'Trạng thái',
             dataIndex: 'active',
-            render(dom, entity, index, action, schema) {
+            render(_, entity) {
                 return <>
                     <Tag color={entity.active ? "lime" : "red"} >
-                        {entity.active ? "ACTIVE" : "INACTIVE"}
+                        {entity.active ? "ĐANG HOẠT ĐỘNG" : "NGƯNG HOẠT ĐỘNG"}
                     </Tag>
                 </>
             },
             hideInSearch: true,
         },
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (_, record) => {
                 return (
                     <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -109,11 +107,11 @@ const RolePage = () => {
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
+            render: (_, record) => {
                 return (
                     <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
@@ -121,11 +119,10 @@ const RolePage = () => {
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
                     <Access
                         permission={ALL_PERMISSIONS.ROLES.UPDATE}
@@ -136,7 +133,6 @@ const RolePage = () => {
                                 fontSize: 20,
                                 color: '#ffa500',
                             }}
-                            type=""
                             onClick={() => {
                                 setSingleRole(entity);
                                 setOpenModal(true);
@@ -149,8 +145,8 @@ const RolePage = () => {
                     >
                         <Popconfirm
                             placement="leftTop"
-                            title={"Xác nhận xóa role"}
-                            description={"Bạn có chắc chắn muốn xóa role này ?"}
+                            title={"Xác nhận xóa vai trò"}
+                            description={"Bạn có chắc chắn muốn xóa vai trò này ?"}
                             onConfirm={() => handleDeleteRole(entity.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
@@ -167,11 +163,10 @@ const RolePage = () => {
                     </Access>
                 </Space>
             ),
-
         },
     ];
 
-    const buildQuery = (params: any, sort: any, filter: any) => {
+    const buildQuery = (params: any, sort: any) => {
         const clone = { ...params };
         const q: any = {
             page: params.current,
@@ -196,7 +191,7 @@ const RolePage = () => {
             sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
         }
 
-        //mặc định sort theo updatedAt
+        // mặc định sort theo updatedAt
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
@@ -213,7 +208,7 @@ const RolePage = () => {
             >
                 <DataTable<IRole>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Roles (Vai Trò)"
+                    headerTitle="Danh sách Vai Trò"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -223,24 +218,22 @@ const RolePage = () => {
                         dispatch(fetchRole({ query }))
                     }}
                     scroll={{ x: true }}
-                    pagination={
-                        {
-                            current: meta.page,
-                            pageSize: meta.pageSize,
-                            showSizeChanger: true,
-                            total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                        }
-                    }
+                    pagination={{
+                        current: meta.page,
+                        pageSize: meta.pageSize,
+                        showSizeChanger: true,
+                        total: meta.total,
+                        showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên tổng {total} vai trò</div>) }
+                    }}
                     rowSelection={false}
-                    toolBarRender={(_action, _rows): any => {
+                    toolBarRender={() => {
                         return (
                             <Button
                                 icon={<PlusOutlined />}
                                 type="primary"
                                 onClick={() => setOpenModal(true)}
                             >
-                                Thêm mới
+                                Thêm vai trò
                             </Button>
                         );
                     }}

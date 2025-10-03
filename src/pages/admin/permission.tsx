@@ -31,7 +31,7 @@ const PermissionPage = () => {
         if (id) {
             const res = await callDeletePermission(id);
             if (res && res.statusCode === 200) {
-                message.success('Xóa Permission thành công');
+                message.success('Xóa quyền hạn thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -48,40 +48,43 @@ const PermissionPage = () => {
 
     const columns: ProColumns<IPermission>[] = [
         {
-            title: 'Id',
+            title: 'Mã quyền',
             dataIndex: 'id',
-            width: 50,
-            render: (text, record, index, action) => {
-                return (
-                    <a href="#" onClick={() => {
-                        setOpenViewDetail(true);
-                        setDataInit(record);
-                    }}>
-                        {record.id}
-                    </a>
-                )
-            },
+            width: 60,
+            render: (_, record) => (
+                <a href="#" onClick={() => {
+                    setOpenViewDetail(true);
+                    setDataInit(record);
+                }}>
+                    {record.id}
+                </a>
+            ),
             hideInSearch: true,
         },
         {
-            title: 'Name',
+            title: 'Tên quyền',
             dataIndex: 'name',
             sorter: true,
         },
         {
-            title: 'API',
+            title: 'Đường dẫn API',
             dataIndex: 'apiPath',
             sorter: true,
         },
         {
-            title: 'Method',
+            title: 'Phương thức',
             dataIndex: 'method',
             sorter: true,
-            render(dom, entity, index, action, schema) {
-                return (
-                    <p style={{ paddingLeft: 10, fontWeight: 'bold', marginBottom: 0, color: colorMethod(entity?.method as string) }}>{entity?.method || ''}</p>
-                )
-            },
+            render: (_, entity) => (
+                <p style={{
+                    paddingLeft: 10,
+                    fontWeight: 'bold',
+                    marginBottom: 0,
+                    color: colorMethod(entity?.method as string)
+                }}>
+                    {entity?.method || ''}
+                </p>
+            ),
         },
         {
             title: 'Module',
@@ -89,60 +92,48 @@ const PermissionPage = () => {
             sorter: true,
         },
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
-                return (
-                    <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
-                )
-            },
+            render: (_, record) => (
+                <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
+            ),
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
-                return (
-                    <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
-                )
-            },
+            render: (_, record) => (
+                <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
+            ),
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
-            width: 50,
-            render: (_value, entity, _index, _action) => (
+            width: 80,
+            render: (_value, entity) => (
                 <Space>
-                    <Access
-                        permission={ALL_PERMISSIONS.PERMISSIONS.UPDATE}
-                        hideChildren
-                    >
+                    <Access permission={ALL_PERMISSIONS.PERMISSIONS.UPDATE} hideChildren>
                         <EditOutlined
                             style={{
                                 fontSize: 20,
                                 color: '#ffa500',
                             }}
-                            type=""
                             onClick={() => {
                                 setOpenModal(true);
                                 setDataInit(entity);
                             }}
                         />
                     </Access>
-                    <Access
-                        permission={ALL_PERMISSIONS.PERMISSIONS.DELETE}
-                        hideChildren
-                    >
+                    <Access permission={ALL_PERMISSIONS.PERMISSIONS.DELETE} hideChildren>
                         <Popconfirm
                             placement="leftTop"
-                            title={"Xác nhận xóa permission"}
-                            description={"Bạn có chắc chắn muốn xóa permission này ?"}
+                            title="Xác nhận xóa quyền hạn"
+                            description="Bạn có chắc chắn muốn xóa quyền hạn này?"
                             onConfirm={() => handleDeletePermission(entity.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
@@ -159,7 +150,6 @@ const PermissionPage = () => {
                     </Access>
                 </Space>
             ),
-
         },
     ];
 
@@ -194,12 +184,12 @@ const PermissionPage = () => {
             for (const field of fields) {
                 if (sort[field]) {
                     sortBy = `sort=${field},${sort[field] === 'ascend' ? 'asc' : 'desc'}`;
-                    break;  // Remove this if you want to handle multiple sort parameters
+                    break;
                 }
             }
         }
 
-        //mặc định sort theo updatedAt
+        // mặc định sort theo updatedAt
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
@@ -211,12 +201,10 @@ const PermissionPage = () => {
 
     return (
         <div>
-            <Access
-                permission={ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE}
-            >
+            <Access permission={ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE}>
                 <DataTable<IPermission>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Permissions (Quyền Hạn)"
+                    headerTitle="Danh sách quyền hạn"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -226,29 +214,28 @@ const PermissionPage = () => {
                         dispatch(fetchPermission({ query }))
                     }}
                     scroll={{ x: true }}
-                    pagination={
-                        {
-                            current: meta.page,
-                            pageSize: meta.pageSize,
-                            showSizeChanger: true,
-                            total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                        }
-                    }
-                    rowSelection={false}
-                    toolBarRender={(_action, _rows): any => {
-                        return (
-                            <Button
-                                icon={<PlusOutlined />}
-                                type="primary"
-                                onClick={() => setOpenModal(true)}
-                            >
-                                Thêm mới
-                            </Button>
-                        );
+                    pagination={{
+                        current: meta.page,
+                        pageSize: meta.pageSize,
+                        showSizeChanger: true,
+                        total: meta.total,
+                        showTotal: (total, range) => (
+                            <div>{range[0]}-{range[1]} trên {total} dòng</div>
+                        )
                     }}
+                    rowSelection={false}
+                    toolBarRender={(): any => (
+                        <Button
+                            icon={<PlusOutlined />}
+                            type="primary"
+                            onClick={() => setOpenModal(true)}
+                        >
+                            Thêm mới
+                        </Button>
+                    )}
                 />
             </Access>
+
             <ModalPermission
                 openModal={openModal}
                 setOpenModal={setOpenModal}

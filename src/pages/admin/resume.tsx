@@ -29,7 +29,7 @@ const ResumePage = () => {
         if (id) {
             const res = await callDeleteResume(id);
             if (res && res.data) {
-                message.success('Xóa Resume thành công');
+                message.success('Xóa hồ sơ thành công');
                 reloadTable();
             } else {
                 notification.error({
@@ -46,9 +46,9 @@ const ResumePage = () => {
 
     const columns: ProColumns<IResume>[] = [
         {
-            title: 'Id',
+            title: 'Mã hồ sơ',
             dataIndex: 'id',
-            width: 50,
+            width: 80,
             render: (text, record, index, action) => {
                 return (
                     <a href="#" onClick={() => {
@@ -62,99 +62,74 @@ const ResumePage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Trạng Thái',
+            title: 'Trạng thái',
             dataIndex: 'status',
             sorter: true,
-            renderFormItem: (item, props, form) => (
+            renderFormItem: () => (
                 <ProFormSelect
                     showSearch
                     mode="multiple"
                     allowClear
                     valueEnum={{
-                        PENDING: 'PENDING',
-                        REVIEWING: 'REVIEWING',
-                        APPROVED: 'APPROVED',
-                        REJECTED: 'REJECTED',
+                        PENDING: 'Đang chờ',
+                        REVIEWING: 'Đang xem xét',
+                        APPROVED: 'Đã duyệt',
+                        REJECTED: 'Từ chối',
                     }}
-                    placeholder="Chọn level"
+                    placeholder="Chọn trạng thái"
                 />
             ),
         },
 
         {
-            title: 'Job',
+            title: 'Công việc',
             dataIndex: ["job", "name"],
             hideInSearch: true,
         },
         {
-            title: 'Company',
+            title: 'Công ty',
             dataIndex: "companyName",
             hideInSearch: true,
         },
 
         {
-            title: 'CreatedAt',
+            title: 'Ngày tạo',
             dataIndex: 'createdAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
-                return (
-                    <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
-                )
-            },
+            render: (_, record) => (
+                <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
+            ),
             hideInSearch: true,
         },
         {
-            title: 'UpdatedAt',
+            title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             width: 200,
             sorter: true,
-            render: (text, record, index, action) => {
-                return (
-                    <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
-                )
-            },
+            render: (_, record) => (
+                <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
+            ),
             hideInSearch: true,
         },
         {
-
-            title: 'Actions',
+            title: 'Thao tác',
             hideInSearch: true,
             width: 100,
-            render: (_value, entity, _index, _action) => (
+            render: (_value, entity) => (
                 <Space>
                     <EditOutlined
                         style={{
                             fontSize: 20,
                             color: '#ffa500',
                         }}
-                        type=""
                         onClick={() => {
                             setOpenViewDetail(true);
                             setDataInit(entity);
                         }}
                     />
-
-                    {/* <Popconfirm
-                        placement="leftTop"
-                        title={"Xác nhận xóa resume"}
-                        description={"Bạn có chắc chắn muốn xóa resume này ?"}
-                        onConfirm={() => handleDeleteResume(entity.id)}
-                        okText="Xác nhận"
-                        cancelText="Hủy"
-                    >
-                        <span style={{ cursor: "pointer", margin: "0 10px" }}>
-                            <DeleteOutlined
-                                style={{
-                                    fontSize: 20,
-                                    color: '#ff4d4f',
-                                }}
-                            />
-                        </span>
-                    </Popconfirm> */}
                 </Space>
             ),
-
         },
     ];
 
@@ -186,14 +161,13 @@ const ResumePage = () => {
             sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
         }
 
-        //mặc định sort theo updatedAt
+        // mặc định sort theo updatedAt
         if (Object.keys(sortBy).length === 0) {
             temp = `${temp}&sort=updatedAt,desc`;
         } else {
             temp = `${temp}&${sortBy}`;
         }
 
-        // temp += "&populate=companyId,jobId&fields=companyId.id, companyId.name, companyId.logo, jobId.id, jobId.name";
         return temp;
     }
 
@@ -204,7 +178,7 @@ const ResumePage = () => {
             >
                 <DataTable<IResume>
                     actionRef={tableRef}
-                    headerTitle="Danh sách Resumes"
+                    headerTitle="Danh sách hồ sơ"
                     rowKey="id"
                     loading={isFetching}
                     columns={columns}
@@ -214,21 +188,17 @@ const ResumePage = () => {
                         dispatch(fetchResume({ query }))
                     }}
                     scroll={{ x: true }}
-                    pagination={
-                        {
-                            current: meta.page,
-                            pageSize: meta.pageSize,
-                            showSizeChanger: true,
-                            total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                        }
-                    }
-                    rowSelection={false}
-                    toolBarRender={(_action, _rows): any => {
-                        return (
-                            <></>
-                        );
+                    pagination={{
+                        current: meta.page,
+                        pageSize: meta.pageSize,
+                        showSizeChanger: true,
+                        total: meta.total,
+                        showTotal: (total, range) => (
+                            <div>{range[0]}-{range[1]} trên {total} dòng</div>
+                        )
                     }}
+                    rowSelection={false}
+                    toolBarRender={(): any => <></>}
                 />
             </Access>
             <ViewDetailResume

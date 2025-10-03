@@ -32,15 +32,12 @@ interface ICompanyLogo {
 const ModalCompany = (props: IProps) => {
     const { openModal, setOpenModal, reloadTable, dataInit, setDataInit } = props;
 
-    //modal animation
     const [animation, setAnimation] = useState<string>('open');
-
     const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
     const [dataLogo, setDataLogo] = useState<ICompanyLogo[]>([]);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
-
     const [value, setValue] = useState<string>("");
     const [form] = Form.useForm();
 
@@ -55,7 +52,6 @@ const ModalCompany = (props: IProps) => {
                 name: dataInit.logo,
                 uid: uuidv4(),
             }])
-
         }
     }, [dataInit])
 
@@ -63,15 +59,14 @@ const ModalCompany = (props: IProps) => {
         const { name, address } = valuesForm;
 
         if (dataLogo.length === 0) {
-            message.error('Vui lòng upload ảnh Logo')
+            message.error('Vui lòng tải lên ảnh Logo');
             return;
         }
 
         if (dataInit?.id) {
-            //update
             const res = await callUpdateCompany(dataInit.id, name, address, value, dataLogo[0].name);
             if (res.data) {
-                message.success("Cập nhật company thành công");
+                message.success("Cập nhật công ty thành công");
                 handleReset();
                 reloadTable();
             } else {
@@ -81,10 +76,9 @@ const ModalCompany = (props: IProps) => {
                 });
             }
         } else {
-            //create
             const res = await callCreateCompany(name, address, value, dataLogo[0].name);
             if (res.data) {
-                message.success("Thêm mới company thành công");
+                message.success("Thêm mới công ty thành công");
                 handleReset();
                 reloadTable();
             } else {
@@ -101,7 +95,6 @@ const ModalCompany = (props: IProps) => {
         setValue("");
         setDataInit(null);
 
-        //add animation when closing modal
         setAnimation('close')
         await new Promise(r => setTimeout(r, 400))
         setOpenModal(false);
@@ -135,11 +128,11 @@ const ModalCompany = (props: IProps) => {
     const beforeUpload = (file: any) => {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
         if (!isJpgOrPng) {
-            message.error('You can only upload JPG/PNG file!');
+            message.error('Chỉ được phép tải file JPG/PNG!');
         }
         const isLt2M = file.size / 1024 / 1024 < 2;
         if (!isLt2M) {
-            message.error('Image must smaller than 2MB!');
+            message.error('Ảnh phải nhỏ hơn 2MB!');
         }
         return isJpgOrPng && isLt2M;
     };
@@ -153,7 +146,7 @@ const ModalCompany = (props: IProps) => {
         }
         if (info.file.status === 'error') {
             setLoadingUpload(false);
-            message.error(info?.file?.error?.event?.message ?? "Đã có lỗi xảy ra khi upload file.")
+            message.error(info?.file?.error?.event?.message ?? "Đã có lỗi xảy ra khi tải file.")
         }
     };
 
@@ -174,13 +167,12 @@ const ModalCompany = (props: IProps) => {
         }
     };
 
-
     return (
         <>
             {openModal &&
                 <>
                     <ModalForm
-                        title={<>{dataInit?.id ? "Cập nhật Company" : "Tạo mới Company"}</>}
+                        title={<>{dataInit?.id ? "Cập nhật công ty" : "Tạo mới công ty"}</>}
                         open={openModal}
                         modalProps={{
                             onCancel: () => { handleReset() },
@@ -225,7 +217,7 @@ const ModalCompany = (props: IProps) => {
                                     name="logo"
                                     rules={[{
                                         required: true,
-                                        message: 'Vui lòng không bỏ trống',
+                                        message: 'Vui lòng tải lên logo',
                                         validator: () => {
                                             if (dataLogo.length > 0) return Promise.resolve();
                                             else return Promise.reject(false);
@@ -259,7 +251,7 @@ const ModalCompany = (props: IProps) => {
                                         >
                                             <div>
                                                 {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
-                                                <div style={{ marginTop: 8 }}>Upload</div>
+                                                <div style={{ marginTop: 8 }}>Tải lên</div>
                                             </div>
                                         </Upload>
                                     </ConfigProvider>
@@ -281,7 +273,6 @@ const ModalCompany = (props: IProps) => {
 
                             <ProCard
                                 title="Miêu tả"
-                                // subTitle="mô tả công ty"
                                 headStyle={{ color: '#d81921' }}
                                 style={{ marginBottom: 20 }}
                                 headerBordered
