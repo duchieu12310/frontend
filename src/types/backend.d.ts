@@ -60,8 +60,6 @@ export interface ISkill {
     updatedAt?: string;
 }
 
-
-
 export interface IUser {
     id?: string;
     name: string;
@@ -74,7 +72,6 @@ export interface IUser {
         id: string;
         name: string;
     }
-
     company?: {
         id: string;
         name: string;
@@ -150,7 +147,6 @@ export interface IPermission {
     deletedAt?: boolean | null;
     createdAt?: string;
     updatedAt?: string;
-
 }
 
 export interface IRole {
@@ -177,4 +173,33 @@ export interface ISubscribers {
     deletedAt?: boolean | null;
     createdAt?: string;
     updatedAt?: string;
+}
+
+// 🏢 Interface mới cho CompanyRegistration
+export interface ICompanyRegistration {
+    id?: string;
+
+    // 👤 Thông tin user tạo bản đăng ký
+    user?: {
+        id: string;
+        email: string;
+        name: string;
+    };
+
+    companyName: string;
+    description?: string;
+    address?: string;
+    logo?: string;
+    facebookLink?: string;
+    githubLink?: string;
+    verificationDocument?: string;  // link file pdf/doc/docx
+    rejectionReason?: string;
+
+    // Trạng thái: PENDING, APPROVED, REJECTED
+    status?: "PENDING" | "APPROVED" | "REJECTED";
+
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
 }

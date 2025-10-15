@@ -1,0 +1,75 @@
+.card-job-section {
+    padding: 20px;
+}
+
+.job-card {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.job-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.card-job-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.company-logo {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    padding: 4px;
+}
+
+.job-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+
+.job-location,
+.job-salary,
+.job-updatedAt {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.job-updatedAt {
+    font-style: italic;
+    margin-top: 6px;
+}
+
+.dflex-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+}
+
+.dflex-pc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.empty {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}

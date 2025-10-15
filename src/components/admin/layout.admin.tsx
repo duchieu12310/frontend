@@ -10,6 +10,7 @@ import {
     AliwangwangOutlined,
     BugOutlined,
     ScheduleOutlined,
+    FormOutlined, // 🆕 thêm biểu tượng cho mục "Đăng ký công ty"
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
@@ -80,6 +81,13 @@ const LayoutAdmin = () => {
                     key: '/admin/company',
                     icon: <BankOutlined />,
                 }] : []),
+
+                // 🆕 Thêm mục "Đăng ký công ty"
+                {
+                    label: <Link to='/admin/register-company'>Đăng ký công ty</Link>,
+                    key: '/admin/register-company',
+                    icon: <FormOutlined />,
+                },
 
                 ...(viewUser || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/user'>Người dùng</Link>,

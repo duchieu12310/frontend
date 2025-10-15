@@ -31,6 +31,7 @@ import ClientCompanyPage from './pages/company';
 import ClientCompanyDetailPage from './pages/company/detail';
 import JobTabs from './pages/admin/job/job.tabs';
 import ClientRegisterCompanyPage from './pages/register-company';
+import CompanyRegistrationList from './pages/admin/CompanyRegistrationPage';
 
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,15 +46,42 @@ const LayoutClient = () => {
   }, [location]);
 
   return (
-    <div className='layout-app' ref={rootRef}>
+    <div
+      className="layout-app"
+      ref={rootRef}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        backgroundColor: "#f9fafb",
+      }}
+    >
+      {/* HEADER */}
       <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <div className={styles['content-app']}>
+
+      {/* MAIN CONTENT */}
+      <main
+        className={styles["content-app"]}
+        style={{
+          flex: 1,
+          padding: "30px 20px",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          margin: "20px auto",
+          width: "100%",
+          maxWidth: "1280px",
+          borderRadius: "12px",
+        }}
+      >
         <Outlet context={[searchTerm, setSearchTerm]} />
-      </div>
+      </main>
+
+
+      {/* FOOTER */}
       <Footer />
     </div>
-  )
-}
+  );
+};
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -81,7 +109,6 @@ export default function App() {
         { path: "company", element: <ClientCompanyPage /> },
         { path: "company/:id", element: <ClientCompanyDetailPage /> },
         { path: "register-company", element: <ClientRegisterCompanyPage /> }
-
       ],
     },
 
@@ -101,6 +128,13 @@ export default function App() {
           element:
             <ProtectedRoute>
               <CompanyPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "register-company",
+          element:
+            <ProtectedRoute>
+              < CompanyRegistrationList />
             </ProtectedRoute>
         },
         {

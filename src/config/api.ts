@@ -1,4 +1,19 @@
-import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume, IPermission, IRole, ISkill, ISubscribers } from '@/types/backend';
+import {
+    IBackendRes,
+    ICompany,
+    IAccount,
+    IUser,
+    IModelPaginate,
+    IGetAccount,
+    IJob,
+    IResume,
+    IPermission,
+    IRole,
+    ISkill,
+    ISubscribers,
+    ICompanyRegistration
+} from '@/types/backend';
+
 import axios from 'config/axios-customize';
 
 /**
@@ -20,8 +35,6 @@ export const callUpdateUserInfo = (data: {
 }) => {
     return axios.put("/api/v1/users", data);
 };
-
-
 
 export const callLogin = (username: string, password: string) => {
     return axios.post<IBackendRes<IAccount>>('/api/v1/auth/login', { username, password })
@@ -57,9 +70,6 @@ export const callUploadSingleFile = (file: any, folderType: string) => {
     });
 }
 
-
-
-
 /**
  * 
 Module Company
@@ -78,6 +88,10 @@ export const callDeleteCompany = (id: string) => {
 
 export const callFetchCompany = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<ICompany>>>(`/api/v1/companies?${query}`);
+}
+
+export const callAllCompany = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICompany>>>(`/api/v1/companies/all?${query}`);
 }
 
 export const callFetchCompanyById = (id: string) => {
@@ -103,8 +117,6 @@ export const callDeleteSkill = (id: string) => {
 export const callFetchAllSkill = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<ISkill>>>(`/api/v1/skills?${query}`);
 }
-
-
 
 /**
  * 
@@ -148,6 +160,10 @@ export const callFetchJob = (query: string) => {
 
 export const callFetchJobById = (id: string) => {
     return axios.get<IBackendRes<IJob>>(`/api/v1/jobs/${id}`);
+}
+
+export const callFetchAllJob = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IJob>>>(`/api/v1/jobs/all?${query}`);
 }
 
 /**
@@ -263,3 +279,32 @@ export const callFetchSubscriberById = (id: string) => {
     return axios.get<IBackendRes<ISubscribers>>(`/api/v1/subscribers/${id}`);
 }
 
+/**
+ * 
+Module Company Registration (bổ sung mới)
+ */
+export const callCreateCompanyRegistration = (data: ICompanyRegistration) => {
+    return axios.post<IBackendRes<ICompanyRegistration>>('/api/v1/company-registrations', data);
+}
+
+export const callFetchCompanyRegistration = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICompanyRegistration>>>(`/api/v1/company-registrations?${query}`);
+}
+
+export const callFetchCompanyRegistrationById = (id: string | number) => {
+    return axios.get<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);
+}
+
+export const callApproveCompanyRegistration = (id: string | number) => {
+    return axios.put<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}/status`);
+}
+
+export const callRejectCompanyRegistration = (id: string | number, rejectionReason: string) => {
+    return axios.put<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}/reject`, rejectionReason, {
+        headers: { 'Content-Type': 'text/plain' }
+    });
+}
+
+export const callDeleteCompanyRegistration = (id: string | number) => {
+    return axios.delete<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);
+}

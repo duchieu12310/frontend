@@ -7,6 +7,7 @@ const ClientJobPage = (props: any) => {
     return (
         <div className={styles["container"]} style={{ marginTop: 20 }}>
             <Row gutter={[20, 20]}>
+                <Divider />
                 <Col span={24}>
                     <SearchClient />
                 </Col>
