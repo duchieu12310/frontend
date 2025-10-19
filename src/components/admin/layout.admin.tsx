@@ -10,7 +10,7 @@ import {
     AliwangwangOutlined,
     BugOutlined,
     ScheduleOutlined,
-    FormOutlined, // 🆕 thêm biểu tượng cho mục "Đăng ký công ty"
+    FormOutlined, // 🆕 biểu tượng cho mục "Đăng ký công ty"
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
@@ -29,7 +29,6 @@ const LayoutAdmin = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [activeMenu, setActiveMenu] = useState('');
     const user = useAppSelector(state => state.account.user);
-
     const permissions = useAppSelector(state => state.account.user.role.permissions);
     const [menuItems, setMenuItems] = useState<MenuProps['items']>([]);
 
@@ -38,39 +37,23 @@ const LayoutAdmin = () => {
 
     useEffect(() => {
         const ACL_ENABLE = import.meta.env.VITE_ACL_ENABLE;
+
         if (permissions?.length || ACL_ENABLE === 'false') {
 
-            const viewCompany = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.COMPANIES.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.COMPANIES.GET_PAGINATE.method
-            )
+            // Kiểm tra quyền từng module
+            const hasPermission = (perm: any) => permissions?.some(
+                item => item.apiPath === perm.apiPath && item.method === perm.method
+            );
 
-            const viewUser = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.USERS.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.USERS.GET_PAGINATE.method
-            )
+            const viewCompany = hasPermission(ALL_PERMISSIONS.COMPANIES.GET_PAGINATE);
+            const viewUser = hasPermission(ALL_PERMISSIONS.USERS.GET_PAGINATE);
+            const viewJob = hasPermission(ALL_PERMISSIONS.JOBS.GET_PAGINATE);
+            const viewResume = hasPermission(ALL_PERMISSIONS.RESUMES.GET_PAGINATE);
+            const viewRole = hasPermission(ALL_PERMISSIONS.ROLES.GET_PAGINATE);
+            const viewPermission = hasPermission(ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE);
+            const viewCompanyRegistration = hasPermission(ALL_PERMISSIONS.COMPANY_REGISTRATIONS.GET_PAGINATE);
 
-            const viewJob = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.JOBS.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.JOBS.GET_PAGINATE.method
-            )
-
-            const viewResume = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.RESUMES.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.RESUMES.GET_PAGINATE.method
-            )
-
-            const viewRole = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.ROLES.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.ROLES.GET_PAGINATE.method
-            )
-
-            const viewPermission = permissions?.find(item =>
-                item.apiPath === ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE.apiPath
-                && item.method === ALL_PERMISSIONS.USERS.GET_PAGINATE.method
-            )
-
-            const full = [
+            const full: MenuProps['items'] = [
                 {
                     label: <Link to='/admin'>Bảng điều khiển</Link>,
                     key: '/admin',
@@ -82,18 +65,18 @@ const LayoutAdmin = () => {
                     icon: <BankOutlined />,
                 }] : []),
 
-                // 🆕 Thêm mục "Đăng ký công ty"
-                {
+                ...(viewCompanyRegistration || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/register-company'>Đăng ký công ty</Link>,
                     key: '/admin/register-company',
-                    icon: <FormOutlined />,
-                },
+                    icon: <FormOutlined />
+                }] : []),
 
                 ...(viewUser || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/user'>Người dùng</Link>,
                     key: '/admin/user',
                     icon: <UserOutlined />
                 }] : []),
+
                 ...(viewJob || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/job'>Công việc</Link>,
                     key: '/admin/job',
@@ -105,107 +88,96 @@ const LayoutAdmin = () => {
                     key: '/admin/resume',
                     icon: <AliwangwangOutlined />
                 }] : []),
+
                 ...(viewPermission || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/permission'>Phân quyền</Link>,
                     key: '/admin/permission',
                     icon: <ApiOutlined />
                 }] : []),
-                ...(viewRole || ACL_ENABLE === 'false' ? [{
+
+                {
                     label: <Link to='/admin/role'>Vai trò</Link>,
                     key: '/admin/role',
                     icon: <ExceptionOutlined />
-                }] : []),
+                },
             ];
 
             setMenuItems(full);
         }
-    }, [permissions])
+    }, [permissions]);
+
     useEffect(() => {
-        setActiveMenu(location.pathname)
-    }, [location])
+        setActiveMenu(location.pathname);
+    }, [location]);
 
     const handleLogout = async () => {
         const res = await callLogout();
         if (res && +res.statusCode === 200) {
             dispatch(setLogoutAction({}));
             message.success('Đăng xuất thành công');
-            navigate('/')
+            navigate('/');
         }
     }
 
     const itemsDropdown = [
+        { label: <Link to={'/'}>Trang chủ</Link>, key: 'home' },
         {
-            label: <Link to={'/'}>Trang chủ</Link>,
-            key: 'home',
-        },
-        {
-            label: <label
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleLogout()}
-            >Đăng xuất</label>,
+            label: <label style={{ cursor: 'pointer' }} onClick={handleLogout}>Đăng xuất</label>,
             key: 'logout',
         },
     ];
 
     return (
-        <>
-            <Layout
-                style={{ minHeight: '100vh' }}
-                className="layout-admin"
-            >
-                {!isMobile ?
-                    <Sider
-                        theme='light'
-                        collapsible
-                        collapsed={collapsed}
-                        onCollapse={(value) => setCollapsed(value)}>
-                        <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-                            <BugOutlined />  QUẢN TRỊ
-                        </div>
-                        <Menu
-                            selectedKeys={[activeMenu]}
-                            mode="inline"
-                            items={menuItems}
-                            onClick={(e) => setActiveMenu(e.key)}
-                        />
-                    </Sider>
-                    :
+        <Layout style={{ minHeight: '100vh' }} className="layout-admin">
+            {!isMobile ? (
+                <Sider
+                    theme='light'
+                    collapsible
+                    collapsed={collapsed}
+                    onCollapse={(value) => setCollapsed(value)}
+                >
+                    <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
+                        <BugOutlined /> QUẢN TRỊ
+                    </div>
                     <Menu
                         selectedKeys={[activeMenu]}
+                        mode="inline"
                         items={menuItems}
                         onClick={(e) => setActiveMenu(e.key)}
-                        mode="horizontal"
                     />
-                }
+                </Sider>
+            ) : (
+                <Menu
+                    selectedKeys={[activeMenu]}
+                    items={menuItems}
+                    onClick={(e) => setActiveMenu(e.key)}
+                    mode="horizontal"
+                />
+            )}
 
-                <Layout>
-                    {!isMobile &&
-                        <div className='admin-header' style={{ display: "flex", justifyContent: "space-between", marginRight: 20 }}>
-                            <Button
-                                type="text"
-                                icon={collapsed ? React.createElement(MenuUnfoldOutlined) : React.createElement(MenuFoldOutlined)}
-                                onClick={() => setCollapsed(!collapsed)}
-                                style={{
-                                    fontSize: '16px',
-                                    width: 64,
-                                    height: 64,
-                                }}
-                            />
+            <Layout>
+                {!isMobile && (
+                    <div className='admin-header' style={{ display: "flex", justifyContent: "space-between", marginRight: 20 }}>
+                        <Button
+                            type="text"
+                            icon={collapsed ? React.createElement(MenuUnfoldOutlined) : React.createElement(MenuFoldOutlined)}
+                            onClick={() => setCollapsed(!collapsed)}
+                            style={{ fontSize: '16px', width: 64, height: 64 }}
+                        />
 
-                            <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
-                                <Space style={{ cursor: "pointer" }}>
-                                    Xin chào {user?.name}
-                                    <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
-                                </Space>
-                            </Dropdown>
-                        </div>
-                    }
-                    <Content style={{ padding: '15px' }}>
-                        <Outlet />
-                    </Content>
-                </Layout>
+                        <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
+                            <Space style={{ cursor: "pointer" }}>
+                                Xin chào {user?.name}
+                                <Avatar>{user?.name?.substring(0, 2)?.toUpperCase()}</Avatar>
+                            </Space>
+                        </Dropdown>
+                    </div>
+                )}
+                <Content style={{ padding: '15px' }}>
+                    <Outlet />
+                </Content>
             </Layout>
-        </>
+        </Layout>
     );
 };
 

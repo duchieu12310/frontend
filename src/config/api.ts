@@ -295,15 +295,24 @@ export const callFetchCompanyRegistrationById = (id: string | number) => {
     return axios.get<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);
 }
 
-export const callApproveCompanyRegistration = (id: string | number) => {
-    return axios.put<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}/status`);
-}
+export const callUpdateCompanyRegistrationStatus = (
+    id: string | number,
+    status: "APPROVED" | "REJECTED",
+    reason?: string
+) => {
+    // ⚠️ Gửi status bằng query param, lý do (nếu có) trong body
+    if (status === "REJECTED" && reason) {
+        return axios.put(`/api/v1/company-registrations/${id}/status?status=${status}`, reason, {
+            headers: {
+                "Content-Type": "text/plain", // gửi chuỗi lý do thuần túy
+            },
+        });
+    } else {
+        // Nếu phê duyệt, chỉ gửi status
+        return axios.put(`/api/v1/company-registrations/${id}/status?status=${status}`);
+    }
+};
 
-export const callRejectCompanyRegistration = (id: string | number, rejectionReason: string) => {
-    return axios.put<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}/reject`, rejectionReason, {
-        headers: { 'Content-Type': 'text/plain' }
-    });
-}
 
 export const callDeleteCompanyRegistration = (id: string | number) => {
     return axios.delete<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);

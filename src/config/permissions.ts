@@ -35,6 +35,14 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PUT", apiPath: '/api/v1/users', module: "USERS" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/users/{id}', module: "USERS" },
     },
+    COMPANY_REGISTRATIONS: {
+        CREATE: { method: "POST", apiPath: '/api/v1/company-registrations', module: "COMPANY_REGISTRATIONS" },
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/company-registrations', module: "COMPANY_REGISTRATIONS" },
+        UPDATE_STATUS: { method: "PUT", apiPath: '/api/v1/company-registrations/{id}/status', module: "COMPANY_REGISTRATIONS" },
+        GET_BY_ID: { method: "GET", apiPath: '/api/v1/company-registrations/{id}', module: "COMPANY_REGISTRATIONS" },
+        REJECT: { method: "PUT", apiPath: '/api/v1/company-registrations/{id}/reject', module: "COMPANY_REGISTRATIONS" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/company-registrations/{id}', module: "COMPANY_REGISTRATIONS" },
+    },
 }
 
 export const ALL_MODULES = {
@@ -45,5 +53,6 @@ export const ALL_MODULES = {
     RESUMES: 'RESUMES',
     ROLES: 'ROLES',
     USERS: 'USERS',
-    SUBSCRIBERS: 'SUBSCRIBERS'
+    SUBSCRIBERS: 'SUBSCRIBERS',
+    COMPANY_REGISTRATIONS: 'COMPANY_REGISTRATIONS'
 }
