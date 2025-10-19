@@ -2,7 +2,7 @@ Cài Version node.js mình sử dụng là 16.20.0:
 
 Các bước cài đặt: (chế độ development)
 1. clone code
-2. cài đặt thư viện: npm i
+2. cài đặt thư viện: npm i,npm install bootstrap,npm install recharts
 3. Update file .env.development (nếu cần thiết)
 4. Chạy dự án: npm run dev
 
