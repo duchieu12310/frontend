@@ -111,29 +111,45 @@ export interface IJob {
 export interface IResume {
     id?: string;
     email: string;
-    userId: string;
     url: string;
-    status: string;
-    companyId: string | {
+    status: string; // Enum: PENDING, APPROVED, REJECTED
+    note?: string;  // Ghi chú (ví dụ: lý do từ chối hoặc hướng dẫn liên hệ)
+
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+
+    // 👤 Thông tin người nộp (user)
+    user?: {
         id: string;
         name: string;
-        logo: string;
     };
-    jobId: string | {
+
+    // 💼 Thông tin công việc
+    job?: {
         id: string;
         name: string;
+        location: string;
+        salary: number;
+        level: string;
+        company: {
+            id: string;
+            name: string;
+            address?: string;
+            logo?: string;
+            description?: string;
+        };
     };
+
+    // 🕒 Lịch sử cập nhật trạng thái (tuỳ chọn)
     history?: {
         status: string;
         updatedAt: Date;
-        updatedBy: { id: string; email: string }
-    }[]
-    createdBy?: string;
-    isDeleted?: boolean;
-    deletedAt?: boolean | null;
-    createdAt?: string;
-    updatedAt?: string;
+        updatedBy: { id: string; email: string };
+    }[];
 }
+
 
 export interface IPermission {
     id?: string;
@@ -202,4 +218,15 @@ export interface ICompanyRegistration {
     updatedAt?: string;
     createdBy?: string;
     updatedBy?: string;
+}
+export interface INotification {
+    id?: string;
+    resourceName: string;
+    createdBy?: string;
+    updatedBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    message: string;
+    isDeleted?: boolean;
+    deletedAt?: string | null;
 }

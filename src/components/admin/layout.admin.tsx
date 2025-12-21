@@ -86,15 +86,16 @@ const LayoutAdmin = () => {
                 ...(viewResume || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/resume'>Hồ sơ</Link>,
                     key: '/admin/resume',
-                    icon: <AliwangwangOutlined />
-                }] : []),
-
-                ...(viewPermission || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/permission'>Phân quyền</Link>,
-                    key: '/admin/permission',
                     icon: <ApiOutlined />
                 }] : []),
 
+
+
+                {
+                    label: <Link to='/admin/permission'>Phân quyền</Link>,
+                    key: '/admin/permission',
+                    icon: <ExceptionOutlined />
+                },
                 {
                     label: <Link to='/admin/role'>Vai trò</Link>,
                     key: '/admin/role',

@@ -201,30 +201,31 @@ const PermissionPage = () => {
 
     return (
         <div>
-            <Access permission={ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE}>
-                <DataTable<IPermission>
-                    actionRef={tableRef}
-                    headerTitle="Danh sách quyền hạn"
-                    rowKey="id"
-                    loading={isFetching}
-                    columns={columns}
-                    dataSource={permissions}
-                    request={async (params, sort, filter): Promise<any> => {
-                        const query = buildQuery(params, sort, filter);
-                        dispatch(fetchPermission({ query }))
-                    }}
-                    scroll={{ x: true }}
-                    pagination={{
-                        current: meta.page,
-                        pageSize: meta.pageSize,
-                        showSizeChanger: true,
-                        total: meta.total,
-                        showTotal: (total, range) => (
-                            <div>{range[0]}-{range[1]} trên {total} dòng</div>
-                        )
-                    }}
-                    rowSelection={false}
-                    toolBarRender={(): any => (
+            {/* ✅ Bỏ Access cho GET_PAGINATE để ai cũng xem được */}
+            <DataTable<IPermission>
+                actionRef={tableRef}
+                headerTitle="Danh sách quyền hạn"
+                rowKey="id"
+                loading={isFetching}
+                columns={columns}
+                dataSource={permissions}
+                request={async (params, sort, filter): Promise<any> => {
+                    const query = buildQuery(params, sort, filter);
+                    dispatch(fetchPermission({ query }));
+                }}
+                scroll={{ x: true }}
+                pagination={{
+                    current: meta.page,
+                    pageSize: meta.pageSize,
+                    showSizeChanger: true,
+                    total: meta.total,
+                    showTotal: (total, range) => (
+                        <div>{range[0]}-{range[1]} trên {total} dòng</div>
+                    )
+                }}
+                rowSelection={false}
+                toolBarRender={(): any => (
+                    <Access permission={ALL_PERMISSIONS.PERMISSIONS.CREATE} hideChildren>
                         <Button
                             icon={<PlusOutlined />}
                             type="primary"
@@ -232,9 +233,9 @@ const PermissionPage = () => {
                         >
                             Thêm mới
                         </Button>
-                    )}
-                />
-            </Access>
+                    </Access>
+                )}
+            />
 
             <ModalPermission
                 openModal={openModal}
@@ -251,7 +252,7 @@ const PermissionPage = () => {
                 setDataInit={setDataInit}
             />
         </div>
-    )
-}
+    );
+};
 
 export default PermissionPage;

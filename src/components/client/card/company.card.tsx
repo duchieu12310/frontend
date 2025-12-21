@@ -1,4 +1,4 @@
-import { callAllCompany } from '@/config/api';
+import { callFetchCompanyPublic } from '@/config/api';
 import { convertSlug } from '@/config/utils';
 import { ICompany } from '@/types/backend';
 import { useState, useEffect } from 'react';
@@ -32,7 +32,9 @@ const CompanyCard = (props: IProps) => {
         if (filter) query += `&${filter}`;
         if (sortQuery) query += `&${sortQuery}`;
 
-        const res = await callAllCompany(query);
+        // 🔥 Gọi API public thay vì all
+        const res = await callFetchCompanyPublic(query);
+
         if (res && res.data) {
             setDisplayCompany(res.data.result);
             setTotal(res.data.meta.total);
@@ -56,7 +58,6 @@ const CompanyCard = (props: IProps) => {
     return (
         <div className={`${styles["company-section"]} py-4`}>
             <div className={`${styles["company-content"]} container`}>
-
                 {isLoading && (
                     <div className="text-center my-5">
                         <div className="spinner-border text-primary" role="status">
@@ -65,14 +66,12 @@ const CompanyCard = (props: IProps) => {
                     </div>
                 )}
 
-                {/* Tiêu đề luôn căn giữa */}
                 <div className="text-center mb-4">
                     <h4 className={`${styles["title"]} mb-0`}>
                         Nhà Tuyển Dụng Hàng Đầu
                     </h4>
                 </div>
 
-                {/* Grid các company */}
                 <div className="row g-4">
                     {displayCompany && displayCompany.length > 0 ? (
                         displayCompany.slice(0, 4).map(item => (
@@ -97,7 +96,6 @@ const CompanyCard = (props: IProps) => {
                                     }}
                                 >
                                     <div className="card-body d-flex flex-column align-items-center justify-content-center">
-                                        {/* Logo cố định kích thước */}
                                         <div
                                             style={{
                                                 width: "120px",
@@ -129,7 +127,6 @@ const CompanyCard = (props: IProps) => {
                     ) : null}
                 </div>
 
-                {/* Nút "Xem tất cả" ở dưới cùng */}
                 {!showPagination && displayCompany && displayCompany.length > 0 && (
                     <div className="text-center mt-4">
                         <Link to="company" className="btn btn-primary">
@@ -138,7 +135,6 @@ const CompanyCard = (props: IProps) => {
                     </div>
                 )}
 
-                {/* Pagination nếu cần */}
                 {showPagination && totalPages > 1 && (
                     <div className="d-flex justify-content-center mt-4">
                         <nav>
