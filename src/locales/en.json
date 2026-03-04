@@ -1,0 +1,34 @@
+{
+    "header": {
+        "home": "Home",
+        "jobs": "Jobs",
+        "companies": "Companies",
+        "login": "Login",
+        "register": "Register",
+        "dashboard": "Dashboard",
+        "logout": "Logout",
+        "welcome": "Welcome",
+        "admin": "Admin Page"
+    },
+    "home": {
+        "categories": {
+            "title": "Key Industries",
+            "view_all": "View All"
+        },
+        "featured_jobs": {
+            "title": "Featured Jobs",
+            "view_all": "View All",
+            "hot": "HOT"
+        },
+        "top_employers": {
+            "title": "Top Employers",
+            "view_all": "View All"
+        },
+        "search": {
+            "title": "Find The Perfect Job That <span>You Deserve</span>",
+            "subtitle": "Discover thousands of career opportunities. Connecting top talent with top companies. Your dream job is just a search away.",
+            "search_btn": "Search A Job",
+            "talent_btn": "Find A Talent"
+        }
+    }
+}

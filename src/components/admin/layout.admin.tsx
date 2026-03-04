@@ -11,6 +11,7 @@ import {
     BugOutlined,
     ScheduleOutlined,
     FormOutlined, // 🆕 biểu tượng cho mục "Đăng ký công ty"
+    FileTextOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
@@ -100,6 +101,11 @@ const LayoutAdmin = () => {
                     label: <Link to='/admin/role'>Vai trò</Link>,
                     key: '/admin/role',
                     icon: <ExceptionOutlined />
+                },
+                {
+                    label: <Link to='/admin/cv-templates'>Mẫu CV</Link>,
+                    key: '/admin/cv-templates',
+                    icon: <FileTextOutlined />
                 },
             ];
 

@@ -230,3 +230,10 @@ export interface INotification {
     isDeleted?: boolean;
     deletedAt?: string | null;
 }
+
+export interface ICVTemplate {
+    id?: number;
+    name?: string;
+    thumbnailUrl?: string;
+    layoutConfig?: string;
+}

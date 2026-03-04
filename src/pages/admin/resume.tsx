@@ -168,7 +168,7 @@ const ResumePage = () => {
             title: "Người nộp hồ sơ",
             dataIndex: ["user", "name"],
             hideInSearch: true,
-            render: (_, record) => record.user?.name || record.user?.email || "",
+            render: (_, record) => record.user?.name || record.email || "",
         },
         {
             title: "Ngày tạo",
@@ -312,7 +312,7 @@ const ResumePage = () => {
                         ),
                     }}
                     rowSelection={false}
-                    toolBarRender={() => <></>}
+                    toolBarRender={false}
                 />
             </Access>
 

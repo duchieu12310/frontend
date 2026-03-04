@@ -1,5 +1,6 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import styles from '@/styles/home.module.scss';
+import { MessageOutlined } from '@ant-design/icons';
 
 interface Testimonial {
     id: number;
@@ -42,58 +43,27 @@ const testimonials: Testimonial[] = [
 
 const ClientsSay: React.FC = () => {
     return (
-        <div className="container-xxl py-5">
-            <div className="container">
-                <h1 className="text-center mb-5">Khách Hàng Nói Về Chúng Tôi!!!</h1>
+        <div className={styles['section-container']}>
+            <div className={styles['testimonials-section']}>
+                <h2><span>Khách Hàng Nói Về Chúng Tôi!!!</span></h2>
 
-                <div id="testimonialCarousel" className="carousel slide" data-bs-ride="carousel">
-                    <div className="carousel-inner">
-                        {testimonials.map((t, index) => (
-                            <div key={t.id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                                <div className="testimonial-item bg-light rounded p-4 text-center">
-                                    <i className="fa fa-quote-left fa-2x text-primary mb-3"></i>
-                                    <p>{t.text}</p>
-                                    <div className="d-flex align-items-center justify-content-center mt-3">
-                                        <img
-                                            className="img-fluid rounded-circle"
-                                            src={t.img}
-                                            alt={t.name}
-                                            style={{ width: '50px', height: '50px' }}
-                                        />
-                                        <div className="ps-3 text-start">
-                                            <h5 className="mb-1">{t.name}</h5>
-                                            <small>{t.profession}</small>
-                                        </div>
-                                    </div>
+                <div className={styles['testimonial-grid']}>
+                    {testimonials.map((t) => (
+                        <div key={t.id} className={styles['testimonial-card']}>
+                            <MessageOutlined className={styles['quote-icon']} />
+                            <p className={styles['text']}>{t.text}</p>
+                            <div className={styles['author']}>
+                                <img
+                                    src={t.img}
+                                    alt={t.name}
+                                />
+                                <div className={styles['info']}>
+                                    <h5>{t.name}</h5>
+                                    <small>{t.profession}</small>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-
-                    {/* Điều khiển carousel */}
-                    <button className="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                        <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span className="visually-hidden">Trước</span>
-                    </button>
-                    <button className="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                        <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span className="visually-hidden">Tiếp</span>
-                    </button>
-
-                    {/* Chỉ báo carousel */}
-                    <div className="carousel-indicators mt-3">
-                        {testimonials.map((_, idx) => (
-                            <button
-                                key={idx}
-                                type="button"
-                                data-bs-target="#testimonialCarousel"
-                                data-bs-slide-to={idx}
-                                className={idx === 0 ? 'active' : ''}
-                                aria-current={idx === 0 ? 'true' : undefined}
-                                aria-label={`Slide ${idx + 1}`}
-                            ></button>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

@@ -110,29 +110,34 @@ const RolePage = () => {
             title: 'Thao tác',
             hideInSearch: true,
             width: 80,
-            render: (_value, entity) => (
-                <Space>
-                    <EditOutlined
-                        style={{ fontSize: 20, color: '#ffa500', cursor: 'pointer' }}
-                        onClick={() => {
-                            setSingleRole(entity);
-                            setOpenModal(true);
-                        }}
-                    />
-                    <Popconfirm
-                        placement="leftTop"
-                        title={"Xác nhận xóa vai trò"}
-                        description={"Bạn có chắc chắn muốn xóa vai trò này?"}
-                        onConfirm={() => handleDeleteRole(entity.id)}
-                        okText="Xác nhận"
-                        cancelText="Hủy"
-                    >
-                        <DeleteOutlined
-                            style={{ fontSize: 20, color: '#ff4d4f', cursor: 'pointer' }}
+            render: (_value, entity) => {
+                // Hide actions for system roles
+                if (entity.id && (+entity.id === 1 || +entity.id === 2)) return <></>;
+
+                return (
+                    <Space>
+                        <EditOutlined
+                            style={{ fontSize: 20, color: '#ffa500', cursor: 'pointer' }}
+                            onClick={() => {
+                                setSingleRole(entity);
+                                setOpenModal(true);
+                            }}
                         />
-                    </Popconfirm>
-                </Space>
-            ),
+                        <Popconfirm
+                            placement="leftTop"
+                            title={"Xác nhận xóa vai trò"}
+                            description={"Bạn có chắc chắn muốn xóa vai trò này?"}
+                            onConfirm={() => handleDeleteRole(entity.id)}
+                            okText="Xác nhận"
+                            cancelText="Hủy"
+                        >
+                            <DeleteOutlined
+                                style={{ fontSize: 20, color: '#ff4d4f', cursor: 'pointer' }}
+                            />
+                        </Popconfirm>
+                    </Space>
+                )
+            },
         },
     ];
 
@@ -169,7 +174,7 @@ const RolePage = () => {
                 columns={columns}
                 dataSource={roles}
                 request={async (params, sort, filter): Promise<any> => {
-                    const query = buildQuery(params, sort, filter);
+                    const query = buildQuery(params, sort);
                     dispatch(fetchRole({ query }));
                 }}
                 scroll={{ x: true }}
@@ -183,15 +188,16 @@ const RolePage = () => {
                     ),
                 }}
                 rowSelection={false}
-                toolBarRender={() => (
+                toolBarRender={() => [
                     <Button
+                        key="add"
                         icon={<PlusOutlined />}
                         type="primary"
                         onClick={() => setOpenModal(true)}
                     >
                         Thêm vai trò
                     </Button>
-                )}
+                ]}
             />
             <ModalRole
                 openModal={openModal}

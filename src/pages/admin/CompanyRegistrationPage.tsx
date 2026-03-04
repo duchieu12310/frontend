@@ -137,7 +137,8 @@ const CompanyRegistrationPage = () => {
             title: "Trạng thái",
             dataIndex: "status",
             hideInSearch: true,
-            render: (status: string) => {
+            render: (_, record) => {
+                const status = record.status;
                 const color = status === "APPROVED" ? "green" : status === "REJECTED" ? "red" : "blue";
                 return <Tag color={color}>{status || "PENDING"}</Tag>;
             },
@@ -146,7 +147,7 @@ const CompanyRegistrationPage = () => {
             title: "Ngày đăng ký",
             dataIndex: "createdAt",
             hideInSearch: true,
-            render: (text) => (text ? dayjs(text).format("DD-MM-YYYY HH:mm") : ""),
+            render: (text: any) => (text ? dayjs(text).format("DD-MM-YYYY HH:mm") : ""),
         },
         {
             title: "Thao tác",
@@ -154,7 +155,9 @@ const CompanyRegistrationPage = () => {
             width: 300,
             align: "center",
             render: (_, record) => {
-                const currentStatus = buttonState[record.id] || record.status;
+                const currentStatus = record.id ? (buttonState[record.id] || record.status) : record.status;
+                if (!record.id) return null;
+
                 return (
                     <Space>
                         {/* 👁️ Xem chi tiết */}
@@ -165,7 +168,7 @@ const CompanyRegistrationPage = () => {
                         {/* ✅ Duyệt công ty */}
                         <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.UPDATE_STATUS} hideChildren>
                             {(currentStatus === "PENDING" || currentStatus === "REJECTED") && (
-                                <Popconfirm title="Duyệt công ty này?" onConfirm={() => handleApprove(record.id)}>
+                                <Popconfirm title="Duyệt công ty này?" onConfirm={() => handleApprove(record.id!)}>
                                     <Button icon={<CheckOutlined />} type="primary" />
                                 </Popconfirm>
                             )}
@@ -174,7 +177,7 @@ const CompanyRegistrationPage = () => {
                         {/* ❌ Từ chối công ty */}
                         <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.REJECT} hideChildren>
                             {(currentStatus === "PENDING" || currentStatus === "APPROVED") && (
-                                <Popconfirm title="Từ chối công ty này?" onConfirm={() => handleReject(record.id)}>
+                                <Popconfirm title="Từ chối công ty này?" onConfirm={() => handleReject(record.id!)}>
                                     <Button icon={<CloseOutlined />} danger />
                                 </Popconfirm>
                             )}
@@ -182,7 +185,7 @@ const CompanyRegistrationPage = () => {
 
                         {/* 🗑️ Xóa đăng ký */}
                         <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.DELETE} hideChildren>
-                            <Popconfirm title="Xóa đăng ký này?" onConfirm={() => handleDelete(record.id)}>
+                            <Popconfirm title="Xóa đăng ký này?" onConfirm={() => handleDelete(record.id!)}>
                                 <Button icon={<DeleteOutlined />} danger type="primary" />
                             </Popconfirm>
                         </Access>

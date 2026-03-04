@@ -1,10 +1,10 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { ICompany } from "@/types/backend";
 import { callFetchCompanyById } from "@/config/api";
 import styles from 'styles/client.module.scss';
 import parse from 'html-react-parser';
-import { Col, Divider, Row, Skeleton } from "antd";
+import { Col, Divider, Row, Skeleton, Breadcrumb } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 
 
@@ -32,6 +32,20 @@ const ClientCompanyDetailPage = (props: any) => {
 
     return (
         <div className={`${styles["container"]} ${styles["detail-job-section"]}`}>
+            <Breadcrumb
+                style={{ margin: '16px 0' }}
+                items={[
+                    {
+                        title: <Link to={"/"}>Trang Chủ</Link>,
+                    },
+                    {
+                        title: <Link to={"/company"}>Công Ty</Link>,
+                    },
+                    {
+                        title: companyDetail?.name ?? "Chi tiết công ty",
+                    },
+                ]}
+            />
             {isLoading ?
                 <Skeleton />
                 :

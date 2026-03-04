@@ -1,25 +1,42 @@
 import { message, notification } from "antd";
 import { Link, useLocation } from "react-router-dom";
-import { callLogin } from "config/api";
+import { callLogin, callLoginGoogle } from "config/api";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setUserLoginInfo } from "@/redux/slice/accountSlide";
 import { useAppSelector } from "@/redux/hooks";
+import { GoogleLogin } from "@react-oauth/google";
 import styles from "styles/auth.module.scss";
 
 const LoginPage = () => {
-    const navigate = useLocation();
+    const location = useLocation();
     const dispatch = useDispatch();
     const [isSubmit, setIsSubmit] = useState(false);
-    const isAuthenticated = useAppSelector((state) => state.account.isAuthenticated);
 
-    const params = new URLSearchParams(navigate.search);
+    const isAuthenticated = useAppSelector(
+        (state) => state.account.isAuthenticated
+    );
+
+    const params = new URLSearchParams(location.search);
     const callback = params.get("callback");
 
     useEffect(() => {
         if (isAuthenticated) window.location.href = "/";
     }, [isAuthenticated]);
 
+    // ================= COMMON SUCCESS HANDLER =================
+    const handleLoginSuccess = (res: any, isGoogle = false) => {
+        localStorage.setItem("access_token", res.data.access_token);
+        dispatch(setUserLoginInfo(res.data.user));
+
+        message.success(
+            isGoogle ? "Đăng nhập Google thành công!" : "Đăng nhập thành công!"
+        );
+
+        window.location.href = callback || "/";
+    };
+
+    // ================= LOCAL LOGIN =================
     const onFinish = async (e: any) => {
         e.preventDefault();
 
@@ -27,101 +44,101 @@ const LoginPage = () => {
         const password = e.target.password.value;
 
         setIsSubmit(true);
-        const res = await callLogin(username, password);
-        setIsSubmit(false);
-
-        if (res?.data) {
-            localStorage.setItem("access_token", res.data.access_token);
-            dispatch(setUserLoginInfo(res.data.user));
-
-            message.success("Đăng nhập thành công!");
-            window.location.href = callback || "/";
-        } else {
+        try {
+            const res = await callLogin(username, password);
+            handleLoginSuccess(res);
+        } catch (error: any) {
             notification.error({
-                message: "Có lỗi xảy ra",
+                message: "Đăng nhập thất bại",
                 description:
-                    res.message && Array.isArray(res.message)
-                        ? res.message[0]
-                        : res.message,
-                duration: 4,
+                    error?.response?.data?.message || "Có lỗi xảy ra"
+            });
+        } finally {
+            setIsSubmit(false);
+        }
+    };
+
+    // ================= GOOGLE LOGIN =================
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        try {
+            const idToken = credentialResponse.credential;
+            const res = await callLoginGoogle(idToken);
+            handleLoginSuccess(res, true);
+        } catch (error: any) {
+            notification.error({
+                message: "Google Login thất bại",
+                description:
+                    error?.response?.data?.message || "Xác thực Google lỗi"
             });
         }
     };
 
-    const handleLoginGoogle = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
-    };
-
     return (
-        <div className={`${styles["login-page"]} d-flex justify-content-center align-items-center vh-100`}>
-            <div className="card p-4 shadow" style={{ width: "380px", borderRadius: "14px" }}>
+        <div
+            className={`${styles["login-page"]} d-flex justify-content-center align-items-center vh-100`}
+        >
+            <div className="card p-4 shadow" style={{ width: "380px" }}>
                 <h3 className="text-center mb-4 fw-bold">Đăng Nhập</h3>
 
+                {/* LOCAL LOGIN */}
                 <form onSubmit={onFinish}>
-                    {/* Email */}
                     <div className="mb-3">
-                        <label className="form-label">Email</label>
+                        <label>Email</label>
                         <input
                             type="text"
                             name="username"
                             className="form-control"
-                            placeholder="Nhập email"
                             required
                         />
                     </div>
 
-                    {/* Password */}
                     <div className="mb-3">
-                        <label className="form-label">Mật khẩu</label>
+                        <label>Mật khẩu</label>
                         <input
                             type="password"
                             name="password"
                             className="form-control"
-                            placeholder="Nhập mật khẩu"
                             required
                         />
                     </div>
 
-                    {/* Submit Button */}
                     <button
                         type="submit"
-                        className="btn btn-primary w-100 mt-2"
+                        className="btn btn-primary w-100"
                         disabled={isSubmit}
                     >
                         {isSubmit ? "Đang xử lý..." : "Đăng nhập"}
                     </button>
-
-                    {/* Google Login */}
-                    <button
-                        type="button"
-                        onClick={handleLoginGoogle}
-                        className="btn btn-light w-100 mt-3 border d-flex align-items-center justify-content-center"
-                        style={{ gap: "8px" }}
-                    >
-                        <img
-                            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                            alt="google"
-                            width="20"
-                        />
-                        <span>Đăng nhập với Google</span>
-                    </button>
-
-                    {/* Divider */}
-                    <div className="text-center my-3 text-muted">——  Hoặc  ——</div>
-
-                    {/* Back to Home */}
-                    <div className="text-center mb-3">
-                        <Link to="/" className="btn btn-outline-secondary w-100">
-                            ← Trang chủ
-                        </Link>
-                    </div>
-
-                    {/* Register */}
-                    <p className="text-center mt-2">
-                        Chưa có tài khoản?
-                        <Link to="/register" className="ms-1">Đăng ký</Link>
-                    </p>
                 </form>
+
+                <div className="text-center my-3 text-muted">
+                    —— Hoặc ——
+                </div>
+
+                {/* GOOGLE LOGIN */}
+                <div className="d-flex justify-content-center">
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() =>
+                            notification.error({
+                                message: "Google Login thất bại"
+                            })
+                        }
+                    />
+                </div>
+
+                <div className="text-center mt-4">
+                    <Link to="/" className="btn btn-outline-secondary w-100">
+                        ← Trang chủ
+                    </Link>
+                </div>
+
+                <p className="text-center mt-3">
+                    Chưa có tài khoản?
+                    <Link to="/register" className="ms-1">
+                        Đăng ký
+                    </Link>
+                </p>
             </div>
         </div>
     );

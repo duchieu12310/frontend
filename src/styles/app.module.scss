@@ -1,7 +1,33 @@
-// @import 'variables.scss';
+@import 'variables.scss';
+
+:root {
+    --primary-color: #{$primary-color};
+    --primary-hover: #{$primary-hover};
+    --font-family-sans: #{$font-family-sans};
+    --font-family-heading: #{$font-family-heading};
+}
+
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: $font-family-sans;
+    background-color: $gray-50;
+    color: $gray-800;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: $font-family-heading;
+    font-weight: 700;
 }
 
 .content-app {

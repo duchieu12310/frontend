@@ -1,0 +1,137 @@
+@import '../../styles/variables.scss';
+
+// Vieclam24h Header Colors
+$header-bg: #4c1fa3; // Deep Purple
+$header-text: #ffffff;
+$header-active: #ffffff;
+
+.header-container {
+    background-color: $header-bg;
+    color: $header-text;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    :global(.navbar) {
+        padding: 0;
+        min-height: 70px;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: $header-text !important;
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-right: 2rem;
+
+        .brand-highlight {
+            color: $white;
+        }
+
+        svg {
+            color: $white !important;
+        }
+    }
+
+    .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+
+        &:hover,
+        &.active {
+            color: $header-active !important;
+            opacity: 1;
+        }
+    }
+
+    // Right side items
+    .right-section {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .location-selector {
+        color: $header-text;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.95rem;
+    }
+
+    .user-section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        line-height: 1.2;
+        color: $header-text;
+        cursor: pointer;
+
+        .label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .action {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+    }
+
+    .employer-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-left: 20px;
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+        color: $header-text;
+        text-decoration: none;
+
+        .icon-bag {
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .text-group {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+
+            .sub {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                opacity: 0.8;
+                font-weight: 600;
+            }
+
+            .main {
+                font-size: 0.9rem;
+                font-weight: 700;
+            }
+        }
+    }
+}
+
+// Dropdown overrides for this dark header
+:global(.dropdown-menu) {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-top: 10px;
+}

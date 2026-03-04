@@ -65,7 +65,12 @@ const JobPage = () => {
             title: 'Công ty',
             dataIndex: ["company", "name"],
             sorter: true,
-            hideInSearch: true,
+            hideInSearch: false,
+            search: {
+                transform: (value) => {
+                    return { companyName: value };
+                }
+            }
         },
         {
             title: 'Mức lương',
@@ -183,6 +188,7 @@ const JobPage = () => {
         let parts = [];
         if (clone.name) parts.push(`name ~ '${clone.name}'`);
         if (clone.salary) parts.push(`salary ~ '${clone.salary}'`);
+        if (clone.companyName) parts.push(`company.name ~ '${clone.companyName}'`);
         if (clone?.level?.length) {
             parts.push(`${sfIn("level", clone.level).toString()}`);
         }
@@ -198,6 +204,7 @@ const JobPage = () => {
         delete clone.name;
         delete clone.salary;
         delete clone.level;
+        delete clone.companyName;
 
         let temp = queryString.stringify(clone);
 
@@ -210,13 +217,24 @@ const JobPage = () => {
                     break;
                 }
             }
+            if (!sortBy) {
+                // handle nested company.name sort
+                if (sort['company,name']) {
+                    sortBy = `sort=company.name,${sort['company,name'] === 'ascend' ? 'asc' : 'desc'}`;
+                } else if (sort['company.name']) {
+                    sortBy = `sort=company.name,${sort['company.name'] === 'ascend' ? 'asc' : 'desc'}`;
+                } else if (sort['company']) {
+                    // sometimes antd passes { company: 'ascend' } if field is just company
+                    sortBy = `sort=company.name,${sort['company'] === 'ascend' ? 'asc' : 'desc'}`;
+                }
+            }
         }
 
         // Mặc định sắp xếp theo ngày cập nhật
-        if (Object.keys(sortBy).length === 0) {
-            temp = `${temp}&sort=updatedAt,desc`;
-        } else {
+        if (sortBy) {
             temp = `${temp}&${sortBy}`;
+        } else {
+            temp = `${temp}&sort=updatedAt,desc`;
         }
 
         return temp;

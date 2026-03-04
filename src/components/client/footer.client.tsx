@@ -1,31 +1,17 @@
 import React from "react";
 import { FaFacebookF, FaGithub, FaLinkedinIn, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import styles from './footer.module.scss';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer
-            style={{
-                backgroundColor: "#1c2331",
-                color: "#b0b0b0",
-                padding: "50px 20px",
-                fontFamily: "Arial, sans-serif",
-            }}
-        >
-            <div
-                style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                    maxWidth: "1200px",
-                    margin: "0 auto 30px auto",
-                }}
-            >
+        <footer className={styles['footer-container']}>
+            <div className={styles['footer-content']}>
                 {/* Company */}
-                <div style={{ flex: "1 1 200px", marginBottom: "20px" }}>
-                    <h5 style={{ color: "#fff", marginBottom: "15px" }}>Company</h5>
-                    <ul style={{ listStyle: "none", padding: 0 }}>
+                <div className={styles.column}>
+                    <h5>Company</h5>
+                    <ul>
                         <li>About Us</li>
                         <li>Contact Us</li>
                         <li>Our Services</li>
@@ -35,9 +21,9 @@ const Footer = () => {
                 </div>
 
                 {/* Quick Links */}
-                <div style={{ flex: "1 1 200px", marginBottom: "20px" }}>
-                    <h5 style={{ color: "#fff", marginBottom: "15px" }}>Quick Links</h5>
-                    <ul style={{ listStyle: "none", padding: 0 }}>
+                <div className={styles.column}>
+                    <h5>Quick Links</h5>
+                    <ul>
                         <li>About Us</li>
                         <li>Contact Us</li>
                         <li>Our Services</li>
@@ -47,8 +33,8 @@ const Footer = () => {
                 </div>
 
                 {/* Contact */}
-                <div style={{ flex: "1 1 200px", marginBottom: "20px" }}>
-                    <h5 style={{ color: "#fff", marginBottom: "15px" }}>Contact</h5>
+                <div className={styles.column}>
+                    <h5>Contact</h5>
                     <p>
                         <FaMapMarkerAlt /> 123 Street, New York, USA
                     </p>
@@ -58,59 +44,34 @@ const Footer = () => {
                     <p>
                         <FaEnvelope /> info@example.com
                     </p>
-                    <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                        <FaFacebookF style={{ cursor: "pointer" }} />
-                        <FaGithub style={{ cursor: "pointer" }} />
-                        <FaLinkedinIn style={{ cursor: "pointer" }} />
+                    <div className={styles['social-links']}>
+                        <FaFacebookF />
+                        <FaGithub />
+                        <FaLinkedinIn />
                     </div>
                 </div>
 
                 {/* Newsletter */}
-                <div style={{ flex: "1 1 200px", marginBottom: "20px" }}>
-                    <h5 style={{ color: "#fff", marginBottom: "15px" }}>Newsletter</h5>
+                <div className={styles.column}>
+                    <h5>Newsletter</h5>
                     <p>Dolor amet sit justo amet elit, clita ipsum elit est.</p>
-                    <div style={{ display: "flex" }}>
+                    <div className={styles['newsletter-form']}>
                         <input
                             type="email"
                             placeholder="Your email"
-                            style={{
-                                flex: 1,
-                                padding: "5px 10px",
-                                border: "none",
-                                borderRadius: "3px 0 0 3px",
-                            }}
                         />
-                        <button
-                            style={{
-                                padding: "5px 15px",
-                                border: "none",
-                                backgroundColor: "#00c853",
-                                color: "#fff",
-                                borderRadius: "0 3px 3px 0",
-                                cursor: "pointer",
-                            }}
-                        >
+                        <button>
                             SignUp
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div
-                style={{
-                    borderTop: "1px solid #333",
-                    paddingTop: "15px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    maxWidth: "1200px",
-                    margin: "0 auto",
-                    fontSize: "14px",
-                }}
-            >
+            <div className={styles['footer-bottom']}>
                 <div>
-                    © Your Site Name, All Right Reserved. Designed By HTML Codex. Distributed By ThemeWagon
+                    © {currentYear} JobEntry. All Right Reserved. Designed By HTML Codex.
                 </div>
-                <div style={{ display: "flex", gap: "15px" }}>
+                <div className={styles.links}>
                     <span>Home</span>
                     <span>Cookies</span>
                     <span>Help</span>

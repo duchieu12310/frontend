@@ -1,0 +1,191 @@
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.chat-window {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 400px;
+    height: 600px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+
+    .chat-header {
+        background: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        span {
+            font-size: 16px;
+            color: #1f1f1f;
+        }
+
+        .close-btn {
+            font-size: 16px;
+            color: #8c8c8c;
+            cursor: pointer;
+            transition: color 0.2s;
+
+            &:hover {
+                color: #595959;
+            }
+        }
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background-color: #fafafa;
+
+        .message-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            max-width: 100%;
+
+            .avatar {
+                flex-shrink: 0;
+                background-color: #1890ff; // Default bot color
+            }
+
+            .message-content {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-width: calc(100% - 44px); // Avatar width + gap
+            }
+
+            .bubble {
+                padding: 10px 14px;
+                border-radius: 12px;
+                font-size: 14px;
+                line-height: 1.5;
+                word-wrap: break-word;
+                position: relative;
+            }
+
+            &.user {
+                flex-direction: row-reverse;
+
+                .avatar {
+                    background-color: #faad14; // User color
+                }
+
+                .message-content {
+                    align-items: flex-end;
+                }
+
+                .bubble {
+                    background-color: #1890ff;
+                    color: #fff;
+                    border-bottom-right-radius: 4px;
+                }
+            }
+
+            &.bot {
+                .bubble {
+                    background-color: #fff;
+                    color: #262626;
+                    border: 1px solid #e8e8e8;
+                    border-bottom-left-radius: 4px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+                }
+            }
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+
+            .suggestion-tag {
+                cursor: pointer;
+                transition: all 0.2s;
+                margin: 0;
+
+                &:hover {
+                    opacity: 0.8;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+            }
+        }
+
+        .job-results {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+
+            .job-card {
+                width: 100%;
+                border: 1px solid #e6e6e6;
+                border-radius: 8px;
+
+                :global {
+                    .ant-card-body {
+                        padding: 12px;
+                    }
+                }
+
+                .job-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 4px;
+
+                    span:first-child {
+                        flex: 1;
+                        margin-right: 8px;
+                    }
+                }
+            }
+        }
+    }
+
+    .chat-input {
+        padding: 16px;
+        background-color: #fff;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        input {
+            flex: 1;
+            border: 1px solid #d9d9d9;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+
+            &:focus {
+                border-color: #1890ff;
+                box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+            }
+        }
+
+        // button styles handled by Antd
+    }
+}

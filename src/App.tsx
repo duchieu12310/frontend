@@ -32,6 +32,11 @@ import ClientCompanyDetailPage from './pages/company/detail';
 import JobTabs from './pages/admin/job/job.tabs';
 import ClientRegisterCompanyPage from './pages/register-company';
 import CompanyRegistrationList from './pages/admin/CompanyRegistrationPage';
+import ClientBlogPage from './pages/blog';
+import ClientBlogDetailPage from './pages/blog/detail';
+import ChatBot from 'components/client/chatbot/ChatBot';
+import ChatBotPage from 'pages/chatbot';
+import CVTemplatePage from 'pages/admin/cv-template';
 
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,9 +44,9 @@ const LayoutClient = () => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (rootRef && rootRef.current) {
-      rootRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    // if (rootRef && rootRef.current) {
+    //   rootRef.current.scrollIntoView({ behavior: 'smooth' });
+    // }
 
   }, [location]);
 
@@ -57,14 +62,14 @@ const LayoutClient = () => {
       }}
     >
       {/* HEADER */}
-      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <Header />
 
       {/* MAIN CONTENT */}
       <main
         className={styles["content-app"]}
         style={{
           flex: 1,
-          padding: "30px 20px",
+          padding: "0 20px 30px 20px",
           backgroundColor: "#ffffff",
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
           margin: "20px auto",
@@ -79,6 +84,7 @@ const LayoutClient = () => {
 
       {/* FOOTER */}
       <Footer />
+      <ChatBot />
     </div>
   );
 };
@@ -108,7 +114,11 @@ export default function App() {
         { path: "job/:id", element: <ClientJobDetailPage /> },
         { path: "company", element: <ClientCompanyPage /> },
         { path: "company/:id", element: <ClientCompanyDetailPage /> },
-        { path: "register-company", element: <ClientRegisterCompanyPage /> }
+        { path: "company/:id", element: <ClientCompanyDetailPage /> },
+        { path: "register-company", element: <ClientRegisterCompanyPage /> },
+        { path: "blog", element: <ClientBlogPage /> },
+        { path: "blog/:id", element: <ClientBlogDetailPage /> },
+        { path: "chat-ai", element: <ChatBotPage /> }
       ],
     },
 
@@ -178,6 +188,13 @@ export default function App() {
           element:
             <ProtectedRoute>
               <RolePage />
+            </ProtectedRoute>
+        },
+        {
+          path: "cv-templates",
+          element:
+            <ProtectedRoute>
+              <CVTemplatePage />
             </ProtectedRoute>
         }
       ],

@@ -12,7 +12,8 @@ import {
     ISkill,
     ISubscribers,
     ICompanyRegistration,
-    INotification
+    INotification,
+    ICVTemplate
 } from '@/types/backend';
 
 import axios from 'config/axios-customize';
@@ -32,6 +33,11 @@ export const callUpdateUserInfo = (data: { name?: string; age?: number; gender?:
 export const callLogin = (username: string, password: string) => {
     return axios.post<IBackendRes<IAccount>>('/api/v1/auth/login', { username, password })
 }
+export const callLoginGoogle = (idToken: string) => {
+    return axios.post("/api/v1/auth/login-google", {
+        idToken
+    });
+};
 export const callFetchAccount = () => {
     return axios.get<IBackendRes<IGetAccount>>('/api/v1/auth/account')
 }
@@ -135,6 +141,9 @@ export const callFetchJobById = (id: string) => {
 }
 export const callFetchAllJob = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IJob>>>(`/api/v1/jobs/all?${query}`);
+}
+export const callSearchJob = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IJob>>>(`/api/v1/jobs/search?${query}`);
 }
 
 /**
@@ -252,4 +261,38 @@ export const callDeleteCompanyRegistration = (id: string | number) => {
  */
 export const callFetchNotificationsLast24h = () => {
     return axios.get<IBackendRes<INotification[]>>('/api/notifications/last24h');
+}
+
+/**
+ * Module ChatBot
+ */
+export const callChatBotSearch = (query: string) => {
+    return axios.post<IBackendRes<any[]>>('/api/v1/chatbot/search', { query });
+}
+
+export const callChatBotSync = () => {
+    return axios.post<IBackendRes<string>>('/api/v1/chatbot/sync');
+}
+
+/**
+ * Module CV Template
+ */
+export const callCreateCVTemplate = (data: ICVTemplate) => {
+    return axios.post<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', data);
+}
+
+export const callUpdateCVTemplate = (data: ICVTemplate) => {
+    return axios.put<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', data);
+}
+
+export const callDeleteCVTemplate = (id: number | string) => {
+    return axios.delete<IBackendRes<void>>(`/api/v1/cv-templates/${id}`);
+}
+
+export const callFetchCVTemplate = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICVTemplate>>>(`/api/v1/cv-templates?${query}`);
+}
+
+export const callFetchCVTemplateById = (id: number | string) => {
+    return axios.get<IBackendRes<ICVTemplate>>(`/api/v1/cv-templates/${id}`);
 }

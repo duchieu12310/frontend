@@ -4,8 +4,8 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
 import ManageAccount from './modal/manage.account';
-import { callFetchNotificationsLast24h } from '@/config/api'; // API lấy notifications
-import './Header.css';
+import { callFetchNotificationsLast24h } from '@/config/api';
+import styles from './header.module.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import {
@@ -14,82 +14,43 @@ import {
     ContactsOutlined,
     RiseOutlined,
     CodeOutlined,
-    BellOutlined
+    BellOutlined,
+    GlobalOutlined,
+    DownOutlined,
+    ShoppingOutlined,
+    UserOutlined
 } from '@ant-design/icons';
-import { Modal } from 'antd';
-import { INotification } from '@/types/backend'; // bổ sung interface Notification
+import { Modal, Dropdown, MenuProps, Avatar } from 'antd';
+import { INotification } from '@/types/backend';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
 
     const isAuthenticated = useAppSelector(state => state.account.isAuthenticated);
     const user = useAppSelector(state => state.account.user);
 
-    const [current, setCurrent] = useState('home');
     const [openManageAccount, setOpenManageAccount] = useState(false);
-
-    // Thông báo
     const [notifications, setNotifications] = useState<INotification[]>([]);
-    const [visibleNotifications, setVisibleNotifications] = useState<INotification[]>([]);
-    const [showCount, setShowCount] = useState(5);
-
-    useEffect(() => {
-        setCurrent(location.pathname);
-    }, [location]);
 
     useEffect(() => {
         const fetchNotifications = async () => {
             if (isAuthenticated) {
                 try {
                     const res = await callFetchNotificationsLast24h();
-                    if (res.statusCode === 200 && res.data) {
-                        let myNotifications = res.data;
-                        const isAdmin = user?.role?.permissions?.length > 0;
-
-                        if (!isAdmin) {
-                            const userEmail = user?.email;
-                            myNotifications = myNotifications.filter(
-                                noti => noti.createdBy === userEmail || noti.updatedBy === userEmail
-                            );
-                        }
-
-                        setNotifications(myNotifications);
-                        setVisibleNotifications(myNotifications.slice(0, showCount));
+                    if (res?.data) {
+                        setNotifications(res.data);
                     }
                 } catch (error) {
-                    console.error('Lấy notifications lỗi:', error);
+                    // console.error(error);
                 }
-            } else {
-                setNotifications([]);
-                setVisibleNotifications([]);
             }
         };
         fetchNotifications();
-    }, [isAuthenticated, user, showCount]);
-
-    const handleLoadMore = () => {
-        setShowCount(prev => prev + 10);
-        setVisibleNotifications(notifications.slice(0, showCount + 10));
-    };
-
-    const handleRegisterCompanyClick = () => {
-        if (!isAuthenticated) {
-            Modal.warning({
-                title: 'Bạn chưa đăng nhập hệ thống',
-                content: (
-                    <div>
-                        Vui lòng đăng nhập để <b>Đăng ký công ty</b>.
-                    </div>
-                ),
-                okText: 'Đăng nhập nhanh',
-                onOk: () => navigate(`/login?callback=/register-company`),
-            });
-        } else {
-            navigate('/register-company');
-        }
-    };
+    }, [isAuthenticated]);
 
     const handleLogout = async () => {
         const res = await callLogout();
@@ -99,213 +60,115 @@ const Header = () => {
         }
     };
 
+    const changeLanguage = (lng: string) => {
+        i18n.changeLanguage(lng);
+    };
+
+    const languageItems: MenuProps['items'] = [
+        { key: 'vi', label: <span onClick={() => changeLanguage('vi')}>🇻🇳 Tiếng Việt</span> },
+        { key: 'en', label: <span onClick={() => changeLanguage('en')}>🇺🇸 English</span> },
+    ];
+
+    const userDropdownItems: MenuProps['items'] = [
+        {
+            key: 'welcome',
+            label: <div style={{ fontWeight: 'bold' }}>{t('header.welcome')}, {user?.name}</div>,
+            disabled: true,
+        },
+        { key: 'manage', label: 'Quản lý tài khoản', icon: <ContactsOutlined />, onClick: () => setOpenManageAccount(true) },
+        ...(user?.role?.permissions?.length ? [{ key: 'admin', label: <Link to="/admin">{t('header.admin')}</Link>, icon: <FireOutlined /> }] : []),
+        { type: 'divider' },
+        { key: 'logout', label: t('header.logout'), icon: <LogoutOutlined />, onClick: handleLogout, danger: true },
+    ];
+
     return (
         <>
-            {/* NAVBAR */}
-            <nav className="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top">
+            <div className={styles['header-container']}>
                 <div className="container-fluid px-4">
-                    <span
-                        className="navbar-brand fw-bold fs-3"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => navigate('/')}
-                    >
-                        <RiseOutlined className="me-2" />
-                        Job<span className="text-warning">Entry</span>
-                    </span>
-
-                    <button
-                        className="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasNavbar"
-                        aria-controls="offcanvasNavbar"
-                    >
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-
-                    {/* Desktop menu */}
-                    <div className="collapse navbar-collapse justify-content-center d-none d-lg-flex">
-                        <ul className="navbar-nav mb-2 mb-lg-0 fw-semibold">
-                            <li className="nav-item">
-                                <Link className={`nav-link ${current === '/' ? 'active' : ''}`} to="/">
-                                    <CodeOutlined className="me-1" /> TRANG CHỦ
-                                </Link>
-                            </li>
-
-                            <li className="nav-item">
-                                <Link className={`nav-link ${current === '/job' ? 'active' : ''}`} to="/job">
-                                    <FireOutlined className="me-1" /> VIỆC LÀM
-                                </Link>
-                            </li>
-
-                            <li className="nav-item">
-                                <Link className={`nav-link ${current === '/company' ? 'active' : ''}`} to="/company">
-                                    <RiseOutlined className="me-1" /> CÔNG TY
-                                </Link>
-                            </li>
-
-                            {(!user?.role || user.role?.permissions?.length === 0) && (
-                                <li className="nav-item">
-                                    <span
-                                        className={`nav-link ${current === '/register-company' ? 'active' : ''}`}
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={handleRegisterCompanyClick}
-                                    >
-                                        <ContactsOutlined className="me-1" /> ĐĂNG KÝ CÔNG TY
-                                    </span>
-                                </li>
-                            )}
-                        </ul>
-                    </div>
-
-                    {/* Desktop login/account */}
-                    <div className="d-none d-lg-flex align-items-center">
-                        {isAuthenticated && (
-                            <div className="dropdown me-3">
-                                <button className="btn btn-light position-relative" type="button" data-bs-toggle="dropdown">
-                                    <BellOutlined style={{ fontSize: 18 }} />
-                                    {notifications.length > 0 && (
-                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            {notifications.length}
-                                        </span>
-                                    )}
-                                </button>
-
-                                <ul className="dropdown-menu dropdown-menu-end p-2" style={{ minWidth: '300px', maxHeight: '400px', overflowY: 'auto' }}>
-                                    {visibleNotifications.length === 0 && <li className="dropdown-item text-center">Không có thông báo</li>}
-
-                                    {visibleNotifications.map((noti, index) => (
-                                        <li key={index} className="dropdown-item border-bottom py-2">
-                                            <div className="fw-semibold">{noti.message}</div>
-                                            <small className="text-muted">{noti.updatedAt || noti.createdAt}</small>
-                                        </li>
-                                    ))}
-
-                                    {visibleNotifications.length < notifications.length && (
-                                        <li className="text-center mt-2">
-                                            <button className="btn btn-link p-0" onClick={handleLoadMore}>
-                                                Xem thêm
-                                            </button>
-                                        </li>
-                                    )}
-                                </ul>
+                    <nav className="navbar navbar-expand-lg">
+                        {/* 1. LOGO */}
+                        <div className={styles.brand} onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+                            <RiseOutlined className="me-2" style={{ fontSize: '32px' }} />
+                            <div style={{ lineHeight: '1.1' }}>
+                                <div>JobEntry</div>
+                                <div style={{ fontSize: '10px', fontWeight: '400', opacity: 0.8, letterSpacing: '1px' }}>NHANH HƠN. DỄ DÀNG HƠN</div>
                             </div>
-                        )}
+                        </div>
 
-                        {isAuthenticated ? (
-                            <div className="dropdown">
-                                <button className="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    {user?.name}
-                                </button>
+                        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                            <span className="navbar-toggler-icon"></span>
+                        </button>
 
-                                <ul className="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <button className="dropdown-item" onClick={() => setOpenManageAccount(true)}>
-                                            <ContactsOutlined className="me-2" />
-                                            Quản lý tài khoản
-                                        </button>
-                                    </li>
-
-                                    {user.role?.permissions?.length > 0 && (
-                                        <li>
-                                            <Link to="/admin" className="dropdown-item">
-                                                <FireOutlined className="me-2" />
-                                                Trang quản trị
-                                            </Link>
-                                        </li>
-                                    )}
-
-                                    <li><hr className="dropdown-divider" /></li>
-
-                                    <li>
-                                        <button className="dropdown-item text-danger" onClick={handleLogout}>
-                                            <LogoutOutlined className="me-2" />
-                                            Đăng xuất
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        ) : (
-                            <Link to="/login" className="btn btn-light fw-semibold px-4">
-                                Đăng nhập
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </nav>
-
-            {/* MOBILE */}
-            <div className="offcanvas offcanvas-end text-bg-success" tabIndex={-1} id="offcanvasNavbar">
-                <div className="offcanvas-header">
-                    <h5 className="offcanvas-title fw-bold">
-                        <RiseOutlined className="me-2" /> JobEntry
-                    </h5>
-                    <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-                </div>
-
-                <div className="offcanvas-body">
-                    <ul className="navbar-nav fw-semibold">
-                        <li className="nav-item">
-                            <Link className="nav-link text-white" to="/">
-                                <CodeOutlined className="me-2" /> TRANG CHỦ
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link text-white" to="/job">
-                                <FireOutlined className="me-2" /> VIỆC LÀM
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link text-white" to="/company">
-                                <RiseOutlined className="me-2" /> CÔNG TY
-                            </Link>
-                        </li>
-
-                        {(!user?.role || user.role?.permissions?.length === 0) && (
-                            <li className="nav-item">
-                                <button className="nav-link text-white btn btn-link" onClick={handleRegisterCompanyClick}>
-                                    <ContactsOutlined className="me-2" /> ĐĂNG KÝ CÔNG TY
-                                </button>
-                            </li>
-                        )}
-
-                        <hr />
-
-                        {isAuthenticated ? (
-                            <>
-                                <li className="nav-item mb-2">
-                                    <span className="text-white fw-bold">🔔 {notifications.length} thông báo</span>
-                                </li>
-
+                        <div className="collapse navbar-collapse" id="navbarContent">
+                            {/* 2. MENU LEFT */}
+                            <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-3">
                                 <li className="nav-item">
-                                    <button className="nav-link text-white btn btn-link" onClick={() => setOpenManageAccount(true)}>
-                                        <ContactsOutlined className="me-2" />
-                                        Quản lý tài khoản
-                                    </button>
+                                    <Link className={styles['nav-link']} to="/job">
+                                        {t('header.jobs')} <DownOutlined style={{ fontSize: '10px' }} />
+                                    </Link>
                                 </li>
+                                <li className="nav-item">
+                                    <Link className={styles['nav-link']} to="/company">
+                                        {t('header.companies')} <DownOutlined style={{ fontSize: '10px' }} />
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <a className={styles['nav-link']} href="#">
+                                        Cẩm nang nghề nghiệp
+                                    </a>
+                                </li>
+                            </ul>
 
-                                {user.role?.permissions?.length > 0 && (
-                                    <li className="nav-item">
-                                        <Link className="nav-link text-white" to="/admin">
-                                            <FireOutlined className="me-2" /> Trang quản trị
-                                        </Link>
-                                    </li>
+                            {/* 3. RIGHT SECTION */}
+                            <div className={styles['right-section']}>
+                                {/* Location Selector */}
+
+
+                                {/* User Auth Section */}
+                                {isAuthenticated ? (
+                                    <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight" arrow>
+                                        <div className={styles['user-section']}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Avatar style={{ backgroundColor: '#fde3cf', color: '#f56a00' }}>{user?.name?.charAt(0).toUpperCase()}</Avatar>
+                                                <div>
+                                                    <div className={styles['label']}>Người tìm việc</div>
+                                                    <div className={styles['action']}>{user?.name}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Dropdown>
+                                ) : (
+                                    <div className={styles['user-section']} onClick={() => navigate('/login')}>
+                                        <div className={styles['label']}>Người tìm việc</div>
+                                        <div className={styles['action']}>{t('header.register')} / {t('header.login')}</div>
+                                    </div>
                                 )}
 
-                                <li className="nav-item">
-                                    <button className="nav-link text-white btn btn-link" onClick={handleLogout}>
-                                        <LogoutOutlined className="me-2" /> Đăng xuất
-                                    </button>
-                                </li>
-                            </>
-                        ) : (
-                            <li className="nav-item">
-                                <Link to="/login" className="btn btn-light fw-semibold w-100 mt-2">
-                                    Đăng nhập
+
+                                <Link
+
+                                    to={(!isAuthenticated || !user?.role?.id) ? "/register-company" : "/admin"}
+                                    className={styles['employer-section']}
+                                >
+                                    <ShoppingOutlined className={styles['icon-bag']} />
+                                    <div className={styles['text-group']}>
+                                        <span className={styles['sub']}>DÀNH CHO</span>
+                                        <span className={styles['main']}>
+                                            {(!isAuthenticated || !user?.role?.id)
+                                                ? "Đăng ký công ty" // Hiển thị nếu role rỗng hoặc chưa login
+                                                : (user?.role?.id === "1" ? "Nhà Tuyển Dụng" : "Quản trị viên")
+                                            }
+                                        </span>
+                                    </div>
                                 </Link>
-                            </li>
-                        )}
-                    </ul>
+
+                                {/* Flag / Language */}
+                                <Dropdown menu={{ items: languageItems }} placement="bottomRight">
+                                    <GlobalOutlined style={{ fontSize: '20px', cursor: 'pointer', color: '#fff' }} />
+                                </Dropdown>
+                            </div>
+                        </div>
+                    </nav>
                 </div>
             </div>
 

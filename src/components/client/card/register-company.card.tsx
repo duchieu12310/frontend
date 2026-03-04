@@ -13,9 +13,9 @@ const RegisterCompany = () => {
     const [loading, setLoading] = useState(false);
 
     // --- Dữ liệu hành chính Việt Nam ---
-    const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
+    const [provinces, setProvinces] = useState<{ code: number; name: string }[]>([]);
+    const [districts, setDistricts] = useState<{ code: number; name: string }[]>([]);
+    const [wards, setWards] = useState<{ code: number; name: string }[]>([]);
 
     // 🗺️ Lấy danh sách tỉnh / thành phố khi mở trang
     useEffect(() => {
@@ -26,7 +26,7 @@ const RegisterCompany = () => {
     }, []);
 
     // 🏙️ Khi chọn tỉnh → tải danh sách quận / huyện
-    const handleProvinceChange = (provinceCode) => {
+    const handleProvinceChange = (provinceCode: number) => {
         form.setFieldsValue({ district: undefined, ward: undefined });
         setDistricts([]);
         setWards([]);
@@ -38,7 +38,7 @@ const RegisterCompany = () => {
     };
 
     // 🏘️ Khi chọn quận → tải danh sách phường / xã
-    const handleDistrictChange = (districtCode) => {
+    const handleDistrictChange = (districtCode: number) => {
         form.setFieldsValue({ ward: undefined });
         setWards([]);
 
@@ -49,7 +49,7 @@ const RegisterCompany = () => {
     };
 
     // 🖼️ Upload logo công ty
-    const handleUploadLogo = async (file) => {
+    const handleUploadLogo = async (file: any) => {
         const res = await callUploadSingleFile(file, "company");
         if (res?.data?.fileName) {
             setLogoUrl(res.data.fileName);
@@ -61,7 +61,7 @@ const RegisterCompany = () => {
     };
 
     // 📄 Upload tài liệu xác minh (pdf/doc/docx)
-    const handleUploadDocument = async (file) => {
+    const handleUploadDocument = async (file: any) => {
         const allowedTypes = [
             "application/pdf",
             "application/msword",
@@ -82,7 +82,7 @@ const RegisterCompany = () => {
     };
 
     // 📨 Gửi form đăng ký công ty
-    const onFinish = async (values) => {
+    const onFinish = async (values: any) => {
         setLoading(true);
         try {
             const provinceName = provinces.find((p) => p.code === values.province)?.name || "";

@@ -1,0 +1,58 @@
+// Design Tokens
+
+// Primary Brand Colors (Modern Nature Green)
+$primary-color: #10b981; // Emerald 500
+$primary-hover: #059669; // Emerald 600
+$primary-light: #ecfdf5; // Emerald 50
+$secondary-color: #334155; // Slate 700
+$accent-color: #f59e0b; // Amber for highlights
+$brand-purple: #5b21b6;
+$brand-purple-light: #f3e8ff;
+
+// Neutral Colors
+$white: #ffffff;
+$black: #0f172a;
+$gray-50: #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-600: #475569;
+$gray-700: #334155; // Added missing 700
+$gray-800: #1e293b;
+$gray-900: #0f172a;
+
+// Functional Colors
+$success: #10b981;
+$warning: #f59e0b;
+$error: #ef4444;
+$info: #3b82f6;
+
+// Typography
+$font-family-sans: 'Inter', sans-serif;
+$font-family-heading: 'Outfit', sans-serif;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+// Border Radius
+$radius-sm: 0.25rem;
+$radius-md: 0.5rem; // 8px
+$radius-lg: 0.75rem; // 12px
+$radius-xl: 1rem; // 16px
+$radius-full: 9999px;
+
+// Transitions
+$transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

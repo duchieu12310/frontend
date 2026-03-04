@@ -1,0 +1,34 @@
+{
+    "header": {
+        "home": "Trang Chủ",
+        "jobs": "Việc Làm",
+        "companies": "Công Ty",
+        "login": "Đăng Nhập",
+        "register": "Đăng Ký",
+        "dashboard": "Quản Lý",
+        "logout": "Đăng Xuất",
+        "welcome": "Xin chào",
+        "admin": "Trang Quản Trị"
+    },
+    "home": {
+        "categories": {
+            "title": "Ngành Nghề Trọng Điểm",
+            "view_all": "Xem tất cả"
+        },
+        "featured_jobs": {
+            "title": "Việc Làm Hấp Dẫn",
+            "view_all": "Xem tất cả",
+            "hot": "HOT"
+        },
+        "top_employers": {
+            "title": "Nhà Tuyển Dụng Hàng Đầu",
+            "view_all": "Xem tất cả"
+        },
+        "search": {
+            "title": "Tìm Công Việc Hoàn Hảo Mà <span>Bạn Xứng Đáng</span>",
+            "subtitle": "Khám phá hàng ngàn cơ hội nghề nghiệp. Kết nối nhân tài hàng đầu với các công ty hàng đầu. Công việc mơ ước của bạn chỉ cách một cú nhấp chuột.",
+            "search_btn": "Tìm Việc",
+            "talent_btn": "Tìm Ứng Viên"
+        }
+    }
+}

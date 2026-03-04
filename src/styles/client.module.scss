@@ -1,8 +1,19 @@
+@import 'variables.scss';
+
 .container {
-    padding-right: 15px;
-    padding-left: 15px;
+    padding-right: $spacing-md;
+    padding-left: $spacing-md;
     margin-right: auto;
     margin-left: auto;
+    max-width: 100%;
+}
+
+.container-fluid {
+    padding-right: 0;
+    padding-left: 0;
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -124,6 +135,10 @@
 }
 
 .card-job-section {
+    background-color: #f4f7ff;
+    padding: 24px;
+    border-radius: 12px;
+
     .empty {
         display: flex;
         justify-content: center;
@@ -143,65 +158,332 @@
         justify-content: space-between;
     }
 
+    .job-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        margin-top: 10px;
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4d4f; // Red color for urgency
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+
+    .location-filter {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        position: relative;
+
+        .filter-header {
+            flex-shrink: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: $gray-700;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+            &:hover {
+                border-color: $brand-purple;
+                color: $brand-purple;
+                background-color: #fafafa;
+            }
+        }
+
+        .filter-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 2px 0; // slight padding for focus rings or shadows if any
+            width: 100%;
+            scroll-behavior: smooth;
+            align-items: center;
+
+            // Hide scrollbar
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+
+            .filter-pill {
+                padding: 8px 16px;
+                border-radius: 99px;
+                background: #fff;
+                border: 1px solid #e5e7eb;
+                white-space: nowrap;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                font-weight: 500;
+                color: $gray-600;
+                user-select: none;
+
+                &:hover {
+                    border-color: $brand-purple;
+                    color: $brand-purple;
+                    background-color: #f9f0ff;
+                }
+
+                &.active {
+                    background: $brand-purple;
+                    color: #fff;
+                    border-color: $brand-purple;
+                    box-shadow: 0 4px 6px -1px rgba(105, 56, 198, 0.3); // Approximate purple shadow
+                }
+            }
+        }
+
+        // Navigation buttons styles
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #fff;
+            flex-shrink: 0;
+            color: $gray-600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+
+            &:hover {
+                border-color: $brand-purple;
+                color: $brand-purple;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                transform: translateY(-1px);
+            }
+
+            &:active {
+                transform: translateY(0);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+        }
+    }
+
     .job-content {
         .card-job-content {
             display: flex;
+            flex-direction: column;
             width: 100%;
-            gap: 10px;
 
-            .card-job-left {
-                width: 70px;
-                margin: 0 auto;
-
-                img {
-                    width: 50px;
-                    height: 50px;
-                }
-            }
-
-            .card-job-right {
-                width: 100%;
+            .job-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
 
                 .job-title {
                     overflow: hidden;
-                    color: #353535;
+                    color: $gray-900; // #222
                     font-weight: 600;
                     text-overflow: ellipsis;
                     text-align: left;
-                    margin-bottom: 10px;
                     line-height: 1.3;
                     transition: .2s all;
-                    font-size: 17px;
+                    font-size: 16px;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
+                    line-clamp: 2;
                     -webkit-box-orient: vertical;
+                    flex: 1;
+                    margin-right: 8px;
+
+                    &:hover {
+                        color: $brand-purple;
+                    }
+                }
+            }
+
+            .job-card-body {
+                display: flex;
+                gap: 12px;
+                align-items: flex-start;
+
+                .card-job-left {
+                    width: 60px;
+                    height: 60px;
+                    flex-shrink: 0;
+                    border: 1px solid #f0f0f0;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #fff;
+                    overflow: hidden;
+
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                    }
                 }
 
-                .job-location {
-                    padding-bottom: 5px;
-                }
+                .card-job-right {
+                    flex: 1;
+                    min-width: 0; // Fix flex child overflow
 
-                .job-updatedAt {
-                    display: block;
-                    float: right;
-                    color: #919191;
+                    .company-name {
+                        font-size: 16px;
+                        color: $gray-500;
+                        margin-bottom: 8px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                    .job-salary {
+                        color: #108ee9; // Blue like in the image
+                        font-weight: 500;
+                        font-size: 14px;
+                        margin-bottom: 4px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+
+                    .job-location {
+                        font-size: 13px;
+                        color: $gray-500;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
                 }
+            }
+
+            .job-card-footer {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 5px;
+                color: $gray-500;
+                font-size: 12px;
+                margin-top: 5px;
             }
         }
     }
 }
 
 .company-section {
-    .company-content {
-        padding-top: 50px;
+    width: 100%;
+    margin-bottom: 40px;
+    padding: 24px $spacing-md;
+    background-color: #fff7f5;
+    border-radius: 12px;
 
-        .card-customize {
-            height: 200px;
-            width: 200px;
-            margin: 20px auto;
+    .company-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #222;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-all {
+            color: #4a1d96;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: color 0.2s;
+
+            &:hover {
+                color: #6938c6;
+            }
         }
     }
 
+    .company-list {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 4px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+
+        // Hide scrollbar
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        .company-card {
+            min-width: 220px;
+            max-width: 220px;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+
+            &:hover {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                transform: translateY(-4px);
+                border-color: #eee;
+            }
+
+            .logo-wrapper {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+            }
+
+            .hiring-text {
+                margin: 0;
+                color: #555;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+        }
+    }
 }
 
 
@@ -294,6 +576,7 @@
         line-height: 2em;
     }
 
+
     .company {
         margin: 20px 0;
         color: #353535;
@@ -303,5 +586,96 @@
         justify-content: center;
         width: 100%;
         align-items: center;
+    }
+}
+
+.guide-section {
+    background-color: #ffffff;
+    padding: 20px $spacing-md;
+    margin-bottom: 40px;
+
+    .guide-header {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 30px;
+    }
+
+    .guide-list {
+        margin-bottom: 30px;
+
+        .guide-card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            transition: transform 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+            &:hover {
+                transform: translateY(-5px);
+            }
+
+            .image-wrapper {
+                width: 100%;
+                height: 200px;
+                overflow: hidden;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+
+            .content {
+                padding: 20px;
+
+                .card-title {
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                    line-height: 1.4;
+                    color: #222;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                .card-desc {
+                    color: #666;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    margin: 0;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+            }
+        }
+    }
+
+    .view-more-btn {
+        text-align: center;
+
+        .btn-guide {
+            background-color: #f3f0ff;
+            color: #5b2ebd;
+            border: none;
+            height: 44px;
+            padding: 0 30px;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 6px;
+
+            &:hover {
+                background-color: #eaddff;
+                color: #4a1d96;
+            }
+        }
     }
 }

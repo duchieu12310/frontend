@@ -1,0 +1,43 @@
+src/components/client/card/register-company.card.tsx(29,35): error TS7006: Parameter 'provinceCode' implicitly has an 'any' type.
+src/components/client/card/register-company.card.tsx(41,35): error TS7006: Parameter 'districtCode' implicitly has an 'any' type.
+src/components/client/card/register-company.card.tsx(52,37): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/components/client/card/register-company.card.tsx(64,41): error TS7006: Parameter 'file' implicitly has an 'any' type.
+src/components/client/card/register-company.card.tsx(85,29): error TS7006: Parameter 'values' implicitly has an 'any' type.
+src/components/client/card/register-company.card.tsx(88,58): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(88,85): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(89,58): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(89,85): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(90,50): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(90,73): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(157,50): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(158,50): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(176,50): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(177,50): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(194,50): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/client/card/register-company.card.tsx(195,50): error TS2339: Property 'code' does not exist on type 'never'.
+src/components/client/header.client.tsx(50,41): error TS18048: 'user.role.permissions.length' is possibly 'undefined'.
+src/components/client/header.client.tsx(228,42): error TS18048: 'user.role.permissions.length' is possibly 'undefined'.
+src/components/client/header.client.tsx(312,34): error TS18048: 'user.role.permissions.length' is possibly 'undefined'.
+src/components/client/Home.tsx(11,39): error TS2307: Cannot find module 'lib/wow/wow.min.js' or its corresponding type declarations.
+src/components/client/Home.tsx(12,26): error TS2307: Cannot find module 'lib/easing/easing.min.js' or its corresponding type declarations.
+src/components/client/Home.tsx(13,26): error TS2307: Cannot find module 'lib/waypoints/waypoints.min.js' or its corresponding type declarations.
+src/components/client/Home.tsx(14,26): error TS2307: Cannot find module 'lib/owlcarousel/owl.carousel.min.js' or its corresponding type declarations.
+src/components/client/search.client.tsx(76,25): error TS2322: Type '(values: any) => void' is not assignable to type '(formData: any) => Promise<boolean | void>'.
+  Type 'void' is not assignable to type 'Promise<boolean | void>'.
+src/pages/admin/CompanyRegistrationPage.tsx(140,13): error TS2322: Type '(status: string) => JSX.Element' is not assignable to type '(dom: ReactNode, entity: ICompanyRegistration, index: number, action: ProCoreActionType<{}> | undefined, schema: { key?: Key | undefined; ... 19 more ...; proFieldProps?: (ProFieldProps & Record<...>) | undefined; } & ... 4 more ... & { ...; }) => ReactNode | { ...; }'.
+  Types of parameters 'status' and 'dom' are incompatible.
+    Type 'ReactNode' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/pages/admin/CompanyRegistrationPage.tsx(149,45): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(date?: string | number | Date | Dayjs | null | undefined): Dayjs', gave the following error.
+    Argument of type 'string | number | true | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal' is not assignable to parameter of type 'string | number | Date | Dayjs | null | undefined'.
+      Type 'true' is not assignable to type 'string | number | Date | Dayjs | null | undefined'.
+  Overload 2 of 3, '(date?: string | number | Date | Dayjs | null | undefined, format?: OptionType | undefined, strict?: boolean | undefined): Dayjs', gave the following error.
+    Argument of type 'string | number | true | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal' is not assignable to parameter of type 'string | number | Date | Dayjs | null | undefined'.
+  Overload 3 of 3, '(date?: string | number | Date | Dayjs | null | undefined, format?: OptionType | undefined, locale?: string | undefined, strict?: boolean | undefined): Dayjs', gave the following error.
+    Argument of type 'string | number | true | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal' is not assignable to parameter of type 'string | number | Date | Dayjs | null | undefined'.
+src/pages/admin/CompanyRegistrationPage.tsx(157,51): error TS2538: Type 'undefined' cannot be used as an index type.
+src/pages/admin/CompanyRegistrationPage.tsx(168,103): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+  Type 'undefined' is not assignable to type 'string | number'.
+src/pages/admin/CompanyRegistrationPage.tsx(177,104): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+src/pages/admin/CompanyRegistrationPage.tsx(185,96): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
