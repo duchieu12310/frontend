@@ -83,7 +83,25 @@ const JobPage = () => {
         },
         {
             title: 'Cấp bậc',
-            dataIndex: 'level',
+            dataIndex: 'levels',
+            render: (text, record) => {
+                const values = record.levels && record.levels.length > 0 
+                    ? record.levels.map((lvl: any) => typeof lvl === 'object' ? lvl.name : lvl) 
+                    : (record.level ? [record.level] : []);
+                return (
+                    <Space size={[0, 4]} wrap>
+                        {values.map((lvl) => {
+                            let color = 'blue';
+                            if (lvl === 'INTERN') color = 'cyan';
+                            else if (lvl === 'FRESHER') color = 'green';
+                            else if (lvl === 'JUNIOR') color = 'geekblue';
+                            else if (lvl === 'MIDDLE') color = 'orange';
+                            else if (lvl === 'SENIOR') color = 'volcano';
+                            return <Tag color={color} key={lvl}>{lvl}</Tag>
+                        })}
+                    </Space>
+                )
+            },
             renderFormItem: () => (
                 <ProFormSelect
                     showSearch
@@ -189,8 +207,8 @@ const JobPage = () => {
         if (clone.name) parts.push(`name ~ '${clone.name}'`);
         if (clone.salary) parts.push(`salary ~ '${clone.salary}'`);
         if (clone.companyName) parts.push(`company.name ~ '${clone.companyName}'`);
-        if (clone?.level?.length) {
-            parts.push(`${sfIn("level", clone.level).toString()}`);
+        if (clone?.levels?.length) {
+            parts.push(`${sfIn("levels.name", clone.levels).toString()}`);
         }
 
         clone.filter = parts.join(' and ');
@@ -203,7 +221,7 @@ const JobPage = () => {
         delete clone.pageSize;
         delete clone.name;
         delete clone.salary;
-        delete clone.level;
+        delete clone.levels;
         delete clone.companyName;
 
         let temp = queryString.stringify(clone);

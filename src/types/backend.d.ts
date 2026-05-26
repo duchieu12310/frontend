@@ -5,6 +5,34 @@ export interface IBackendRes<T> {
     data?: T;
 }
 
+export interface IProvince {
+    id: number;
+    name: string;
+    code: string;
+}
+
+export interface IDistrict {
+    id: number;
+    name: string;
+    code: string;
+    province?: IProvince;
+}
+
+export interface IWard {
+    id: number;
+    name: string;
+    code: string;
+    district?: IDistrict;
+}
+
+export interface IAddress {
+    id?: number;
+    line?: string;
+    province?: IProvince;
+    district?: IDistrict;
+    ward?: IWard;
+}
+
 export interface IModelPaginate<T> {
     meta: {
         page: number;
@@ -40,9 +68,18 @@ export interface IGetAccount extends Omit<IAccount, "access_token"> { }
 export interface ICompany {
     id?: string;
     name?: string;
-    address?: string;
+    address?: IAddress;
     logo: string;
     description?: string;
+    images?: { id?: number; url: string; type: string; displayOrder: number }[];
+    descriptions?: { id?: number; content: string; type: string }[];
+    taxCode?: string;
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
+    businessLicense?: string;
+    owner?: IUser;
+    approvedAt?: string;
+    approvedBy?: string;
+    rejectReason?: string;
     createdBy?: string;
     isDeleted?: boolean;
     deletedAt?: boolean | null;
@@ -67,7 +104,7 @@ export interface IUser {
     password?: string;
     age: number;
     gender: string;
-    address: string;
+    address?: IAddress;
     role?: {
         id: string;
         name: string;
@@ -95,11 +132,14 @@ export interface IJob {
     location: string;
     salary: number;
     quantity: number;
-    level: string;
+    level?: string;
+    levels?: string[];
     description: string;
     startDate: Date;
     endDate: Date;
     active: boolean;
+    requirements?: { id?: number; content: string }[];
+    benefits?: { id?: number; content: string }[];
 
     createdBy?: string;
     isDeleted?: boolean;
@@ -111,9 +151,13 @@ export interface IJob {
 export interface IResume {
     id?: string;
     email: string;
-    url: string;
+    url?: string;
     status: string; // Enum: PENDING, APPROVED, REJECTED
     note?: string;  // Ghi chú (ví dụ: lý do từ chối hoặc hướng dẫn liên hệ)
+    formatCv?: {
+        id: number;
+        title: string;
+    };
 
     createdBy?: string;
     updatedBy?: string;
@@ -132,7 +176,8 @@ export interface IResume {
         name: string;
         location: string;
         salary: number;
-        level: string;
+        level?: string;
+        levels?: string[];
         company: {
             id: string;
             name: string;
@@ -149,7 +194,6 @@ export interface IResume {
         updatedBy: { id: string; email: string };
     }[];
 }
-
 
 export interface IPermission {
     id?: string;
@@ -191,34 +235,7 @@ export interface ISubscribers {
     updatedAt?: string;
 }
 
-// 🏢 Interface mới cho CompanyRegistration
-export interface ICompanyRegistration {
-    id?: string;
 
-    // 👤 Thông tin user tạo bản đăng ký
-    user?: {
-        id: string;
-        email: string;
-        name: string;
-    };
-
-    companyName: string;
-    description?: string;
-    address?: string;
-    logo?: string;
-    facebookLink?: string;
-    githubLink?: string;
-    verificationDocument?: string;  // link file pdf/doc/docx
-    rejectionReason?: string;
-
-    // Trạng thái: PENDING, APPROVED, REJECTED
-    status?: "PENDING" | "APPROVED" | "REJECTED";
-
-    createdAt?: string;
-    updatedAt?: string;
-    createdBy?: string;
-    updatedBy?: string;
-}
 export interface INotification {
     id?: string;
     resourceName: string;
@@ -231,9 +248,151 @@ export interface INotification {
     deletedAt?: string | null;
 }
 
+export interface ICVSectionLayout {
+    id?: number;
+    sectionKey: string;
+    sectionName: string;
+    columnPlacement: string;
+    orderIndex: number;
+    visible: boolean;
+}
+
 export interface ICVTemplate {
     id?: number;
-    name?: string;
-    thumbnailUrl?: string;
-    layoutConfig?: string;
+    title: string;
+    layout?: string;
+    theme?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    sectionLayouts?: ICVSectionLayout[];
+    personalInformations?: IPersonalInformation[];
+    careerObjectives?: ICareerObjective[];
+    educations?: IEducation[];
+    technicalSkills?: ITechnicalSkill[];
+    softSkills?: ISoftSkill[];
+    projects?: IProject[];
+    workExperiences?: IWorkExperience[];
+    achievements?: IAchievement[];
+    certifications?: ICertification[];
+    activities?: IActivity[];
+    languages?: ILanguage[];
+    hobbies?: IHobby[];
+}
+
+export interface IPersonalInformation {
+    id?: number;
+    fullName: string;
+    dateOfBirth?: string;
+    phone: string;
+    email: string;
+    address?: string;
+    github?: string;
+    linkedin?: string;
+    image?: string;
+}
+
+export interface ICareerObjective {
+    id?: number;
+    content: string;
+}
+
+export interface IEducation {
+    id?: number;
+    schoolName: string;
+    major: string;
+    startDate?: string;
+    endDate?: string;
+    gpa?: number;
+}
+
+export interface ITechnicalSkill {
+    id?: number;
+    skillName: string;
+    level?: string;
+}
+
+export interface ISoftSkill {
+    id?: number;
+    skillName: string;
+}
+
+export interface IProject {
+    id?: number;
+    projectName: string;
+    technologies?: string;
+    description?: string;
+    githubLink?: string;
+}
+
+export interface IWorkExperience {
+    id?: number;
+    company: string;
+    position: string;
+    startDate?: string;
+    endDate?: string;
+    description?: string;
+}
+
+export interface IAchievement {
+    id?: number;
+    title: string;
+    description?: string;
+}
+
+export interface ICertification {
+    id?: number;
+    name: string;
+    organization?: string;
+    issueDate?: string;
+}
+
+export interface IActivity {
+    id?: number;
+    activityName: string;
+    role?: string;
+}
+
+export interface ILanguage {
+    id?: number;
+    language: string;
+    level?: string;
+}
+
+export interface IHobby {
+    id?: number;
+    hobby: string;
+}
+
+export interface IFormatCV {
+    id?: number;
+    title: string;
+    theme?: string;
+    layoutKey?: string;
+    selectedTemplateIds?: number[];
+    sectionLayouts?: ICVSectionLayout[];
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+    user?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    cvTemplate?: {
+        id: number;
+        title: string;
+    };
+    personalInformations?: IPersonalInformation[];
+    careerObjectives?: ICareerObjective[];
+    educations?: IEducation[];
+    technicalSkills?: ITechnicalSkill[];
+    softSkills?: ISoftSkill[];
+    projects?: IProject[];
+    workExperiences?: IWorkExperience[];
+    achievements?: IAchievement[];
+    certifications?: ICertification[];
+    activities?: IActivity[];
+    languages?: ILanguage[];
+    hobbies?: IHobby[];
 }

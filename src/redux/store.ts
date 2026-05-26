@@ -11,7 +11,6 @@ import resumeReducer from './slice/resumeSlide';
 import permissionReducer from './slice/permissionSlide';
 import roleReducer from './slice/roleSlide';
 import skillReducer from './slice/skillSlide';
-import cvTemplateReducer from './slice/cvTemplateSlide';
 
 export const store = configureStore({
   reducer: {
@@ -23,7 +22,6 @@ export const store = configureStore({
     permission: permissionReducer,
     role: roleReducer,
     skill: skillReducer,
-    cvTemplate: cvTemplateReducer,
   },
 });
 

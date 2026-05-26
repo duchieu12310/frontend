@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { isMobile } from "react-device-detect";
 import type { TabsProps } from "antd";
-import { IResume, ISubscribers } from "@/types/backend";
+import { IResume, ISubscribers, IProvince, IDistrict, IWard, IAddress, IUser } from "@/types/backend";
 import { useState, useEffect } from "react";
 import {
     callCreateSubscriber,
@@ -22,7 +22,11 @@ import {
     callGetSubscriberSkills,
     callUpdateSubscriber,
     callChangePassword,
-
+    callFetchProvinces,
+    callFetchDistricts,
+    callFetchWards,
+    callFetchUser,
+    callUpdateUser
 } from "@/config/api";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -205,10 +209,7 @@ const JobByEmail = () => {
         </Form>
     );
 };
-/** ------------------ Cập nhâp thông tin người dùng------------------ */
 /** ------------------ Cập nhật thông tin người dùng ------------------ */
-import { callFetchUser, callUpdateUser } from "@/config/api";
-import { IUser } from "@/types/backend";
 
 const { Option } = Select;
 
@@ -216,24 +217,74 @@ const UserUpdateInfo = () => {
     const [form] = Form.useForm();
     const user = useAppSelector((state) => state.account.user);
     const [loading, setLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+    const [provinces, setProvinces] = useState<IProvince[]>([]);
+    const [districts, setDistricts] = useState<IDistrict[]>([]);
+    const [wards, setWards] = useState<IWard[]>([]);
+
+    useEffect(() => {
+        const initProvinces = async () => {
+            const res = await callFetchProvinces();
+            if (res && res.data) {
+                setProvinces(res.data);
+            }
+        };
+        initProvinces();
+    }, []);
+
+    const handleProvinceChange = async (provinceId: number) => {
+        form.setFieldsValue({ districtId: undefined, wardId: undefined });
+        setDistricts([]);
+        setWards([]);
+        const res = await callFetchDistricts(provinceId);
+        if (res && res.data) {
+            setDistricts(res.data);
+        }
+    };
+
+    const handleDistrictChange = async (districtId: number) => {
+        form.setFieldsValue({ wardId: undefined });
+        setWards([]);
+        const res = await callFetchWards(districtId);
+        if (res && res.data) {
+            setWards(res.data);
+        }
+    };
 
     // Lấy thông tin user hiện tại
     useEffect(() => {
         const init = async () => {
             try {
-                // lấy user theo id
                 const query = `id=${user?.id}`;
                 const res = await callFetchUser(query);
                 if (res && res.data) {
-                    const current = res.data.result[0]; // vì callFetchUser trả về dạng paginate
+                    const current = res.data.result[0] as IUser;
+                    setCurrentUser(current);
+                    
                     form.setFieldsValue({
                         id: current.id,
                         email: current.email,
                         name: current.name,
                         gender: current.gender,
-                        address: current.address,
                         age: current.age,
+                        provinceId: current.address?.province?.id,
+                        districtId: current.address?.district?.id,
+                        wardId: current.address?.ward?.id,
+                        detailAddress: current.address?.line,
                     });
+
+                    if (current.address?.province?.id) {
+                        const distRes = await callFetchDistricts(current.address.province.id);
+                        if (distRes && distRes.data) {
+                            setDistricts(distRes.data);
+                        }
+                    }
+                    if (current.address?.district?.id) {
+                        const wardRes = await callFetchWards(current.address.district.id);
+                        if (wardRes && wardRes.data) {
+                            setWards(wardRes.data);
+                        }
+                    }
                 }
             } catch (e: any) {
                 notification.error({
@@ -246,11 +297,28 @@ const UserUpdateInfo = () => {
     }, [user?.id]);
 
     const onFinish = async (values: any) => {
+        const { id, name, email, gender, age, provinceId, districtId, wardId, detailAddress } = values;
+        
+        const province = provinces.find(p => p.id === provinceId);
+        const district = districts.find(d => d.id === districtId);
+        const ward = wards.find(w => w.id === wardId);
+
+        const address: IAddress = {
+            id: currentUser?.address?.id,
+            line: detailAddress,
+            province: province ? { id: province.id, name: province.name, code: province.code } : undefined,
+            district: district ? { id: district.id, name: district.name, code: district.code } : undefined,
+            ward: ward ? { id: ward.id, name: ward.name, code: ward.code } : undefined
+        };
+
         setLoading(true);
         try {
-            const res = await callUpdateUser(values as IUser);
+            const res = await callUpdateUser({ id, name, email, gender, age, address } as IUser);
             if (res && res.data) {
                 message.success("Cập nhật thông tin thành công");
+                if (res.data.address) {
+                    setCurrentUser(prev => prev ? { ...prev, address: res.data.address } : null);
+                }
             } else {
                 notification.error({
                     message: "Có lỗi xảy ra",
@@ -296,8 +364,66 @@ const UserUpdateInfo = () => {
                         <Input type="number" placeholder="Nhập tuổi" />
                     </Form.Item>
                 </Col>
+                
+                <Col span={8}>
+                    <Form.Item
+                        label="Tỉnh/Thành phố"
+                        name="provinceId"
+                        rules={[{ required: true, message: 'Vui lòng chọn Tỉnh/Thành phố!' }]}
+                    >
+                        <Select
+                            placeholder="Chọn Tỉnh/Thành phố"
+                            onChange={handleProvinceChange}
+                            showSearch
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={provinces.map(p => ({ label: p.name, value: p.id }))}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item
+                        label="Quận/Huyện"
+                        name="districtId"
+                        rules={[{ required: true, message: 'Vui lòng chọn Quận/Huyện!' }]}
+                    >
+                        <Select
+                            placeholder="Chọn Quận/Huyện"
+                            onChange={handleDistrictChange}
+                            showSearch
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={districts.map(d => ({ label: d.name, value: d.id }))}
+                            disabled={!districts.length}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item
+                        label="Phường/Xã"
+                        name="wardId"
+                        rules={[{ required: true, message: 'Vui lòng chọn Phường/Xã!' }]}
+                    >
+                        <Select
+                            placeholder="Chọn Phường/Xã"
+                            showSearch
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={wards.map(w => ({ label: w.name, value: w.id }))}
+                            disabled={!wards.length}
+                        />
+                    </Form.Item>
+                </Col>
+
                 <Col span={24}>
-                    <Form.Item label="Địa chỉ" name="address">
+                    <Form.Item
+                        label="Địa chỉ cụ thể (Số nhà, đường...)"
+                        name="detailAddress"
+                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ cụ thể!' }]}
+                    >
                         <Input placeholder="Nhập địa chỉ" />
                     </Form.Item>
                 </Col>

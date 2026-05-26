@@ -6,6 +6,7 @@ import styles from 'styles/client.module.scss';
 import parse from 'html-react-parser';
 import { Col, Divider, Row, Skeleton, Breadcrumb } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
+import { formatAddress } from "@/config/utils";
 
 
 const ClientCompanyDetailPage = (props: any) => {
@@ -52,17 +53,36 @@ const ClientCompanyDetailPage = (props: any) => {
                 <Row gutter={[20, 20]}>
                     {companyDetail && companyDetail.id &&
                         <>
-                            <Col span={24} md={16}>
+                             <Col span={24} md={16}>
                                 <div className={styles["header"]}>
                                     {companyDetail.name}
                                 </div>
 
                                 <div className={styles["location"]}>
-                                    <EnvironmentOutlined style={{ color: '#58aaab' }} />&nbsp;{(companyDetail?.address)}
+                                    <EnvironmentOutlined style={{ color: '#58aaab' }} />&nbsp;{formatAddress(companyDetail?.address)}
                                 </div>
 
-                                <Divider />
-                                {parse(companyDetail?.description ?? "")}
+                                {companyDetail.descriptions && companyDetail.descriptions.length > 0 && (
+                                     <>
+                                         <Divider />
+                                         <h3 style={{ fontSize: 18, marginBottom: 15, fontWeight: 600, color: '#333' }}>
+                                             Đặc điểm nổi bật & Phúc lợi công ty
+                                         </h3>
+                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 15, marginTop: 15 }}>
+                                             {companyDetail.descriptions.map((desc, idx) => (
+                                                 <div key={idx} style={{
+                                                     background: '#fafafa',
+                                                     padding: '12px 18px',
+                                                     borderRadius: 8,
+                                                     borderLeft: '4px solid #5b2ebd',
+                                                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                                                 }}
+                                                     dangerouslySetInnerHTML={{ __html: desc.content }}
+                                                 />
+                                             ))}
+                                         </div>
+                                     </>
+                                 )}
                             </Col>
 
                             <Col span={24} md={8}>

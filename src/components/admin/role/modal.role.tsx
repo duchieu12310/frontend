@@ -20,10 +20,11 @@ interface IProps {
     }[];
     singleRole: IRole | null;
     setSingleRole: (v: any) => void;
+    isViewMode?: boolean;
 }
 
 const ModalRole = (props: IProps) => {
-    const { openModal, setOpenModal, reloadTable, listPermissions, singleRole, setSingleRole } = props;
+    const { openModal, setOpenModal, reloadTable, listPermissions, singleRole, setSingleRole, isViewMode = false } = props;
     const dispatch = useAppDispatch();
     const [form] = Form.useForm();
 
@@ -83,7 +84,7 @@ const ModalRole = (props: IProps) => {
     return (
         <>
             <ModalForm
-                title={<>{singleRole?.id ? "Cập nhật Role" : "Tạo mới Role"}</>}
+                title={<>{isViewMode ? "Chi tiết Role" : (singleRole?.id ? "Cập nhật Role" : "Tạo mới Role")}</>}
                 open={openModal}
                 modalProps={{
                     onCancel: () => { handleReset() },
@@ -99,12 +100,12 @@ const ModalRole = (props: IProps) => {
                 form={form}
                 onFinish={submitRole}
                 submitter={{
-                    render: (_: any, dom: any) => <FooterToolbar>{dom}</FooterToolbar>,
+                    render: (_: any, dom: any) => <FooterToolbar>{isViewMode ? dom[0] : dom}</FooterToolbar>,
                     submitButtonProps: {
                         icon: <CheckSquareOutlined />
                     },
                     searchConfig: {
-                        resetText: "Hủy",
+                        resetText: isViewMode ? "Đóng" : "Hủy",
                         submitText: <>{singleRole?.id ? "Cập nhật" : "Tạo mới"}</>,
                     }
                 }}
@@ -118,6 +119,7 @@ const ModalRole = (props: IProps) => {
                                 { required: true, message: 'Vui lòng không bỏ trống' },
                             ]}
                             placeholder="Nhập name"
+                            disabled={isViewMode}
                         />
                     </Col>
                     <Col lg={12} md={12} sm={24} xs={24}>
@@ -129,6 +131,7 @@ const ModalRole = (props: IProps) => {
                             initialValue={true}
                             fieldProps={{
                                 defaultChecked: true,
+                                disabled: isViewMode,
                             }}
                         />
                     </Col>
@@ -139,6 +142,7 @@ const ModalRole = (props: IProps) => {
                             name="description"
                             rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
                             placeholder="Nhập miêu tả role"
+                            disabled={isViewMode}
                             fieldProps={{
                                 autoSize: { minRows: 2 }
                             }}
@@ -159,6 +163,7 @@ const ModalRole = (props: IProps) => {
                                 listPermissions={listPermissions}
                                 singleRole={singleRole}
                                 openModal={openModal}
+                                isViewMode={isViewMode}
                             />
 
                         </ProCard>

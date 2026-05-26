@@ -18,7 +18,8 @@ import {
     GlobalOutlined,
     DownOutlined,
     ShoppingOutlined,
-    UserOutlined
+    UserOutlined,
+    FileTextOutlined
 } from '@ant-design/icons';
 import { Modal, Dropdown, MenuProps, Avatar } from 'antd';
 import { INotification } from '@/types/backend';
@@ -75,6 +76,7 @@ const Header = () => {
             label: <div style={{ fontWeight: 'bold' }}>{t('header.welcome')}, {user?.name}</div>,
             disabled: true,
         },
+        { key: 'cv', label: <Link to="/cv">CV của tôi</Link>, icon: <FileTextOutlined /> },
         { key: 'manage', label: 'Quản lý tài khoản', icon: <ContactsOutlined />, onClick: () => setOpenManageAccount(true) },
         ...(user?.role?.permissions?.length ? [{ key: 'admin', label: <Link to="/admin">{t('header.admin')}</Link>, icon: <FireOutlined /> }] : []),
         { type: 'divider' },

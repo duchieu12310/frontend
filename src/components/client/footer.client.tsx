@@ -1,5 +1,5 @@
 import React from "react";
-import { FaFacebookF, FaGithub, FaLinkedinIn, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import { FaFacebook, FaLinkedin, FaYoutube, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 import styles from './footer.module.scss';
 
 const Footer = () => {
@@ -8,74 +8,70 @@ const Footer = () => {
     return (
         <footer className={styles['footer-container']}>
             <div className={styles['footer-content']}>
-                {/* Company */}
+                {/* Column 1: Về ITviec */}
                 <div className={styles.column}>
-                    <h5>Company</h5>
+                    <h5>Về ITviec</h5>
                     <ul>
-                        <li>About Us</li>
-                        <li>Contact Us</li>
-                        <li>Our Services</li>
-                        <li>Privacy Policy</li>
-                        <li>Terms & Condition</li>
+                        <li>Về ITviec</li>
+                        <li>Liên Hệ</li>
+                        <li>Dịch vụ AI Match</li>
+                        <li>Hỏi Đáp</li>
+                        <li>Quy chế hoạt động</li>
+                        <li>Thỏa thuận sử dụng</li>
+                        <li>Chính sách bảo mật</li>
+                        <li>Giải quyết khiếu nại</li>
+                        <li>Thông cáo báo chí</li>
                     </ul>
                 </div>
 
-                {/* Quick Links */}
+                {/* Column 2: Chiến dịch & Tài nguyên */}
                 <div className={styles.column}>
-                    <h5>Quick Links</h5>
+                    <h5>Chiến dịch & Tài nguyên</h5>
                     <ul>
-                        <li>About Us</li>
-                        <li>Contact Us</li>
-                        <li>Our Services</li>
-                        <li>Privacy Policy</li>
-                        <li>Terms & Condition</li>
+                        <li>Cuộc thi viết IT Story</li>
+                        <li>Việc làm IT nổi bật</li>
+                        <li>Khảo sát lương IT hàng năm</li>
                     </ul>
                 </div>
 
-                {/* Contact */}
+                {/* Column 3: Liên hệ */}
                 <div className={styles.column}>
-                    <h5>Contact</h5>
-                    <p>
-                        <FaMapMarkerAlt /> 123 Street, New York, USA
-                    </p>
-                    <p>
-                        <FaPhone /> +012 345 67890
-                    </p>
-                    <p>
-                        <FaEnvelope /> info@example.com
-                    </p>
-                    <div className={styles['social-links']}>
-                        <FaFacebookF />
-                        <FaGithub />
-                        <FaLinkedinIn />
-                    </div>
-                </div>
-
-                {/* Newsletter */}
-                <div className={styles.column}>
-                    <h5>Newsletter</h5>
-                    <p>Dolor amet sit justo amet elit, clita ipsum elit est.</p>
-                    <div className={styles['newsletter-form']}>
-                        <input
-                            type="email"
-                            placeholder="Your email"
-                        />
-                        <button>
-                            SignUp
-                        </button>
+                    <h5>Liên hệ</h5>
+                    <div className={styles['contact-info']}>
+                        <div className={styles['contact-item']}>
+                            <h6><FaMapMarkerAlt /> Văn phòng Hồ Chí Minh</h6>
+                            <p>60 Nguyễn Văn Thủ, Phường Tân Định, Quận 1, Tp. Hồ Chí Minh</p>
+                            <p className={styles.phone}><FaPhone /> (+84) 977 460 519</p>
+                        </div>
+                        <div className={styles['contact-item']}>
+                            <h6><FaMapMarkerAlt /> Văn phòng Hà Nội</h6>
+                            <p>Tòa nhà Ford, 105 Láng Hạ, Quận Đống Đa, Hà Nội</p>
+                            <p className={styles.phone}><FaPhone /> (+84) 983 131 351</p>
+                        </div>
+                        <div className={styles['contact-item']}>
+                            <h6><FaEnvelope /> Email hỗ trợ</h6>
+                            <p className={styles.email}>love@itviec.com</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className={styles['footer-bottom']}>
-                <div>
-                    © {currentYear} JobEntry. All Right Reserved. Designed By HTML Codex.
-                </div>
-                <div className={styles.links}>
-                    <span>Home</span>
-                    <span>Cookies</span>
-                    <span>Help</span>
-                    <span>FAQs</span>
+                <div className={styles['footer-bottom-content']}>
+                    <div className={styles.copyright}>
+                        Copyright © IT VIEC JSC - Mã số thuế: 0312191599
+                    </div>
+                    <div className={styles['social-links']}>
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                            <FaFacebook />
+                        </a>
+                        <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                            <FaLinkedin />
+                        </a>
+                        <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                            <FaYoutube />
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>
@@ -83,3 +79,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

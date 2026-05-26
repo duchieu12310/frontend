@@ -52,7 +52,8 @@ const LayoutAdmin = () => {
             const viewResume = hasPermission(ALL_PERMISSIONS.RESUMES.GET_PAGINATE);
             const viewRole = hasPermission(ALL_PERMISSIONS.ROLES.GET_PAGINATE);
             const viewPermission = hasPermission(ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE);
-            const viewCompanyRegistration = hasPermission(ALL_PERMISSIONS.COMPANY_REGISTRATIONS.GET_PAGINATE);
+            const viewFormatCV = hasPermission(ALL_PERMISSIONS.FORMAT_CVS.GET_PAGINATE);
+            const viewCVTemplate = hasPermission(ALL_PERMISSIONS.CV_TEMPLATES.GET_PAGINATE);
 
             const full: MenuProps['items'] = [
                 {
@@ -64,12 +65,6 @@ const LayoutAdmin = () => {
                     label: <Link to='/admin/company'>Công ty</Link>,
                     key: '/admin/company',
                     icon: <BankOutlined />,
-                }] : []),
-
-                ...(viewCompanyRegistration || ACL_ENABLE === 'false' ? [{
-                    label: <Link to='/admin/register-company'>Đăng ký công ty</Link>,
-                    key: '/admin/register-company',
-                    icon: <FormOutlined />
                 }] : []),
 
                 ...(viewUser || ACL_ENABLE === 'false' ? [{
@@ -90,23 +85,29 @@ const LayoutAdmin = () => {
                     icon: <ApiOutlined />
                 }] : []),
 
+                ...(viewFormatCV || ACL_ENABLE === 'false' ? [{
+                    label: <Link to='/admin/cv'>CV tuyển dụng</Link>,
+                    key: '/admin/cv',
+                    icon: <FileTextOutlined />
+                }] : []),
 
+                ...(viewCVTemplate || ACL_ENABLE === 'false' ? [{
+                    label: <Link to='/admin/cv-template'>Mẫu CV</Link>,
+                    key: '/admin/cv-template',
+                    icon: <ApiOutlined />
+                }] : []),
 
-                {
+                ...(viewPermission || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/permission'>Phân quyền</Link>,
                     key: '/admin/permission',
                     icon: <ExceptionOutlined />
-                },
-                {
+                }] : []),
+
+                ...(viewRole || ACL_ENABLE === 'false' ? [{
                     label: <Link to='/admin/role'>Vai trò</Link>,
                     key: '/admin/role',
                     icon: <ExceptionOutlined />
-                },
-                {
-                    label: <Link to='/admin/cv-templates'>Mẫu CV</Link>,
-                    key: '/admin/cv-templates',
-                    icon: <FileTextOutlined />
-                },
+                }] : [])
             ];
 
             setMenuItems(full);

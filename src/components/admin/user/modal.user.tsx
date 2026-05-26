@@ -1,9 +1,9 @@
 import { ModalForm, ProForm, ProFormDigit, ProFormSelect, ProFormText } from "@ant-design/pro-components";
-import { Col, Form, Row, message, notification } from "antd";
+import { Col, Form, Row, Select, message, notification } from "antd";
 import { isMobile } from 'react-device-detect';
 import { useState, useEffect } from "react";
-import { callCreateUser, callFetchCompany, callFetchRole, callUpdateUser } from "@/config/api";
-import { IUser } from "@/types/backend";
+import { callCreateUser, callFetchCompany, callFetchRole, callUpdateUser, callFetchProvinces, callFetchDistricts, callFetchWards } from "@/config/api";
+import { IUser, IProvince, IDistrict, IWard, IAddress } from "@/types/backend";
 import { DebounceSelect } from "./debouce.select";
 
 interface IProps {
@@ -24,38 +24,112 @@ const ModalUser = (props: IProps) => {
     const { openModal, setOpenModal, reloadTable, dataInit, setDataInit } = props;
     const [companies, setCompanies] = useState<ICompanySelect[]>([]);
     const [roles, setRoles] = useState<ICompanySelect[]>([]);
+    const [provinces, setProvinces] = useState<IProvince[]>([]);
+    const [districts, setDistricts] = useState<IDistrict[]>([]);
+    const [wards, setWards] = useState<IWard[]>([]);
 
     const [form] = Form.useForm();
 
     useEffect(() => {
-        if (dataInit?.id) {
-            if (dataInit.company) {
-                setCompanies([{
-                    label: dataInit.company.name,
-                    value: dataInit.company.id,
-                    key: dataInit.company.id,
-                }])
+        const initProvinces = async () => {
+            const res = await callFetchProvinces();
+            if (res && res.data) {
+                setProvinces(res.data);
             }
-            if (dataInit.role) {
-                setRoles([
-                    {
-                        label: dataInit.role?.name,
-                        value: dataInit.role?.id,
-                        key: dataInit.role?.id,
-                    }
-                ])
-            }
-            form.setFieldsValue({
-                ...dataInit,
-                role: { label: dataInit.role?.name, value: dataInit.role?.id },
-                company: { label: dataInit.company?.name, value: dataInit.company?.id },
-            })
-
+        };
+        if (openModal) {
+            initProvinces();
         }
+    }, [openModal]);
+
+    const handleProvinceChange = async (provinceId: number) => {
+        form.setFieldsValue({ districtId: undefined, wardId: undefined });
+        setDistricts([]);
+        setWards([]);
+        const res = await callFetchDistricts(provinceId);
+        if (res && res.data) {
+            setDistricts(res.data);
+        }
+    };
+
+    const handleDistrictChange = async (districtId: number) => {
+        form.setFieldsValue({ wardId: undefined });
+        setWards([]);
+        const res = await callFetchWards(districtId);
+        if (res && res.data) {
+            setWards(res.data);
+        }
+    };
+
+    useEffect(() => {
+        const loadInitialAddress = async () => {
+            if (dataInit?.id) {
+                if (dataInit.company) {
+                    setCompanies([{
+                        label: dataInit.company.name,
+                        value: dataInit.company.id,
+                        key: dataInit.company.id,
+                    }])
+                }
+                if (dataInit.role) {
+                    setRoles([
+                        {
+                            label: dataInit.role?.name,
+                            value: dataInit.role?.id,
+                            key: dataInit.role?.id,
+                        }
+                    ])
+                }
+                form.setFieldsValue({
+                    ...dataInit,
+                    role: { label: dataInit.role?.name, value: dataInit.role?.id },
+                    company: dataInit.company ? { label: dataInit.company?.name, value: dataInit.company?.id } : undefined,
+                    provinceId: dataInit.address?.province?.id,
+                    districtId: dataInit.address?.district?.id,
+                    wardId: dataInit.address?.ward?.id,
+                    detailAddress: dataInit.address?.line,
+                });
+
+                if (dataInit.address?.province?.id) {
+                    const distRes = await callFetchDistricts(dataInit.address.province.id);
+                    if (distRes && distRes.data) {
+                        setDistricts(distRes.data);
+                    }
+                } else {
+                    setDistricts([]);
+                }
+                if (dataInit.address?.district?.id) {
+                    const wardRes = await callFetchWards(dataInit.address.district.id);
+                    if (wardRes && wardRes.data) {
+                        setWards(wardRes.data);
+                    }
+                } else {
+                    setWards([]);
+                }
+            } else {
+                form.resetFields();
+                setDistricts([]);
+                setWards([]);
+            }
+        };
+        loadInitialAddress();
     }, [dataInit]);
 
     const submitUser = async (valuesForm: any) => {
-        const { name, email, password, address, age, gender, role, company } = valuesForm;
+        const { name, email, password, provinceId, districtId, wardId, detailAddress, age, gender, role, company } = valuesForm;
+        
+        const province = provinces.find(p => p.id === provinceId);
+        const district = districts.find(d => d.id === districtId);
+        const ward = wards.find(w => w.id === wardId);
+
+        const address: IAddress = {
+            id: dataInit?.address?.id,
+            line: detailAddress,
+            province: province ? { id: province.id, name: province.name, code: province.code } : undefined,
+            district: district ? { id: district.id, name: district.name, code: district.code } : undefined,
+            ward: ward ? { id: ward.id, name: ward.name, code: ward.code } : undefined
+        };
+
         if (dataInit?.id) {
             //update
             const user = {
@@ -67,13 +141,13 @@ const ModalUser = (props: IProps) => {
                 gender,
                 address,
                 role: { id: role.value, name: "" },
-                company: {
+                company: company?.value ? {
                     id: company.value,
                     name: company.label
-                }
+                } : null
             }
 
-            const res = await callUpdateUser(user);
+            const res = await callUpdateUser(user as IUser);
             if (res.data) {
                 message.success("Cập nhật user thành công");
                 handleReset();
@@ -94,12 +168,12 @@ const ModalUser = (props: IProps) => {
                 gender,
                 address,
                 role: { id: role.value, name: "" },
-                company: {
+                company: company?.value ? {
                     id: company.value,
                     name: company.label
-                }
+                } : null
             }
-            const res = await callCreateUser(user);
+            const res = await callCreateUser(user as IUser);
             if (res.data) {
                 message.success("Thêm mới user thành công");
                 handleReset();
@@ -118,6 +192,8 @@ const ModalUser = (props: IProps) => {
         setDataInit(null);
         setCompanies([]);
         setRoles([]);
+        setDistricts([]);
+        setWards([]);
         setOpenModal(false);
     }
 
@@ -172,7 +248,7 @@ const ModalUser = (props: IProps) => {
                 initialValues={dataInit?.id ? {
                     ...dataInit,
                     role: { label: dataInit.role?.name, value: dataInit.role?.id },
-                    company: { label: dataInit.company?.name, value: dataInit.company?.id },
+                    company: dataInit.company ? { label: dataInit.company?.name, value: dataInit.company?.id } : undefined,
                 } : {}}
 
             >
@@ -272,12 +348,67 @@ const ModalUser = (props: IProps) => {
                             />
                         </ProForm.Item>
                     </Col>
-                    <Col lg={12} md={12} sm={24} xs={24}>
+                    <Col lg={6} md={6} sm={24} xs={24}>
+                        <ProForm.Item
+                            label="Tỉnh/Thành phố"
+                            name="provinceId"
+                            rules={[{ required: true, message: 'Vui lòng chọn Tỉnh/Thành phố!' }]}
+                        >
+                            <Select
+                                placeholder="Chọn Tỉnh/Thành phố"
+                                onChange={handleProvinceChange}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={provinces.map(p => ({ label: p.name, value: p.id }))}
+                                style={{ width: '100%' }}
+                            />
+                        </ProForm.Item>
+                    </Col>
+                    <Col lg={6} md={6} sm={24} xs={24}>
+                        <ProForm.Item
+                            label="Quận/Huyện"
+                            name="districtId"
+                            rules={[{ required: true, message: 'Vui lòng chọn Quận/Huyện!' }]}
+                        >
+                            <Select
+                                placeholder="Chọn Quận/Huyện"
+                                onChange={handleDistrictChange}
+                                showSearch
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={districts.map(d => ({ label: d.name, value: d.id }))}
+                                disabled={!districts.length}
+                                style={{ width: '100%' }}
+                            />
+                        </ProForm.Item>
+                    </Col>
+                    <Col lg={6} md={6} sm={24} xs={24}>
+                        <ProForm.Item
+                            label="Phường/Xã"
+                            name="wardId"
+                            rules={[{ required: true, message: 'Vui lòng chọn Phường/Xã!' }]}
+                        >
+                            <Select
+                                placeholder="Chọn Phường/Xã"
+                                showSearch
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={wards.map(w => ({ label: w.name, value: w.id }))}
+                                disabled={!wards.length}
+                                style={{ width: '100%' }}
+                            />
+                        </ProForm.Item>
+                    </Col>
+                    <Col lg={6} md={6} sm={24} xs={24}>
                         <ProFormText
-                            label="Địa chỉ"
-                            name="address"
+                            label="Địa chỉ cụ thể"
+                            name="detailAddress"
                             rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
-                            placeholder="Nhập địa chỉ"
+                            placeholder="Nhập số nhà, tên đường..."
                         />
                     </Col>
                 </Row>

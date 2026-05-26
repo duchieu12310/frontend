@@ -35,13 +35,17 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PUT", apiPath: '/api/v1/users', module: "USERS" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/users/{id}', module: "USERS" },
     },
-    COMPANY_REGISTRATIONS: {
-        CREATE: { method: "POST", apiPath: '/api/v1/company-registrations', module: "COMPANY_REGISTRATIONS" },
-        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/company-registrations', module: "COMPANY_REGISTRATIONS" },
-        UPDATE_STATUS: { method: "PUT", apiPath: '/api/v1/company-registrations/{id}/status', module: "COMPANY_REGISTRATIONS" },
-        GET_BY_ID: { method: "GET", apiPath: '/api/v1/company-registrations/{id}', module: "COMPANY_REGISTRATIONS" },
-        REJECT: { method: "PUT", apiPath: '/api/v1/company-registrations/{id}/reject', module: "COMPANY_REGISTRATIONS" },
-        DELETE: { method: "DELETE", apiPath: '/api/v1/company-registrations/{id}', module: "COMPANY_REGISTRATIONS" },
+    FORMAT_CVS: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/format-cvs', module: "FORMAT_CVS" },
+        CREATE: { method: "POST", apiPath: '/api/v1/format-cvs', module: "FORMAT_CVS" },
+        UPDATE: { method: "PUT", apiPath: '/api/v1/format-cvs', module: "FORMAT_CVS" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/format-cvs/{id}', module: "FORMAT_CVS" },
+    },
+    CV_TEMPLATES: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/cv-templates', module: "CV_TEMPLATES" },
+        CREATE: { method: "POST", apiPath: '/api/v1/cv-templates', module: "CV_TEMPLATES" },
+        UPDATE: { method: "PUT", apiPath: '/api/v1/cv-templates', module: "CV_TEMPLATES" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/cv-templates/{id}', module: "CV_TEMPLATES" },
     },
 }
 
@@ -54,5 +58,6 @@ export const ALL_MODULES = {
     ROLES: 'ROLES',
     USERS: 'USERS',
     SUBSCRIBERS: 'SUBSCRIBERS',
-    COMPANY_REGISTRATIONS: 'COMPANY_REGISTRATIONS'
+    FORMAT_CVS: 'FORMAT_CVS',
+    CV_TEMPLATES: 'CV_TEMPLATES'
 }

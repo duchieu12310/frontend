@@ -133,12 +133,18 @@ const LoginPage = () => {
                     </Link>
                 </div>
 
-                <p className="text-center mt-3">
+                <div className="text-center mt-3">
                     Chưa có tài khoản?
-                    <Link to="/register" className="ms-1">
-                        Đăng ký
-                    </Link>
-                </p>
+                    <div className="d-flex justify-content-center gap-2 mt-1">
+                        <Link to="/register?role=user">
+                            Đăng ký Ứng viên
+                        </Link>
+                        <span className="text-muted">|</span>
+                        <Link to="/register?role=employer" className="fw-bold">
+                            Đăng ký Nhà tuyển dụng
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
     );

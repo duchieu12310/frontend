@@ -1,7 +1,7 @@
 import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IRole } from "@/types/backend";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, EyeOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, Tag, message, notification } from "antd";
 import { useState, useRef, useEffect } from 'react';
@@ -22,6 +22,8 @@ const RolePage = () => {
     const meta = useAppSelector(state => state.role.meta);
     const roles = useAppSelector(state => state.role.result);
     const dispatch = useAppDispatch();
+    const [isViewMode, setIsViewMode] = useState<boolean>(false);
+    const currentUserPermissions = useAppSelector(state => state.account.user.role.permissions) ?? [];
 
     // tất cả quyền từ backend (chỉ dùng để hiển thị trong ModalRole)
     const [listPermissions, setListPermissions] = useState<{
@@ -36,11 +38,15 @@ const RolePage = () => {
         const init = async () => {
             const res = await callFetchPermission(`page=1&size=100`);
             if (res.data?.result) {
-                setListPermissions(groupByPermission(res.data?.result));
+                // Filter: only keep permissions that the current user actually has
+                const allowedPermissions = res.data.result.filter((p: any) =>
+                    currentUserPermissions.some((up: any) => String(up.id) === String(p.id))
+                );
+                setListPermissions(groupByPermission(allowedPermissions));
             }
         };
         init();
-    }, []);
+    }, [currentUserPermissions]);
 
     const handleDeleteRole = async (id: string | undefined) => {
         if (id) {
@@ -107,12 +113,24 @@ const RolePage = () => {
             hideInSearch: true,
         },
         {
-            title: 'Thao tác',
-            hideInSearch: true,
-            width: 80,
+            width: 100,
             render: (_value, entity) => {
-                // Hide actions for system roles
-                if (entity.id && (+entity.id === 1 || +entity.id === 2)) return <></>;
+                const isSystemRole = entity.id && (+entity.id === 1 || +entity.id === 2);
+
+                if (isSystemRole) {
+                    return (
+                        <Space>
+                            <EyeOutlined
+                                style={{ fontSize: 20, color: '#1890ff', cursor: 'pointer' }}
+                                onClick={() => {
+                                    setSingleRole(entity);
+                                    setIsViewMode(true);
+                                    setOpenModal(true);
+                                }}
+                            />
+                        </Space>
+                    );
+                }
 
                 return (
                     <Space>
@@ -120,6 +138,7 @@ const RolePage = () => {
                             style={{ fontSize: 20, color: '#ffa500', cursor: 'pointer' }}
                             onClick={() => {
                                 setSingleRole(entity);
+                                setIsViewMode(false);
                                 setOpenModal(true);
                             }}
                         />
@@ -193,7 +212,11 @@ const RolePage = () => {
                         key="add"
                         icon={<PlusOutlined />}
                         type="primary"
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => {
+                            setSingleRole(null);
+                            setIsViewMode(false);
+                            setOpenModal(true);
+                        }}
                     >
                         Thêm vai trò
                     </Button>
@@ -206,6 +229,7 @@ const RolePage = () => {
                 listPermissions={listPermissions!}
                 singleRole={singleRole}
                 setSingleRole={setSingleRole}
+                isViewMode={isViewMode}
             />
         </div>
     );

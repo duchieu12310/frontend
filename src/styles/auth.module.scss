@@ -179,6 +179,65 @@ $shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0,
                     }
                 }
             }
+
+            .otp-wrapper {
+                text-align: center;
+                .otp-inputs {
+                    display: flex;
+                    justify-content: center;
+                    margin: 1.5rem 0;
+                    
+                    .otp-digit {
+                        width: 3rem;
+                        height: 3rem;
+                        font-size: 1.5rem;
+                        text-align: center;
+                        border-radius: 0.5rem;
+                        border: 1px solid #d9d9d9;
+                        margin: 0 0.25rem;
+                        outline: none;
+                        transition: all 0.3s;
+                        color: #000;
+                        background: #fff;
+                        
+                        &:focus {
+                            border-color: #1a73e8;
+                            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+                        }
+                    }
+                }
+                .timer-text {
+                    font-size: 1rem;
+                    color: $color-gray;
+                    margin: 0.5rem 0;
+                    strong {
+                        color: #1a73e8;
+                    }
+                }
+                .action-links {
+                    margin-top: 1.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    align-items: center;
+                    font-size: 0.9rem;
+                    
+                    a, button {
+                        color: #1a73e8;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        font-size: inherit;
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+                    .btn-cancel {
+                        color: #f44336;
+                    }
+                }
+            }
         }
     }
 }

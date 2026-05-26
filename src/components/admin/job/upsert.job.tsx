@@ -1,7 +1,7 @@
 import { Breadcrumb, Col, ConfigProvider, Divider, Form, Row, message, notification } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DebounceSelect } from "../user/debouce.select";
-import { FooterToolbar, ProForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-components";
+import { FooterToolbar, ProForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormSwitch, ProFormText, ProFormList } from "@ant-design/pro-components";
 import styles from 'styles/admin.module.scss';
 import { LOCATION_LIST, SKILLS_LIST } from "@/config/utils";
 import { ICompanySelect } from "../user/modal.user";
@@ -66,7 +66,9 @@ const ViewUpsertJob = (props: any) => {
                             value: `${res.data.company?.id}@#$${res.data.company?.logo}` as string,
                             key: res.data.company?.id
                         },
-                        skills: temp
+                        skills: temp,
+                        requirements: res.data.requirements || [],
+                        benefits: res.data.benefits || []
                     })
                 }
             }
@@ -105,6 +107,26 @@ const ViewUpsertJob = (props: any) => {
     }
 
     const onFinish = async (values: any) => {
+        const levelMap: Record<string, number> = {
+            INTERN: 1,
+            FRESHER: 2,
+            JUNIOR: 3,
+            MIDDLE: 4,
+            SENIOR: 5
+        };
+        const arrLevels = values?.levels?.map((item: any) => {
+            const val = typeof item === 'object' ? item.value : item;
+            return { id: levelMap[val] };
+        }) || [];
+
+        const arrRequirements = values?.requirements?.filter((item: any) => item?.content)?.map((item: any) => ({
+            content: item.content
+        })) || [];
+
+        const arrBenefits = values?.benefits?.filter((item: any) => item?.content)?.map((item: any) => ({
+            content: item.content
+        })) || [];
+
         if (dataUpdate?.id) {
             //update
             const cp = values?.company?.value?.split('@#$');
@@ -127,7 +149,9 @@ const ViewUpsertJob = (props: any) => {
                 location: values.location,
                 salary: values.salary,
                 quantity: values.quantity,
-                level: values.level,
+                levels: arrLevels,
+                requirements: arrRequirements,
+                benefits: arrBenefits,
                 description: value,
                 startDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(values.startDate) ? dayjs(values.startDate, 'DD/MM/YYYY').toDate() : values.startDate,
                 endDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(values.endDate) ? dayjs(values.endDate, 'DD/MM/YYYY').toDate() : values.endDate,
@@ -160,7 +184,9 @@ const ViewUpsertJob = (props: any) => {
                 location: values.location,
                 salary: values.salary,
                 quantity: values.quantity,
-                level: values.level,
+                levels: arrLevels,
+                requirements: arrRequirements,
+                benefits: arrBenefits,
                 description: value,
                 startDate: dayjs(values.startDate, 'DD/MM/YYYY').toDate(),
                 endDate: dayjs(values.endDate, 'DD/MM/YYYY').toDate(),
@@ -275,7 +301,7 @@ const ViewUpsertJob = (props: any) => {
                             </Col>
                             <Col span={24} md={6}>
                                 <ProFormSelect
-                                    name="level"
+                                    name="levels"
                                     label="Trình độ"
                                     valueEnum={{
                                         INTERN: 'INTERN',
@@ -284,8 +310,9 @@ const ViewUpsertJob = (props: any) => {
                                         MIDDLE: 'MIDDLE',
                                         SENIOR: 'SENIOR',
                                     }}
-                                    placeholder="Please select a level"
+                                    placeholder="Please select levels"
                                     rules={[{ required: true, message: 'Vui lòng chọn level!' }]}
+                                    mode="multiple"
                                 />
                             </Col>
 
@@ -355,6 +382,72 @@ const ViewUpsertJob = (props: any) => {
                                         defaultChecked: true,
                                     }}
                                 />
+                            </Col>
+                            <Col span={24} md={12}>
+                                <div className="custom-pro-form-list-wrapper">
+                                    <style>{`
+                                        .custom-pro-form-list-wrapper .ant-form-item {
+                                            width: 100% !important;
+                                            margin-bottom: 0 !important;
+                                        }
+                                    `}</style>
+                                    <ProFormList
+                                        name="requirements"
+                                        label="Yêu cầu công việc"
+                                        creatorButtonProps={{
+                                            creatorButtonText: 'Thêm yêu cầu mới',
+                                            style: { width: '100%' }
+                                        }}
+                                        copyIconProps={false}
+                                        itemRender={({ listDom, action }) => {
+                                            return (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', marginBottom: '12px' }}>
+                                                    <div style={{ flex: 1 }}>{listDom}</div>
+                                                    <div style={{ flex: 'none' }}>{action}</div>
+                                                </div>
+                                            )
+                                        }}
+                                    >
+                                        <ProFormText 
+                                            name="content" 
+                                            placeholder="Nhập yêu cầu công việc..." 
+                                            rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}
+
+                                            style={{ width: '100%' }}
+                                            fieldProps={{ style: { width: '100%' } }}
+                                        />
+                                    </ProFormList>
+                                </div>
+                            </Col>
+                            <Col span={24} md={12}>
+                                <div className="custom-pro-form-list-wrapper">
+                                    <ProFormList
+                                        name="benefits"
+                                        label="Quyền lợi công việc"
+                                        creatorButtonProps={{
+                                            creatorButtonText: 'Thêm quyền lợi mới',
+                                            style: { width: '100%' }
+                                        }}
+                                        copyIconProps={false}
+                                        itemRender={({ listDom, action }) => {
+                                            return (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', marginBottom: '12px' }}>
+                                                    <div style={{ flex: 1 }}>{listDom}</div>
+                                                    <div style={{ flex: 'none' }}>{action}</div>
+                                                </div>
+                                            )
+                                        }}
+                                    >
+                                        <ProFormText 
+                                            name="content" 
+                                            placeholder="Nhập quyền lợi..." 
+                                            rules={[{ required: true, message: 'Vui lòng nhập nội dung!' }]}
+
+                                            style={{ width: '100%' }}
+                                            fieldProps={{ style: { width: '100%' } }}
+                                        />
+                                    </ProFormList>
+                                </div>
                             </Col>
                             <Col span={24}>
                                 <ProForm.Item

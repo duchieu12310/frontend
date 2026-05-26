@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Upload, Button, Form, Input, Select, Row, Col } from "antd";
+import { message, Upload, Button, Form, Input, Select, Row, Col, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { callUploadSingleFile, callCreateCompanyRegistration } from "@/config/api";
+import { callUploadSingleFile, callCreateCompany, callFetchProvinces, callFetchDistricts, callFetchWards } from "@/config/api";
+import { IProvince, IDistrict, IWard, IAddress, ICompany } from "@/types/backend";
+
+const { Option } = Select;
 
 const RegisterCompany = () => {
     const [form] = Form.useForm();
@@ -12,43 +15,53 @@ const RegisterCompany = () => {
     const [documentUrl, setDocumentUrl] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // --- Dữ liệu hành chính Việt Nam ---
-    const [provinces, setProvinces] = useState<{ code: number; name: string }[]>([]);
-    const [districts, setDistricts] = useState<{ code: number; name: string }[]>([]);
-    const [wards, setWards] = useState<{ code: number; name: string }[]>([]);
+    // --- Division Data ---
+    const [provinces, setProvinces] = useState<IProvince[]>([]);
+    const [districts, setDistricts] = useState<IDistrict[]>([]);
+    const [wards, setWards] = useState<IWard[]>([]);
 
-    // 🗺️ Lấy danh sách tỉnh / thành phố khi mở trang
     useEffect(() => {
-        fetch("https://provinces.open-api.vn/api/?depth=1")
-            .then((res) => res.json())
-            .then((data) => setProvinces(data))
-            .catch(() => message.error("Không thể tải danh sách tỉnh/thành!"));
+        const initProvinces = async () => {
+            try {
+                const res = await callFetchProvinces();
+                if (res && res.data) {
+                    setProvinces(res.data);
+                }
+            } catch (err) {
+                message.error("Không thể tải danh sách tỉnh/thành!");
+            }
+        };
+        initProvinces();
     }, []);
 
-    // 🏙️ Khi chọn tỉnh → tải danh sách quận / huyện
-    const handleProvinceChange = (provinceCode: number) => {
-        form.setFieldsValue({ district: undefined, ward: undefined });
+    const handleProvinceChange = async (provinceId: number) => {
+        form.setFieldsValue({ districtId: undefined, wardId: undefined });
         setDistricts([]);
         setWards([]);
-
-        fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
-            .then((res) => res.json())
-            .then((data) => setDistricts(data.districts || []))
-            .catch(() => message.error("Không thể tải danh sách quận/huyện!"));
+        try {
+            const res = await callFetchDistricts(provinceId);
+            if (res && res.data) {
+                setDistricts(res.data);
+            }
+        } catch (err) {
+            message.error("Không thể tải danh sách quận/huyện!");
+        }
     };
 
-    // 🏘️ Khi chọn quận → tải danh sách phường / xã
-    const handleDistrictChange = (districtCode: number) => {
-        form.setFieldsValue({ ward: undefined });
+    const handleDistrictChange = async (districtId: number) => {
+        form.setFieldsValue({ wardId: undefined });
         setWards([]);
-
-        fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`)
-            .then((res) => res.json())
-            .then((data) => setWards(data.wards || []))
-            .catch(() => message.error("Không thể tải danh sách phường/xã!"));
+        try {
+            const res = await callFetchWards(districtId);
+            if (res && res.data) {
+                setWards(res.data);
+            }
+        } catch (err) {
+            message.error("Không thể tải danh sách phường/xã!");
+        }
     };
 
-    // 🖼️ Upload logo công ty
+    // --- Upload Handlers ---
     const handleUploadLogo = async (file: any) => {
         const res = await callUploadSingleFile(file, "company");
         if (res?.data?.fileName) {
@@ -60,7 +73,6 @@ const RegisterCompany = () => {
         return false;
     };
 
-    // 📄 Upload tài liệu xác minh (pdf/doc/docx)
     const handleUploadDocument = async (file: any) => {
         const allowedTypes = [
             "application/pdf",
@@ -81,41 +93,49 @@ const RegisterCompany = () => {
         return false;
     };
 
-    // 📨 Gửi form đăng ký công ty
+    // --- Submit Handler ---
     const onFinish = async (values: any) => {
         setLoading(true);
         try {
-            const provinceName = provinces.find((p) => p.code === values.province)?.name || "";
-            const districtName = districts.find((d) => d.code === values.district)?.name || "";
-            const wardName = wards.find((w) => w.code === values.ward)?.name || "";
+            const { companyName, description, taxCode, provinceId, districtId, wardId, detailAddress } = values;
 
-            const fullAddress = [
-                values.detailAddress,
-                wardName,
-                districtName,
-                provinceName,
-            ]
-                .filter(Boolean)
-                .join(", ");
+            const province = provinces.find((p) => p.id === provinceId);
+            const district = districts.find((d) => d.id === districtId);
+            const ward = wards.find((w) => w.id === wardId);
 
-            const payload = {
-                companyName: values.companyName,
-                description: values.description,
-                address: fullAddress,
-                logo: logoUrl,
-                facebookLink: values.facebookLink || "",
-                githubLink: values.githubLink || "",
-                verificationDocument: documentUrl,
+            const address: IAddress = {
+                line: detailAddress,
+                province: province ? { id: province.id, name: province.name, code: province.code } : undefined,
+                district: district ? { id: district.id, name: district.name, code: district.code } : undefined,
+                ward: ward ? { id: ward.id, name: ward.name, code: ward.code } : undefined
             };
 
-            const res = await callCreateCompanyRegistration(payload);
+            const payload: ICompany = {
+                name: companyName,
+                description: description,
+                taxCode: taxCode,
+                address: address,
+                logo: logoUrl,
+                businessLicense: documentUrl,
+                status: "PENDING"
+            };
+
+            const res = await callCreateCompany(payload);
             if (res?.data) {
                 message.success("Gửi đăng ký công ty thành công! Vui lòng chờ duyệt.");
                 navigate("/");
+            } else {
+                notification.error({
+                    message: "Đăng ký thất bại",
+                    description: res.message || "Có lỗi xảy ra"
+                });
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            message.error("Đăng ký thất bại. Vui lòng thử lại!");
+            notification.error({
+                message: "Đăng ký thất bại",
+                description: err?.response?.data?.message || "Vui lòng thử lại!"
+            });
         }
         setLoading(false);
     };
@@ -132,19 +152,26 @@ const RegisterCompany = () => {
                 </Form.Item>
 
                 <Form.Item
-                    label="Mô tả"
+                    label="Mã số thuế"
+                    name="taxCode"
+                    rules={[{ required: true, message: "Vui lòng nhập mã số thuế!" }]}
+                >
+                    <Input placeholder="VD: 0102030405" />
+                </Form.Item>
+
+                <Form.Item
+                    label="Mô tả công ty"
                     name="description"
                     rules={[{ required: true, message: "Vui lòng nhập mô tả công ty!" }]}
                 >
                     <Input.TextArea rows={4} placeholder="Giới thiệu về công ty..." />
                 </Form.Item>
 
-                {/* --- Gộp Tỉnh / Huyện / Xã trên cùng 1 dòng --- */}
                 <Form.Item label="Địa chỉ (Tỉnh/Thành, Quận/Huyện, Phường/Xã)" required>
                     <Row gutter={10}>
                         <Col span={8}>
                             <Form.Item
-                                name="province"
+                                name="provinceId"
                                 rules={[{ required: true, message: "Chọn tỉnh / thành!" }]}
                                 noStyle
                             >
@@ -152,17 +179,19 @@ const RegisterCompany = () => {
                                     placeholder="Tỉnh / Thành phố"
                                     onChange={handleProvinceChange}
                                     showSearch
-                                    optionFilterProp="label"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+                                    }
                                     options={provinces.map((p) => ({
                                         label: p.name,
-                                        value: p.code,
+                                        value: p.id,
                                     }))}
                                 />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
                             <Form.Item
-                                name="district"
+                                name="districtId"
                                 rules={[{ required: true, message: "Chọn quận / huyện!" }]}
                                 noStyle
                             >
@@ -171,17 +200,19 @@ const RegisterCompany = () => {
                                     onChange={handleDistrictChange}
                                     showSearch
                                     disabled={!districts.length}
-                                    optionFilterProp="label"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+                                    }
                                     options={districts.map((d) => ({
                                         label: d.name,
-                                        value: d.code,
+                                        value: d.id,
                                     }))}
                                 />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
                             <Form.Item
-                                name="ward"
+                                name="wardId"
                                 rules={[{ required: true, message: "Chọn phường / xã!" }]}
                                 noStyle
                             >
@@ -189,10 +220,12 @@ const RegisterCompany = () => {
                                     placeholder="Phường / Xã"
                                     showSearch
                                     disabled={!wards.length}
-                                    optionFilterProp="label"
+                                    filterOption={(input, option) =>
+                                        (option?.label ?? "").toString().toLowerCase().includes(input.toLowerCase())
+                                    }
                                     options={wards.map((w) => ({
                                         label: w.name,
-                                        value: w.code,
+                                        value: w.id,
                                     }))}
                                 />
                             </Form.Item>
@@ -208,23 +241,6 @@ const RegisterCompany = () => {
                     <Input placeholder="VD: Số 17, Ngõ 34, Đường Trần Duy Hưng" />
                 </Form.Item>
 
-                <Form.Item
-                    label="Facebook"
-                    name="facebookLink"
-                    rules={[{ type: "url", message: "Vui lòng nhập link hợp lệ!" }]}
-                >
-                    <Input placeholder="https://facebook.com/company" />
-                </Form.Item>
-
-                <Form.Item
-                    label="GitHub"
-                    name="githubLink"
-                    rules={[{ type: "url", message: "Vui lòng nhập link hợp lệ!" }]}
-                >
-                    <Input placeholder="https://github.com/company" />
-                </Form.Item>
-
-
                 <Form.Item label="Logo công ty">
                     <Upload beforeUpload={handleUploadLogo} showUploadList={false} accept="image/*">
                         <Button icon={<UploadOutlined />}>Chọn file ảnh</Button>
@@ -236,7 +252,7 @@ const RegisterCompany = () => {
                     )}
                 </Form.Item>
 
-                <Form.Item label="Tài liệu xác minh (PDF/DOC/DOCX)">
+                <Form.Item label="Tài liệu xác minh (PDF/DOC/DOCX)" required>
                     <Upload
                         beforeUpload={handleUploadDocument}
                         showUploadList={false}
@@ -248,7 +264,7 @@ const RegisterCompany = () => {
                         <div className="mt-2">
                             📄{" "}
                             <a href={documentUrl} target="_blank" rel="noopener noreferrer">
-                                Xem tài liệu
+                                Xem tài liệu đã tải lên
                             </a>
                         </div>
                     )}
@@ -256,7 +272,7 @@ const RegisterCompany = () => {
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" block loading={loading}>
-                        Gửi đăng ký
+                        Gửi đăng ký doanh nghiệp
                     </Button>
                 </Form.Item>
             </Form>

@@ -67,7 +67,7 @@ const ResumePage = () => {
             const values = await formReject.validateFields();
             const res = await callUpdateResumeById(rejectModal.id!, {
                 status: "REJECTED",
-                note: values.reason,
+                note: values.reason || "",
             });
             if (res && res.data) {
                 message.warning("Đã từ chối hồ sơ");
@@ -187,8 +187,8 @@ const ResumePage = () => {
             width: 220,
             render: (_, entity) => {
                 const status = entity.status;
-                const showApprove = status === "PENDING" || status === "REJECTED";
-                const showReject = status === "PENDING" || status === "APPROVED";
+                const showApprove = status === "PENDING" || status === "REVIEWING" || status === "REJECTED";
+                const showReject = status === "PENDING" || status === "REVIEWING" || status === "APPROVED";
 
                 return (
                     <Space>
@@ -203,40 +203,44 @@ const ResumePage = () => {
                             />
                         </Tooltip>
 
-                        {/* ✅ và ❌ chỉ hiển thị khi KHÔNG phải admin */}
-                        {!isAdmin && (
-                            <>
-                                {/* ✅ Chấp nhận */}
-                                {showApprove && (
-                                    <Tooltip title="Chấp nhận hồ sơ">
-                                        <CheckOutlined
-                                            style={{ fontSize: 20, color: "green" }}
-                                            onClick={() =>
-                                                setApproveModal({
-                                                    open: true,
-                                                    id: entity.id,
-                                                    defaultAddress:
-                                                        entity.job?.company?.address ||
-                                                        "Địa chỉ công ty",
-                                                })
-                                            }
-                                        />
-                                    </Tooltip>
-                                )}
+                        {/* ✅ Chấp nhận */}
+                        <Access permission={ALL_PERMISSIONS.RESUMES.UPDATE} hideChildren={true}>
+                            {showApprove && (
+                                <Tooltip title="Chấp nhận hồ sơ">
+                                    <CheckOutlined
+                                        style={{ fontSize: 20, color: "green" }}
+                                        onClick={() => {
+                                            const addr = entity.job?.location ||
+                                                entity.job?.company?.address ||
+                                                "Địa chỉ công việc";
+                                            setApproveModal({
+                                                open: true,
+                                                id: entity.id,
+                                                defaultAddress: addr,
+                                            });
+                                            formApprove.setFieldsValue({
+                                                address: addr,
+                                            });
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
+                        </Access>
 
-                                {/* ❌ Từ chối */}
-                                {showReject && (
-                                    <Tooltip title="Từ chối hồ sơ">
-                                        <CloseOutlined
-                                            style={{ fontSize: 20, color: "red" }}
-                                            onClick={() =>
-                                                setRejectModal({ open: true, id: entity.id })
-                                            }
-                                        />
-                                    </Tooltip>
-                                )}
-                            </>
-                        )}
+                        {/* ❌ Từ chối */}
+                        <Access permission={ALL_PERMISSIONS.RESUMES.UPDATE} hideChildren={true}>
+                            {showReject && (
+                                <Tooltip title="Từ chối hồ sơ">
+                                    <CloseOutlined
+                                        style={{ fontSize: 20, color: "red" }}
+                                        onClick={() => {
+                                            setRejectModal({ open: true, id: entity.id });
+                                            formReject.setFieldsValue({ reason: "" });
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
+                        </Access>
 
                         {/* 🗑️ Xóa */}
                         <Access permission={ALL_PERMISSIONS.RESUMES.DELETE}>
@@ -336,11 +340,10 @@ const ResumePage = () => {
             >
                 <Form form={formReject} layout="vertical">
                     <Form.Item
-                        label="Lý do từ chối"
+                        label="Lý do từ chối (không bắt buộc)"
                         name="reason"
-                        rules={[{ required: true, message: "Vui lòng nhập lý do từ chối" }]}
                     >
-                        <Input.TextArea rows={4} placeholder="Nhập lý do từ chối..." />
+                        <Input.TextArea rows={4} placeholder="Nhập lý do từ chối nếu có..." />
                     </Form.Item>
                 </Form>
             </Modal>

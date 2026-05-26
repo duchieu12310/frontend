@@ -1,38 +1,28 @@
 import DataTable from "@/components/client/data-table";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { fetchCVTemplate } from "@/redux/slice/cvTemplateSlide";
 import { ICVTemplate } from "@/types/backend";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message, notification, Image } from "antd";
-import { useState, useRef } from 'react';
-import queryString from 'query-string';
+import { Button, Popconfirm, Space, message } from "antd";
+import { useRef } from 'react';
+import dayjs from 'dayjs';
 import { callDeleteCVTemplate } from "@/config/api";
-import ModalCVTemplate from "@/components/admin/cv-template/modal.cv-template";
-import { sfLike } from "spring-filter-query-builder";
+import queryString from 'query-string';
+import { useNavigate } from "react-router-dom";
+import Access from "@/components/share/access";
+import { ALL_PERMISSIONS } from "@/config/permissions";
 
 const CVTemplatePage = () => {
-    const [openModal, setOpenModal] = useState<boolean>(false);
-    const [dataInit, setDataInit] = useState<ICVTemplate | null>(null);
-
+    const navigate = useNavigate();
     const tableRef = useRef<ActionType>();
 
-    const isFetching = useAppSelector(state => state.cvTemplate.isFetching);
-    const meta = useAppSelector(state => state.cvTemplate.meta);
-    const templates = useAppSelector(state => state.cvTemplate.result);
-    const dispatch = useAppDispatch();
-
-    const handleDelete = async (id: string | number | undefined) => {
+    const handleDeleteCVTemplate = async (id: number | undefined) => {
         if (id) {
             const res = await callDeleteCVTemplate(id);
-            if (+res.statusCode === 200) {
-                message.success('Xóa template thành công');
+            if (res && res.data) {
+                message.success('Xóa Mẫu CV thành công');
                 reloadTable();
             } else {
-                notification.error({
-                    message: 'Có lỗi xảy ra',
-                    description: res.message
-                });
+                message.error('Có lỗi xảy ra');
             }
         }
     }
@@ -43,58 +33,68 @@ const CVTemplatePage = () => {
 
     const columns: ProColumns<ICVTemplate>[] = [
         {
-            title: 'STT',
-            key: 'index',
+            title: 'Id',
+            dataIndex: 'id',
             width: 50,
-            align: "center",
-            render: (text, record, index) => {
+            render: (text, record, index, action) => {
                 return (
-                    <>
-                        {(index + 1) + (meta.page - 1) * (meta.pageSize)}
-                    </>)
+                    <span>
+                        {record.id}
+                    </span>
+                )
             },
             hideInSearch: true,
         },
         {
-            title: 'Tên Template',
-            dataIndex: 'name',
+            title: 'Tiêu đề',
+            dataIndex: 'title',
             sorter: true,
         },
         {
-            title: 'Thumbnail',
-            dataIndex: 'thumbnailUrl',
-            hideInSearch: true,
-            render: (text, record) => {
+            title: 'Ngày tạo',
+            dataIndex: 'createdAt',
+            width: 200,
+            sorter: true,
+            render: (text, record, index, action) => {
                 return (
-                    <Image
-                        width={100}
-                        src={record.thumbnailUrl}
-                    />
+                    <>{record.createdAt ? dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
                 )
-            }
+            },
+            hideInSearch: true,
         },
         {
-            title: 'Thao tác',
+            title: 'Ngày cập nhật',
+            dataIndex: 'updatedAt',
+            width: 200,
+            sorter: true,
+            render: (text, record, index, action) => {
+                return (
+                    <>{record.updatedAt ? dayjs(record.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</>
+                )
+            },
+            hideInSearch: true,
+        },
+        {
+            title: 'Actions',
             hideInSearch: true,
             width: 50,
-            render: (_value, entity) => (
+            render: (_value, entity, _index, _action) => (
                 <Space>
                     <EditOutlined
                         style={{
                             fontSize: 20,
                             color: '#ffa500',
-                            cursor: 'pointer'
                         }}
+                        type=""
                         onClick={() => {
-                            setOpenModal(true);
-                            setDataInit(entity);
+                            navigate(`/admin/cv-template/upsert?id=${entity.id}`);
                         }}
                     />
                     <Popconfirm
                         placement="leftTop"
-                        title={"Xác nhận xóa template"}
-                        description={"Bạn có chắc chắn muốn xóa template này ?"}
-                        onConfirm={() => handleDelete(entity.id)}
+                        title={"Xác nhận xóa mẫu CV"}
+                        description={"Bạn có chắc chắn muốn xóa mẫu CV này ?"}
+                        onConfirm={() => handleDeleteCVTemplate(entity.id)}
                         okText="Xác nhận"
                         cancelText="Hủy"
                     >
@@ -107,31 +107,30 @@ const CVTemplatePage = () => {
                             />
                         </span>
                     </Popconfirm>
-                </Space >
+                </Space>
             ),
         },
     ];
 
     const buildQuery = (params: any, sort: any, filter: any) => {
-        const q: any = {
-            page: params.current,
-            size: params.pageSize,
-            filter: ""
-        }
-
         const clone = { ...params };
-        if (clone.name) q.filter = `${sfLike("name", clone.name)}`;
+        if (clone.title) clone.title = `/${clone.title}/i`;
 
-        if (!q.filter) delete q.filter;
-        let temp = queryString.stringify(q);
+        let temp = queryString.stringify(clone);
 
         let sortBy = "";
-        if (sort && sort.name) {
-            sortBy = sort.name === 'ascend' ? "sort=name,asc" : "sort=name,desc";
+        if (sort && sort.title) {
+            sortBy = sort.title === 'ascend' ? "sort=title,asc" : "sort=title,desc";
+        }
+        if (sort && sort.createdAt) {
+            sortBy = sort.createdAt === 'ascend' ? "sort=createdAt,asc" : "sort=createdAt,desc";
+        }
+        if (sort && sort.updatedAt) {
+            sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
         }
 
         if (Object.keys(sortBy).length === 0) {
-            temp = `${temp}&sort=id,desc`;
+            temp = `${temp}&sort=updatedAt,desc`;
         } else {
             temp = `${temp}&${sortBy}`;
         }
@@ -140,51 +139,43 @@ const CVTemplatePage = () => {
     }
 
     return (
-        <div>
-            <DataTable<ICVTemplate>
-                actionRef={tableRef}
-                headerTitle="Danh sách CV Template"
-                rowKey="id"
-                loading={isFetching}
-                columns={columns}
-                dataSource={templates}
-                request={async (params, sort, filter): Promise<any> => {
-                    const query = buildQuery(params, sort, filter);
-                    dispatch(fetchCVTemplate({ query }))
-                }}
-                scroll={{ x: true }}
-                pagination={
-                    {
-                        current: meta.page,
-                        pageSize: meta.pageSize,
-                        showSizeChanger: true,
-                        total: meta.total,
-                        showTotal: (total, range) => {
-                            return (<div>{range[0]}-{range[1]} trên {total} bản ghi</div>)
+        <Access permission={ALL_PERMISSIONS.CV_TEMPLATES.GET_PAGINATE}>
+            <div>
+                <DataTable<ICVTemplate>
+                    actionRef={tableRef}
+                    headerTitle="Danh sách Mẫu CV"
+                    rowKey="id"
+                    columns={columns}
+                    request={async (params, sort, filter): Promise<any> => {
+                        const query = buildQuery(params, sort, filter);
+                        // Fetch directly from API
+                        const { callFetchCVTemplates } = await import('@/config/api');
+                        const res = await callFetchCVTemplates(query);
+                        if (res && res.data) {
+                            return {
+                                data: res.data.result,
+                                success: true,
+                                total: res.data.meta.total
+                            }
                         }
-                    }
-                }
-                rowSelection={false}
-                toolBarRender={(_action, _rows): any => {
-                    return (
+                        return {
+                            data: [],
+                            success: false,
+                            total: 0
+                        }
+                    }}
+                    toolBarRender={() => [
                         <Button
                             icon={<PlusOutlined />}
                             type="primary"
-                            onClick={() => setOpenModal(true)}
+                            onClick={() => navigate('/admin/cv-template/upsert')}
                         >
                             Thêm mới
                         </Button>
-                    );
-                }}
-            />
-            <ModalCVTemplate
-                openModal={openModal}
-                setOpenModal={setOpenModal}
-                reloadTable={reloadTable}
-                dataInit={dataInit}
-                setDataInit={setDataInit}
-            />
-        </div>
+                    ]}
+                />
+            </div>
+        </Access>
     )
 }
 

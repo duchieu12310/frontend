@@ -1,4 +1,4 @@
-import { IPermission } from '@/types/backend';
+import { IPermission, IAddress } from '@/types/backend';
 import { grey, green, blue, red, orange } from '@ant-design/colors';
 import { RocketOutlined, CodeOutlined, LineChartOutlined, TeamOutlined, BankOutlined, RobotOutlined } from '@ant-design/icons';
 import groupBy from 'lodash/groupBy';
@@ -185,4 +185,17 @@ export const groupByPermission = (data: any[]): { module: string; permissions: I
     return map(groupedData, (value, key) => {
         return { module: key, permissions: value as IPermission[] };
     });
+};
+
+export const formatAddress = (address?: IAddress | string): string => {
+    if (!address) return '';
+    if (typeof address === 'string') return address;
+    
+    const parts: string[] = [];
+    if (address.line) parts.push(address.line);
+    if (address.ward?.name) parts.push(address.ward.name);
+    if (address.district?.name) parts.push(address.district.name);
+    if (address.province?.name) parts.push(address.province.name);
+    
+    return parts.join(', ');
 };

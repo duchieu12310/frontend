@@ -136,7 +136,9 @@ const ClientJobDetailPage = (props: any) => {
                                                 <div>
                                                     <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Kinh nghiệm</Text>
                                                     <Text strong style={{ fontSize: 16 }}>
-                                                        {jobDetail.level || 'Không yêu cầu'}
+                                                        {jobDetail.levels && jobDetail.levels.length > 0 
+                                                            ? jobDetail.levels.join(', ') 
+                                                            : (jobDetail.level || 'Không yêu cầu')}
                                                     </Text>
                                                 </div>
                                             </div>
@@ -181,22 +183,21 @@ const ClientJobDetailPage = (props: any) => {
                                     <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 32, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: 24 }}>
                                         <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 12, marginBottom: 24 }}>Yêu cầu công việc</Title>
                                         <ul style={{ lineHeight: 2, fontSize: 15, color: '#333', paddingLeft: 20 }}>
-                                            {[
-                                                "Tốt nghiệp Đại học chuyên ngành liên quan đến IT hoặc tương đương.",
-                                                "Có tối thiểu 1-2 năm kinh nghiệm làm việc thực tế với các công nghệ yêu cầu.",
-                                                "Tư duy logic tốt, có khả năng giải quyết vấn đề.",
-                                                "Có khả năng đọc hiểu tài liệu tiếng Anh chuyên ngành.",
-                                                "Chủ động trong công việc, có tinh thần trách nhiệm cao.",
-                                                "Có kinh nghiệm sử dụng GIT quản lý source code (GitLab/GitHub).",
-                                                "Hiểu biết về quy trình phát triển phần mềm Agile/Scrum.",
-                                                "Có kỹ năng làm việc nhóm tốt, hòa đồng và sẵn sàng hỗ trợ đồng nghiệp.",
-                                                "Sẵn sàng học hỏi các công nghệ mới, cập nhật xu hướng công nghệ.",
-                                                "Ưu tiên ứng viên có kiến thức về Cloud (AWS/Azure) và Containerization (Docker).",
-                                                "Có khả năng làm việc dưới áp lực cao và đảm bảo tiến độ dự án.",
-                                                `Mã tham chiếu nội bộ: ${dayjs().valueOf().toString(16).toUpperCase()}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
-                                            ].slice(0, 5).map((item, index) => (
-                                                <li key={index}>{item}</li>
-                                            ))}
+                                            {jobDetail.requirements && jobDetail.requirements.length > 0 ? (
+                                                jobDetail.requirements.map((item: any, index) => (
+                                                    <li key={index}>{item.content}</li>
+                                                ))
+                                            ) : (
+                                                [
+                                                    "Tốt nghiệp Đại học chuyên ngành liên quan đến IT hoặc tương đương.",
+                                                    "Có tối thiểu 1-2 năm kinh nghiệm làm việc thực tế với các công nghệ yêu cầu.",
+                                                    "Tư duy logic tốt, có khả năng giải quyết vấn đề.",
+                                                    "Có khả năng đọc hiểu tài liệu tiếng Anh chuyên ngành.",
+                                                    "Chủ động trong công việc, có tinh thần trách nhiệm cao."
+                                                ].map((item, index) => (
+                                                    <li key={index}>{item}</li>
+                                                ))
+                                            )}
                                         </ul>
                                     </div>
 
@@ -204,22 +205,21 @@ const ClientJobDetailPage = (props: any) => {
                                     <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 32, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: 24 }}>
                                         <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 12, marginBottom: 24 }}>Quyền lợi</Title>
                                         <ul style={{ lineHeight: 2, fontSize: 15, color: '#333', paddingLeft: 20 }}>
-                                            {[
-                                                "Mức lương cạnh tranh, review lương 2 lần/năm (tháng 6 và tháng 12).",
-                                                "Thưởng tháng 13, thưởng hiệu quả dự án, thưởng các dịp lễ tết.",
-                                                "Được đóng BHXH, BHYT, BHTN full lương theo quy định của nhà nước.",
-                                                "Gói bảo hiểm sức khỏe cao cấp (PVI/BaoViet) cho nhân viên và người thân.",
-                                                "Môi trường làm việc trẻ trung, năng động, chuyên nghiệp (Open office).",
-                                                "Tham gia các khóa đào tạo nâng cao kỹ năng chuyên môn và kỹ năng mềm.",
-                                                "Du lịch nghỉ mát hàng năm (Company Trip), Team Building hàng quý.",
-                                                "Khám sức khỏe định kỳ hàng năm tại các bệnh viện uy tín.",
-                                                "Được cung cấp đầy đủ trang thiết bị làm việc hiện đại (Macbook Pro/Dell XPS).",
-                                                "Câu lạc bộ thể thao, giải trí, Teabreak, coffee miễn phí hàng ngày.",
-                                                "Cơ hội thăng tiến rõ ràng, được Mentor hướng dẫn phát triển nghề nghiệp.",
-                                                "Thời gian làm việc linh hoạt, Hybrid working (lên văn phòng 3-4 ngày/tuần)."
-                                            ].slice(0, 5).map((item, index) => (
-                                                <li key={index}>{item}</li>
-                                            ))}
+                                            {jobDetail.benefits && jobDetail.benefits.length > 0 ? (
+                                                jobDetail.benefits.map((item: any, index) => (
+                                                    <li key={index}>{item.content}</li>
+                                                ))
+                                            ) : (
+                                                [
+                                                    "Mức lương cạnh tranh, review lương 2 lần/năm (tháng 6 và tháng 12).",
+                                                    "Thưởng tháng 13, thưởng hiệu quả dự án, thưởng các dịp lễ tết.",
+                                                    "Được đóng BHXH, BHYT, BHTN full lương theo quy định của nhà nước.",
+                                                    "Gói bảo hiểm sức khỏe cao cấp (PVI/BaoViet) cho nhân viên và người thân.",
+                                                    "Môi trường làm việc trẻ trung, năng động, chuyên nghiệp (Open office)."
+                                                ].map((item, index) => (
+                                                    <li key={index}>{item}</li>
+                                                ))
+                                            )}
                                         </ul>
                                     </div>
 
@@ -233,7 +233,9 @@ const ClientJobDetailPage = (props: any) => {
                                             </Col>
                                             <Col span={12} md={8}>
                                                 <div style={{ color: '#888', fontSize: 13, marginBottom: 6 }}>Cấp bậc</div>
-                                                <div style={{ fontWeight: 500 }}>{jobDetail.level || 'Nhân viên'}</div>
+                                                <div style={{ fontWeight: 500 }}>{jobDetail.levels && jobDetail.levels.length > 0 
+                                                     ? jobDetail.levels.join(', ') 
+                                                     : (jobDetail.level || 'Nhân viên')}</div>
                                             </Col>
                                             <Col span={12} md={8}>
                                                 <div style={{ color: '#888', fontSize: 13, marginBottom: 6 }}>Số lượng tuyển</div>

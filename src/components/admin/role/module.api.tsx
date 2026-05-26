@@ -21,10 +21,11 @@ interface IProps {
 
   singleRole: IRole | null;
   openModal: boolean;
+  isViewMode?: boolean;
 };
 
 const ModuleApi = (props: IProps) => {
-  const { form, listPermissions, singleRole, openModal } = props;
+  const { form, listPermissions, singleRole, openModal, isViewMode = false } = props;
 
   useEffect(() => {
     if (listPermissions?.length && singleRole?.id && openModal === true) {
@@ -105,6 +106,7 @@ const ModuleApi = (props: IProps) => {
           name={["permissions", item.module]}
           fieldProps={{
             defaultChecked: false,
+            disabled: isViewMode,
             onClick: (u, e) => { e.stopPropagation() },
             onChange: (value) => handleSwitchAll(value, item.module),
           }}
@@ -122,6 +124,7 @@ const ModuleApi = (props: IProps) => {
                     name={["permissions", value.id as string]}
                     fieldProps={{
                       defaultChecked: false,
+                      disabled: isViewMode,
                       onChange: (v) => handleSingleCheck(v, (value.id) as string, item.module)
                     }}
                   />

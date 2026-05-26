@@ -1,0 +1,612 @@
+.cvContainer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .headerSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+
+    h2 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+  }
+
+  .cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .cvCard {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: rgba(24, 144, 255, 0.3);
+    }
+
+    .cardHeader {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      padding: 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .cvIcon {
+        font-size: 28px;
+        color: #1890ff;
+      }
+
+      .cvTitle {
+        font-weight: 650;
+        font-size: 16px;
+        color: #262626;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .cardBody {
+      padding: 20px;
+      flex-grow: 1;
+
+      .metaText {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    .cardActions {
+      background: #fafafa;
+      padding: 12px 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+  }
+
+  .templateSection {
+    background: #fafafa;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+
+    .templateTitle {
+      font-size: 20px;
+      font-weight: 650;
+      color: #262626;
+      margin-bottom: 20px;
+    }
+
+    .templateGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .templateCard {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+
+      &:hover {
+        border-color: #1890ff;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .tplIcon {
+        font-size: 32px;
+        color: #52c41a;
+      }
+
+      span {
+        font-weight: 600;
+        color: #262626;
+      }
+    }
+  }
+}
+
+/* Upsert/Editor styles */
+.upsertContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+  background-color: #f0f2f5;
+  padding: 12px;
+
+  .editorHeader {
+    background: #ffffff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .backLink {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #8c8c8c;
+      font-size: 14px;
+      cursor: pointer;
+
+      &:hover {
+        color: #1890ff;
+      }
+    }
+
+    h3 {
+      margin: 4px 0 0 0;
+      font-weight: 700;
+      color: #262626;
+    }
+  }
+
+  .mainLayout {
+    display: flex;
+    gap: 12px;
+    flex-grow: 1;
+
+    @media (max-width: 992px) {
+      flex-direction: column;
+    }
+  }
+
+  .leftPane {
+    flex: 1;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    height: fit-content;
+  }
+
+  .rightPane {
+    width: 360px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 160px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    @media (max-width: 992px) {
+      width: 100%;
+      position: static;
+      height: auto;
+    }
+
+    .previewTitle {
+      font-weight: 700;
+      color: #595959;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+    }
+
+    .scrollContainer {
+      flex-grow: 1;
+      overflow-y: auto;
+      background: #f0f2f5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+/* Premium A4 CV Mockup Preview styling */
+.cvPaper {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background: #ffffff;
+  width: 100%;
+  min-height: 600px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #333333;
+  line-height: 1.5;
+  font-size: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  /* Top Banner style matching standard premium CVs */
+  .bannerHeader {
+    background-color: #5d4037; /* Warm deep brown primary */
+    color: #ffffff;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .nameText {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .titleText {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      opacity: 0.8;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+  }
+
+  /* Two Column Inner Layout */
+.cvPaper .bannerHeader,
+.cvPaper .rightColumn,
+.cvPaper .sectionBlock,
+.cvPaper .contactList,
+.cvPaper .skillTag,
+.cvPaper .skillRowLevel {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+  .cvContentColumns {
+    display: flex;
+    flex-grow: 1;
+    min-height: 500px;
+  }
+
+  /* Left major content pane */
+  .leftColumn {
+    flex: 3;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Right sidebar pane */
+  .rightColumn {
+    flex: 2;
+    background-color: #e0dcd5; /* Warm light gray sidebar */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Shared components */
+  .sectionBlock {
+    .sectionTitle {
+      font-size: 13px;
+      font-weight: 700;
+      color: #3e2723;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1.5px solid #a1887f;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+
+    .sectionContent {
+      font-size: 11px;
+      color: #4e342e;
+    }
+  }
+
+  /* Avatar Area */
+  .avatarWrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    .avatarCircle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: #00796b;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 700;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      border: 3px solid #ffffff;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+
+  /* Contact List Details */
+  .contactList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 10.5px;
+    color: #4e342e;
+
+    .contactItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      word-break: break-all;
+
+      .icon {
+        color: #5d4037;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  /* Section Item details */
+  .experienceItem, .educationItem, .projectItem {
+    margin-bottom: 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .itemHeader {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 650;
+      font-size: 11px;
+      color: #212121;
+    }
+
+    .itemSubheader {
+      font-style: italic;
+      font-size: 10px;
+      color: #616161;
+      margin-bottom: 3px;
+    }
+
+    .itemDetail {
+      font-size: 10.5px;
+      color: #424242;
+      white-space: pre-line;
+    }
+  }
+
+  /* Skill tag style */
+  .skillTag {
+    display: inline-block;
+    background-color: #efebe9;
+    color: #4e342e;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 550;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border: 1px solid #d7ccc8;
+  }
+
+  .skillListWithLevel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 4px;
+
+    .skillRow {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+      padding-bottom: 2px;
+    }
+  }
+
+  /* Themes */
+  &.themeBrown {
+    .bannerHeader {
+      background-color: #5d4037;
+    }
+    .rightColumn {
+      background-color: #e0dcd5;
+    }
+    .sectionBlock {
+      .sectionTitle {
+        color: #3e2723;
+        border-bottom-color: #a1887f;
+      }
+      .sectionContent {
+        color: #4e342e;
+      }
+    }
+    .contactList {
+      color: #4e342e;
+      .contactItem {
+        .icon {
+          color: #5d4037;
+        }
+      }
+    }
+    .skillTag {
+      background-color: #efebe9;
+      border-color: #d7ccc8;
+      color: #4e342e;
+    }
+    .skillRowLevel {
+      color: #5d4037;
+    }
+  }
+
+  &.themeEmerald {
+    .bannerHeader {
+      background-color: #004d40;
+    }
+    .rightColumn {
+      background-color: #e0f2f1;
+    }
+    .sectionBlock {
+      .sectionTitle {
+        color: #00332c;
+        border-bottom-color: #80cbc4;
+      }
+      .sectionContent {
+        color: #004d40;
+      }
+    }
+    .contactList {
+      color: #004d40;
+      .contactItem {
+        .icon {
+          color: #004d40;
+        }
+      }
+    }
+    .skillTag {
+      background-color: #e0f2f1;
+      border-color: #b2dfdb;
+      color: #004d40;
+    }
+    .skillRowLevel {
+      color: #004d40;
+    }
+  }
+
+  &.themeBlue {
+    .bannerHeader {
+      background-color: #0d47a1;
+    }
+    .rightColumn {
+      background-color: #e3f2fd;
+    }
+    .sectionBlock {
+      .sectionTitle {
+        color: #0d3c82;
+        border-bottom-color: #90caf9;
+      }
+      .sectionContent {
+        color: #1565c0;
+      }
+    }
+    .contactList {
+      color: #1565c0;
+      .contactItem {
+        .icon {
+          color: #1565c0;
+        }
+      }
+    }
+    .skillTag {
+      background-color: #e3f2fd;
+      border-color: #bbdefb;
+      color: #1565c0;
+    }
+    .skillRowLevel {
+      color: #1565c0;
+    }
+  }
+
+  &.themeSlate {
+    .bannerHeader {
+      background-color: #263238;
+    }
+    .rightColumn {
+      background-color: #eceff1;
+    }
+    .sectionBlock {
+      .sectionTitle {
+        color: #212121;
+        border-bottom-color: #b0bec5;
+      }
+      .sectionContent {
+        color: #37474f;
+      }
+    }
+    .contactList {
+      color: #37474f;
+      .contactItem {
+        .icon {
+          color: #37474f;
+        }
+      }
+    }
+    .skillTag {
+      background-color: #eceff1;
+      border-color: #cfd8dc;
+      color: #37474f;
+    }
+    .skillRowLevel {
+      color: #37474f;
+    }
+  }
+
+  /* Bố cục (Layouts) */
+  &.layoutRight {
+    .cvContentColumns {
+      flex-direction: row;
+    }
+  }
+
+  &.layoutLeft {
+    .cvContentColumns {
+      flex-direction: row-reverse;
+    }
+  }
+
+  &.layoutSingle {
+    .cvContentColumns {
+      flex-direction: column;
+    }
+    .leftColumn, .rightColumn {
+      flex: none;
+      width: 100%;
+    }
+    .rightColumn {
+      background-color: transparent !important;
+      border-left: none;
+      border-top: 1px dashed rgba(0, 0, 0, 0.1);
+      padding-top: 20px;
+    }
+  }
+}
+

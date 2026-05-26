@@ -3,6 +3,8 @@ import { IResume } from "@/types/backend";
 import { Badge, Button, Descriptions, Drawer, Form, Select, message, notification } from "antd";
 import dayjs from 'dayjs';
 import { useState, useEffect } from 'react';
+import { useAppSelector } from "@/redux/hooks";
+import { ALL_PERMISSIONS } from "@/config/permissions";
 const { Option } = Select;
 
 interface IProps {
@@ -16,6 +18,26 @@ const ViewDetailResume = (props: IProps) => {
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
     const { onClose, open, dataInit, setDataInit, reloadTable } = props;
     const [form] = Form.useForm();
+
+    const permissions = useAppSelector(state => state.account.user.role.permissions);
+    const [hasUpdatePermission, setHasUpdatePermission] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (permissions?.length) {
+            const check = permissions.find(item =>
+                item.apiPath === ALL_PERMISSIONS.RESUMES.UPDATE.apiPath
+                && item.method === ALL_PERMISSIONS.RESUMES.UPDATE.method
+                && item.module === ALL_PERMISSIONS.RESUMES.UPDATE.module
+            );
+            if (check || import.meta.env.VITE_ACL_ENABLE === 'false') {
+                setHasUpdatePermission(true);
+            } else {
+                setHasUpdatePermission(false);
+            }
+        } else {
+            setHasUpdatePermission(import.meta.env.VITE_ACL_ENABLE === 'false');
+        }
+    }, [permissions]);
 
     const handleChangeStatus = async () => {
         setIsSubmit(true);
@@ -55,11 +77,10 @@ const ViewDetailResume = (props: IProps) => {
                 maskClosable={false}
                 destroyOnClose
                 extra={
-
+                    hasUpdatePermission &&
                     <Button loading={isSubmit} type="primary" onClick={handleChangeStatus}>
                         Change Status
                     </Button>
-
                 }
             >
                 <Descriptions title="" bordered column={2} layout="vertical">
@@ -75,6 +96,7 @@ const ViewDetailResume = (props: IProps) => {
                                     // allowClear
                                     style={{ width: "100%" }}
                                     defaultValue={dataInit?.status}
+                                    disabled={!hasUpdatePermission}
                                 >
                                     <Option value="PENDING">PENDING</Option>
                                     <Option value="REVIEWING">REVIEWING</Option>
@@ -94,6 +116,29 @@ const ViewDetailResume = (props: IProps) => {
                     </Descriptions.Item>
                     <Descriptions.Item label="Ngày tạo">{dataInit && dataInit.createdAt ? dayjs(dataInit.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</Descriptions.Item>
                     <Descriptions.Item label="Ngày sửa">{dataInit && dataInit.updatedAt ? dayjs(dataInit.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</Descriptions.Item>
+                    <Descriptions.Item label="Chi tiết CV" span={2}>
+                        {dataInit?.formatCv ? (
+                            <a
+                                href={`/cv/view/${dataInit.formatCv.id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontWeight: "bold", color: "#1890ff" }}
+                            >
+                                Xem CV thiết kế ({dataInit.formatCv.title})
+                            </a>
+                        ) : dataInit?.url ? (
+                            <a
+                                href={`${import.meta.env.VITE_BACKEND_URL}/storage/resume/${dataInit.url}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontWeight: "bold", color: "#1890ff" }}
+                            >
+                                Tải/Xem file CV đính kèm
+                            </a>
+                        ) : (
+                            <span style={{ color: "#ff4d4f" }}>Không có thông tin CV</span>
+                        )}
+                    </Descriptions.Item>
 
                 </Descriptions>
             </Drawer>

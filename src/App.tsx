@@ -29,15 +29,18 @@ import ClientJobPage from './pages/job';
 import ClientJobDetailPage from './pages/job/detail';
 import ClientCompanyPage from './pages/company';
 import ClientCompanyDetailPage from './pages/company/detail';
-import JobTabs from './pages/admin/job/job.tabs';
 import ClientRegisterCompanyPage from './pages/register-company';
-import CompanyRegistrationList from './pages/admin/CompanyRegistrationPage';
+import JobTabs from './pages/admin/job/job.tabs';
 import ClientBlogPage from './pages/blog';
 import ClientBlogDetailPage from './pages/blog/detail';
 import ChatBot from 'components/client/chatbot/ChatBot';
 import ChatBotPage from 'pages/chatbot';
-import CVTemplatePage from 'pages/admin/cv-template';
-
+import CVTemplatePage from './pages/admin/cv-template';
+import ViewUpsertCVTemplate from './components/admin/cv-template/upsert.cv-template';
+import ClientCVPage from './pages/cv';
+import ViewUpsertCV from './pages/cv/upsert';
+import ViewCV from './pages/cv/view';
+import AdminCVPage from './pages/admin/cv';
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -114,11 +117,13 @@ export default function App() {
         { path: "job/:id", element: <ClientJobDetailPage /> },
         { path: "company", element: <ClientCompanyPage /> },
         { path: "company/:id", element: <ClientCompanyDetailPage /> },
-        { path: "company/:id", element: <ClientCompanyDetailPage /> },
-        { path: "register-company", element: <ClientRegisterCompanyPage /> },
         { path: "blog", element: <ClientBlogPage /> },
         { path: "blog/:id", element: <ClientBlogDetailPage /> },
-        { path: "chat-ai", element: <ChatBotPage /> }
+        { path: "chat-ai", element: <ChatBotPage /> },
+        { path: "cv", element: <ClientCVPage /> },
+        { path: "cv/upsert", element: <ViewUpsertCV /> },
+        { path: "cv/view/:id", element: <ViewCV /> },
+        { path: "register-company", element: <ClientRegisterCompanyPage /> }
       ],
     },
 
@@ -138,13 +143,6 @@ export default function App() {
           element:
             <ProtectedRoute>
               <CompanyPage />
-            </ProtectedRoute>
-        },
-        {
-          path: "register-company",
-          element:
-            <ProtectedRoute>
-              < CompanyRegistrationList />
             </ProtectedRoute>
         },
         {
@@ -177,6 +175,26 @@ export default function App() {
             </ProtectedRoute>
         },
         {
+          path: "cv",
+          element:
+            <ProtectedRoute>
+              <AdminCVPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "cv-template",
+          children: [
+            {
+              index: true,
+              element: <ProtectedRoute><CVTemplatePage /></ProtectedRoute>
+            },
+            {
+              path: "upsert",
+              element: <ProtectedRoute><ViewUpsertCVTemplate /></ProtectedRoute>
+            }
+          ]
+        },
+        {
           path: "permission",
           element:
             <ProtectedRoute>
@@ -188,13 +206,6 @@ export default function App() {
           element:
             <ProtectedRoute>
               <RolePage />
-            </ProtectedRoute>
-        },
-        {
-          path: "cv-templates",
-          element:
-            <ProtectedRoute>
-              <CVTemplatePage />
             </ProtectedRoute>
         }
       ],

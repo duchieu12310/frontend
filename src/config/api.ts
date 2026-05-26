@@ -11,9 +11,13 @@ import {
     IRole,
     ISkill,
     ISubscribers,
-    ICompanyRegistration,
     INotification,
-    ICVTemplate
+    ICVTemplate,
+    IFormatCV,
+    IProvince,
+    IDistrict,
+    IWard,
+    IAddress
 } from '@/types/backend';
 
 import axios from 'config/axios-customize';
@@ -21,13 +25,26 @@ import axios from 'config/axios-customize';
 /**
  * Module Auth
  */
-export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) => {
-    return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address })
+export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: IAddress, roleName?: string) => {
+    const role = roleName ? { name: roleName } : undefined;
+    return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address, role })
+}
+export const callRegisterConfirm = (userId: number, token: string) => {
+    return axios.post<IBackendRes<any>>('/api/v1/auth/register/confirm', { userId, token });
+}
+export const callRegisterResend = (userId: number) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/auth/register/resend?userId=${userId}`);
+}
+export const callRegisterChangeEmail = (userId: number, email: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/auth/register/change-email?userId=${userId}&email=${email}`);
+}
+export const callRegisterCancel = (userId: number) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/auth/register/cancel?userId=${userId}`);
 }
 export const callChangePassword = (data: { oldPassword: string; newPassword: string }) => {
     return axios.put("/api/v1/auth/change-password", data);
 };
-export const callUpdateUserInfo = (data: { name?: string; age?: number; gender?: string; address?: string }) => {
+export const callUpdateUserInfo = (data: { name?: string; age?: number; gender?: string; address?: IAddress }) => {
     return axios.put("/api/v1/users", data);
 };
 export const callLogin = (username: string, password: string) => {
@@ -67,11 +84,11 @@ export const callUploadSingleFile = (file: any, folderType: string) => {
 /**
  * Module Company
  */
-export const callCreateCompany = (name: string, address: string, description: string, logo: string) => {
-    return axios.post<IBackendRes<ICompany>>('/api/v1/companies', { name, address, description, logo })
+export const callCreateCompany = (company: ICompany) => {
+    return axios.post<IBackendRes<ICompany>>('/api/v1/companies', company)
 }
-export const callUpdateCompany = (id: string, name: string, address: string, description: string, logo: string) => {
-    return axios.put<IBackendRes<ICompany>>(`/api/v1/companies`, { id, name, address, description, logo })
+export const callUpdateCompany = (company: ICompany) => {
+    return axios.put<IBackendRes<ICompany>>(`/api/v1/companies`, company)
 }
 export const callDeleteCompany = (id: string) => {
     return axios.delete<IBackendRes<ICompany>>(`/api/v1/companies/${id}`);
@@ -149,9 +166,14 @@ export const callSearchJob = (query: string) => {
 /**
  * Module Resume
  */
-export const callCreateResume = (url: string, jobId: any, email: string, userId: string | number) => {
+export const callCreateResume = (url: string, jobId: any, email: string, userId: string | number, formatCvId?: number) => {
     return axios.post<IBackendRes<IResume>>('/api/v1/resumes', {
-        email, url, status: "PENDING", user: { id: userId }, job: { id: jobId }
+        email,
+        url: url || null,
+        status: "PENDING",
+        user: { id: userId },
+        job: { id: jobId },
+        formatCv: formatCvId ? { id: formatCvId } : null
     })
 }
 export const callUpdateResumeStatus = (id: any, status: string) => {
@@ -170,7 +192,7 @@ export const callFetchResumeByUser = () => {
     return axios.post<IBackendRes<IModelPaginate<IResume>>>(`/api/v1/resumes/by-user`);
 }
 export const callUpdateResumeById = (id: number | string, data: { status?: string; note?: string }) => {
-    return axios.put<IBackendRes<IResume>>(`/api/v1/resumes/${id}`, data);
+    return axios.put<IBackendRes<IResume>>(`/api/v1/resumes`, { id, ...data });
 }
 
 /**
@@ -233,28 +255,7 @@ export const callFetchSubscriberById = (id: string) => {
     return axios.get<IBackendRes<ISubscribers>>(`/api/v1/subscribers/${id}`);
 }
 
-/**
- * Module Company Registration
- */
-export const callCreateCompanyRegistration = (data: ICompanyRegistration) => {
-    return axios.post<IBackendRes<ICompanyRegistration>>('/api/v1/company-registrations', data);
-}
-export const callFetchCompanyRegistration = (query: string) => {
-    return axios.get<IBackendRes<IModelPaginate<ICompanyRegistration>>>(`/api/v1/company-registrations?${query}`);
-}
-export const callFetchCompanyRegistrationById = (id: string | number) => {
-    return axios.get<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);
-}
-export const callUpdateCompanyRegistrationStatus = (id: string | number, status: "APPROVED" | "REJECTED", reason?: string) => {
-    if (status === "REJECTED" && reason) {
-        return axios.put(`/api/v1/company-registrations/${id}/status?status=${status}`, reason, { headers: { "Content-Type": "text/plain" } });
-    } else {
-        return axios.put(`/api/v1/company-registrations/${id}/status?status=${status}`);
-    }
-}
-export const callDeleteCompanyRegistration = (id: string | number) => {
-    return axios.delete<IBackendRes<ICompanyRegistration>>(`/api/v1/company-registrations/${id}`);
-}
+
 
 /**
  * Module Notification (Mới thêm)
@@ -277,22 +278,59 @@ export const callChatBotSync = () => {
 /**
  * Module CV Template
  */
-export const callCreateCVTemplate = (data: ICVTemplate) => {
-    return axios.post<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', data);
-}
-
-export const callUpdateCVTemplate = (data: ICVTemplate) => {
-    return axios.put<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', data);
-}
-
-export const callDeleteCVTemplate = (id: number | string) => {
-    return axios.delete<IBackendRes<void>>(`/api/v1/cv-templates/${id}`);
-}
-
-export const callFetchCVTemplate = (query: string) => {
+export const callFetchCVTemplates = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<ICVTemplate>>>(`/api/v1/cv-templates?${query}`);
 }
 
-export const callFetchCVTemplateById = (id: number | string) => {
+export const callFetchCVTemplateById = (id: number) => {
     return axios.get<IBackendRes<ICVTemplate>>(`/api/v1/cv-templates/${id}`);
 }
+
+export const callCreateCVTemplate = (cvTemplate: ICVTemplate) => {
+    return axios.post<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', cvTemplate);
+}
+
+export const callUpdateCVTemplate = (cvTemplate: ICVTemplate) => {
+    return axios.put<IBackendRes<ICVTemplate>>('/api/v1/cv-templates', cvTemplate);
+}
+
+export const callDeleteCVTemplate = (id: number) => {
+    return axios.delete<IBackendRes<any>>(`/api/v1/cv-templates/${id}`);
+}
+
+/**
+ * Module Format CV
+ */
+export const callFetchFormatCVs = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IFormatCV>>>(`/api/v1/format-cvs?${query}`);
+}
+
+export const callFetchFormatCVById = (id: number) => {
+    return axios.get<IBackendRes<IFormatCV>>(`/api/v1/format-cvs/${id}`);
+}
+
+export const callCreateFormatCV = (formatCV: IFormatCV) => {
+    return axios.post<IBackendRes<IFormatCV>>('/api/v1/format-cvs', formatCV);
+}
+
+export const callUpdateFormatCV = (formatCV: IFormatCV) => {
+    return axios.put<IBackendRes<IFormatCV>>('/api/v1/format-cvs', formatCV);
+}
+
+export const callDeleteFormatCV = (id: number) => {
+    return axios.delete<IBackendRes<any>>(`/api/v1/format-cvs/${id}`);
+}
+
+/**
+ * Module Address / Divisions
+ */
+export const callFetchProvinces = () => {
+    return axios.get<IBackendRes<IProvince[]>>('/api/v1/provinces');
+}
+export const callFetchDistricts = (provinceId: number) => {
+    return axios.get<IBackendRes<IDistrict[]>>(`/api/v1/districts?provinceId=${provinceId}`);
+}
+export const callFetchWards = (districtId: number) => {
+    return axios.get<IBackendRes<IWard[]>>(`/api/v1/wards?districtId=${districtId}`);
+}
+

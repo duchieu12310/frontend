@@ -1,15 +1,15 @@
 import { CheckSquareOutlined, LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { FooterToolbar, ModalForm, ProCard, ProFormText, ProFormTextArea } from "@ant-design/pro-components";
-import { Col, ConfigProvider, Form, Modal, Row, Upload, message, notification } from "antd";
+import { FooterToolbar, ModalForm, ProCard, ProFormText, ProFormTextArea, ProFormList, ProForm } from "@ant-design/pro-components";
+import { Col, ConfigProvider, Form, Modal, Row, Upload, Select, message, notification } from "antd";
 import 'styles/reset.scss';
 import { isMobile } from 'react-device-detect';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { useEffect, useState } from "react";
-import { callCreateCompany, callUpdateCompany, callUploadSingleFile } from "@/config/api";
-import { ICompany } from "@/types/backend";
+import { callCreateCompany, callUpdateCompany, callUploadSingleFile, callFetchProvinces, callFetchDistricts, callFetchWards } from "@/config/api";
+import { ICompany, IProvince, IDistrict, IWard, IAddress } from "@/types/backend";
 import { v4 as uuidv4 } from 'uuid';
 import enUS from 'antd/lib/locale/en_US';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface IProps {
     openModal: boolean;
@@ -17,11 +17,6 @@ interface IProps {
     dataInit?: ICompany | null;
     setDataInit: (v: any) => void;
     reloadTable: () => void;
-}
-
-interface ICompanyForm {
-    name: string;
-    address: string;
 }
 
 interface ICompanyLogo {
@@ -38,33 +33,125 @@ const ModalCompany = (props: IProps) => {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
-    const [value, setValue] = useState<string>("");
+    const [provinces, setProvinces] = useState<IProvince[]>([]);
+    const [districts, setDistricts] = useState<IDistrict[]>([]);
+    const [wards, setWards] = useState<IWard[]>([]);
     const [form] = Form.useForm();
 
     useEffect(() => {
-        if (dataInit?.id && dataInit?.description) {
-            setValue(dataInit.description);
-            form.setFieldsValue({
-                name: dataInit.name,
-                address: dataInit.address,
-            })
-            setDataLogo([{
-                name: dataInit.logo,
-                uid: uuidv4(),
-            }])
+        const initProvinces = async () => {
+            const res = await callFetchProvinces();
+            if (res && res.data) {
+                setProvinces(res.data);
+            }
+        };
+        if (openModal) {
+            initProvinces();
         }
-    }, [dataInit])
+    }, [openModal]);
 
-    const submitCompany = async (valuesForm: ICompanyForm) => {
-        const { name, address } = valuesForm;
+    const handleProvinceChange = async (provinceId: number) => {
+        form.setFieldsValue({ districtId: undefined, wardId: undefined });
+        setDistricts([]);
+        setWards([]);
+        const res = await callFetchDistricts(provinceId);
+        if (res && res.data) {
+            setDistricts(res.data);
+        }
+    };
+
+    const handleDistrictChange = async (districtId: number) => {
+        form.setFieldsValue({ wardId: undefined });
+        setWards([]);
+        const res = await callFetchWards(districtId);
+        if (res && res.data) {
+            setWards(res.data);
+        }
+    };
+
+    useEffect(() => {
+        const loadInitialAddress = async () => {
+            if (dataInit?.id) {
+                form.setFieldsValue({
+                    name: dataInit.name,
+                    provinceId: dataInit.address?.province?.id,
+                    districtId: dataInit.address?.district?.id,
+                    wardId: dataInit.address?.ward?.id,
+                    detailAddress: dataInit.address?.line,
+                    companyDescriptions: dataInit.descriptions || []
+                });
+                setDataLogo([{
+                    name: dataInit.logo,
+                    uid: uuidv4(),
+                }]);
+
+                if (dataInit.address?.province?.id) {
+                    const distRes = await callFetchDistricts(dataInit.address.province.id);
+                    if (distRes && distRes.data) {
+                        setDistricts(distRes.data);
+                    }
+                } else {
+                    setDistricts([]);
+                }
+                if (dataInit.address?.district?.id) {
+                    const wardRes = await callFetchWards(dataInit.address.district.id);
+                    if (wardRes && wardRes.data) {
+                        setWards(wardRes.data);
+                    }
+                } else {
+                    setWards([]);
+                }
+            } else {
+                form.resetFields();
+                setDistricts([]);
+                setWards([]);
+            }
+        };
+        loadInitialAddress();
+    }, [dataInit]);
+
+    const isQuillEmpty = (content: string) => {
+        if (!content) return true;
+        const cleanContent = content.replace(/<[^>]*>/g, '').trim();
+        return cleanContent === '';
+    };
+
+    const submitCompany = async (valuesForm: any) => {
+        console.log(">>> Submitting valuesForm:", valuesForm);
+        const { name, provinceId, districtId, wardId, detailAddress, companyDescriptions } = valuesForm;
 
         if (dataLogo.length === 0) {
             message.error('Vui lòng tải lên ảnh Logo');
             return;
         }
 
+        const arrDescriptions = companyDescriptions?.filter((item: any) => item?.content && !isQuillEmpty(item.content))?.map((item: any) => ({
+            content: item.content,
+            type: item.type || "HIGHLIGHT"
+        })) || [];
+
+        const province = provinces.find(p => p.id === provinceId);
+        const district = districts.find(d => d.id === districtId);
+        const ward = wards.find(w => w.id === wardId);
+
+        const address: IAddress = {
+            id: dataInit?.address?.id,
+            line: detailAddress,
+            province: province ? { id: province.id, name: province.name, code: province.code } : undefined,
+            district: district ? { id: district.id, name: district.name, code: district.code } : undefined,
+            ward: ward ? { id: ward.id, name: ward.name, code: ward.code } : undefined
+        };
+
+        const companyPayload: ICompany = {
+            name,
+            address,
+            logo: dataLogo[0].name,
+            descriptions: arrDescriptions
+        }
+
         if (dataInit?.id) {
-            const res = await callUpdateCompany(dataInit.id, name, address, value, dataLogo[0].name);
+            companyPayload.id = dataInit.id;
+            const res = await callUpdateCompany(companyPayload);
             if (res.data) {
                 message.success("Cập nhật công ty thành công");
                 handleReset();
@@ -76,7 +163,7 @@ const ModalCompany = (props: IProps) => {
                 });
             }
         } else {
-            const res = await callCreateCompany(name, address, value, dataLogo[0].name);
+            const res = await callCreateCompany(companyPayload);
             if (res.data) {
                 message.success("Thêm mới công ty thành công");
                 handleReset();
@@ -92,9 +179,9 @@ const ModalCompany = (props: IProps) => {
 
     const handleReset = async () => {
         form.resetFields();
-        setValue("");
         setDataInit(null);
-
+        setDistricts([]);
+        setWards([]);
         setAnimation('close')
         await new Promise(r => setTimeout(r, 400))
         setOpenModal(false);
@@ -260,33 +347,103 @@ const ModalCompany = (props: IProps) => {
                             </Col>
 
                             <Col span={16}>
-                                <ProFormTextArea
-                                    label="Địa chỉ"
-                                    name="address"
-                                    rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
-                                    placeholder="Nhập địa chỉ công ty"
-                                    fieldProps={{
-                                        autoSize: { minRows: 4 }
-                                    }}
-                                />
+                                <Row gutter={16}>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Tỉnh/Thành phố"
+                                            name="provinceId"
+                                            rules={[{ required: true, message: 'Vui lòng chọn Tỉnh/Thành phố!' }]}
+                                        >
+                                            <Select
+                                                placeholder="Chọn Tỉnh/Thành phố"
+                                                onChange={handleProvinceChange}
+                                                showSearch
+                                                filterOption={(input, option) =>
+                                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={provinces.map(p => ({ label: p.name, value: p.id }))}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Quận/Huyện"
+                                            name="districtId"
+                                            rules={[{ required: true, message: 'Vui lòng chọn Quận/Huyện!' }]}
+                                        >
+                                            <Select
+                                                placeholder="Chọn Quận/Huyện"
+                                                onChange={handleDistrictChange}
+                                                showSearch
+                                                filterOption={(input, option) =>
+                                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={districts.map(d => ({ label: d.name, value: d.id }))}
+                                                disabled={!districts.length}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Form.Item
+                                            label="Phường/Xã"
+                                            name="wardId"
+                                            rules={[{ required: true, message: 'Vui lòng chọn Phường/Xã!' }]}
+                                        >
+                                            <Select
+                                                placeholder="Chọn Phường/Xã"
+                                                showSearch
+                                                filterOption={(input, option) =>
+                                                    (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase())
+                                                }
+                                                options={wards.map(w => ({ label: w.name, value: w.id }))}
+                                                disabled={!wards.length}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <ProFormText
+                                            label="Địa chỉ cụ thể"
+                                            name="detailAddress"
+                                            rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
+                                            placeholder="Nhập số nhà, tên đường..."
+                                        />
+                                    </Col>
+                                </Row>
                             </Col>
 
-                            <ProCard
-                                title="Miêu tả"
-                                headStyle={{ color: '#d81921' }}
-                                style={{ marginBottom: 20 }}
-                                headerBordered
-                                size="small"
-                                bordered
-                            >
-                                <Col span={24}>
-                                    <ReactQuill
-                                        theme="snow"
-                                        value={value}
-                                        onChange={setValue}
-                                    />
-                                </Col>
-                            </ProCard>
+                            <Col span={24}>
+                                <div className="custom-pro-form-list-wrapper" style={{ border: '1px solid #d9d9d9', borderRadius: 8, padding: 16, marginBottom: 20, background: '#fafafa' }}>
+                                    <ProFormList
+                                        name="companyDescriptions"
+                                        label="Đặc điểm nổi bật & Phúc lợi công ty"
+                                        creatorButtonProps={{
+                                            creatorButtonText: 'Thêm mô tả mới',
+                                            style: { width: '100%', marginTop: 8 }
+                                        }}
+                                        min={0}
+                                        copyIconProps={false}
+                                    >
+                                        <ProForm.Item
+                                            name="content"
+                                            rules={[{ required: true, message: 'Bắt buộc' }]}
+                                        >
+                                            <ReactQuill
+                                                theme="snow"
+                                                modules={{
+                                                    toolbar: [
+                                                        ['bold', 'italic', 'underline', 'strike'],
+                                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                        ['link', 'clean']
+                                                    ]
+                                                }}
+                                            />
+                                        </ProForm.Item>
+                                    </ProFormList>
+                                </div>
+                            </Col>
                         </Row>
                     </ModalForm>
                     <Modal

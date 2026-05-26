@@ -1,20 +1,29 @@
 @import '../../styles/variables.scss';
 
+// Local ITviec Design Tokens
+$itviec-red: #cf1c24;
+$itviec-red-hover: #b0151c;
+$itviec-bg: #161616;
+$itviec-bottom-bg: #0b0b0b;
+$itviec-text-muted: #a6a6a6;
+$itviec-border-color: #2c2c2c;
+
 .footer-container {
-    background-color: $gray-900;
-    color: $gray-400;
-    padding: $spacing-xxl 0 $spacing-lg;
+    background-color: $itviec-bg;
+    color: $itviec-text-muted;
+    padding: $spacing-xxl 0 0;
     font-family: $font-family-sans;
     margin-top: auto;
+    border-top: 3px solid $itviec-red;
 }
 
 .footer-content {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    max-width: 1280px;
-    margin: 0 auto $spacing-xl;
-    padding: 0 $spacing-md;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 $spacing-lg $spacing-xxl;
     gap: $spacing-xl;
 }
 
@@ -25,136 +34,175 @@
     h5 {
         color: $white;
         margin-bottom: $spacing-lg;
-        font-size: 1.1rem;
+        font-family: $font-family-heading;
+        font-size: 1.15rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         position: relative;
-        padding-bottom: $spacing-sm;
+        padding-bottom: $spacing-xs;
 
         &::after {
             content: '';
             position: absolute;
             left: 0;
             bottom: 0;
-            width: 40px;
+            width: 30px;
             height: 2px;
-            background-color: $primary-color;
+            background-color: $itviec-red;
         }
     }
 
     ul {
         list-style: none;
         padding: 0;
+        margin: 0;
 
         li {
             margin-bottom: $spacing-sm;
             cursor: pointer;
-            transition: color 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.2s ease-in-out;
+            color: $itviec-text-muted;
 
             &:hover {
-                color: $primary-color;
+                color: $white;
                 padding-left: $spacing-xs;
+                border-left: 2px solid $itviec-red;
+                margin-left: -$spacing-xs;
             }
+        }
+    }
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.contact-item {
+    border-left: 2px solid $itviec-border-color;
+    padding-left: $spacing-md;
+    transition: border-color 0.3s;
+
+    &:hover {
+        border-color: $itviec-red;
+    }
+
+    h6 {
+        color: $white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: $spacing-xs;
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+
+        svg {
+            color: $itviec-red;
         }
     }
 
     p {
-        margin-bottom: $spacing-md;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+        color: $itviec-text-muted;
+    }
+
+    .phone {
+        font-weight: 600;
+        color: $white;
+        margin-top: 4px;
         display: flex;
         align-items: center;
-        gap: $spacing-sm;
+        gap: $spacing-xs;
+        font-size: 0.9rem;
+
+        svg {
+            font-size: 0.85rem;
+            color: $itviec-red;
+        }
     }
-}
 
-.social-links {
-    display: flex;
-    gap: $spacing-md;
-    margin-top: $spacing-md;
-
-    svg {
-        font-size: 1.2rem;
+    .email {
+        color: $itviec-red;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: color 0.2s;
 
         &:hover {
             color: $white;
-            transform: translateY(-2px);
-        }
-    }
-}
-
-.newsletter-form {
-    display: flex;
-    margin-top: $spacing-md;
-
-    input {
-        flex: 1;
-        padding: $spacing-sm $spacing-md;
-        border: 1px solid $gray-700;
-        border-radius: $radius-md 0 0 $radius-md;
-        background-color: $gray-800;
-        color: $white;
-        outline: none;
-
-        &:focus {
-            border-color: $primary-color;
-        }
-    }
-
-    button {
-        padding: $spacing-sm $spacing-lg;
-        border: none;
-        background-color: $primary-color;
-        color: $white;
-        border-radius: 0 $radius-md $radius-md 0;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background-color 0.2s;
-
-        &:hover {
-            background-color: $primary-hover;
+            text-decoration: underline;
         }
     }
 }
 
 .footer-bottom {
-    border-top: 1px solid $gray-800;
-    padding-top: $spacing-lg;
+    background-color: $itviec-bottom-bg;
+    border-top: 1px solid $itviec-border-color;
+    padding: $spacing-lg 0;
+}
+
+.footer-bottom-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1280px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding-left: $spacing-md;
-    padding-right: $spacing-md;
-    font-size: 0.9rem;
+    padding: 0 $spacing-lg;
     flex-wrap: wrap;
     gap: $spacing-md;
+}
 
-    .links {
+.copyright {
+    font-size: 0.85rem;
+    color: $itviec-text-muted;
+}
+
+.social-links {
+    display: flex;
+    gap: $spacing-md;
+
+    a {
         display: flex;
-        gap: $spacing-lg;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #222;
+        color: $itviec-text-muted;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
 
-        span {
-            cursor: pointer;
+        svg {
+            font-size: 1.1rem;
+        }
 
-            &:hover {
-                color: $white;
-            }
+        &:hover {
+            background-color: $itviec-red;
+            color: $white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba($itviec-red, 0.3);
         }
     }
 }
 
 @media (max-width: 768px) {
     .footer-content {
-        flex-direction: column;
-        gap: $spacing-lg;
+        padding-bottom: $spacing-xl;
     }
 
-    .footer-bottom {
+    .column {
+        flex: 1 1 100%;
+    }
+
+    .footer-bottom-content {
         flex-direction: column;
         text-align: center;
-
-        .links {
-            justify-content: center;
-        }
+        gap: $spacing-md;
     }
-}
+}
