@@ -4,9 +4,10 @@ import { ICompany } from "@/types/backend";
 import { callFetchCompanyById } from "@/config/api";
 import styles from 'styles/client.module.scss';
 import parse from 'html-react-parser';
-import { Col, Divider, Row, Skeleton, Breadcrumb } from "antd";
-import { EnvironmentOutlined } from "@ant-design/icons";
+import { Col, Divider, Row, Skeleton, Breadcrumb, Button, message } from "antd";
+import { EnvironmentOutlined, MessageOutlined } from "@ant-design/icons";
 import { formatAddress } from "@/config/utils";
+import { callCreateChatRoom } from "@/config/api";
 
 
 const ClientCompanyDetailPage = (props: any) => {
@@ -14,8 +15,21 @@ const ClientCompanyDetailPage = (props: any) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     let location = useLocation();
+    let navigate = useNavigate();
     let params = new URLSearchParams(location.search);
     const id = params?.get("id"); // job id
+
+    const handleChatWithEmployer = async () => {
+        if (!companyDetail || !companyDetail.id) return;
+        try {
+            const res = await callCreateChatRoom(companyDetail.id);
+            if (res && res.data) {
+                navigate('/chat');
+            }
+        } catch (err) {
+            message.error('Vui lòng đăng nhập để gửi tin nhắn cho nhà tuyển dụng.');
+        }
+    };
 
     useEffect(() => {
         const init = async () => {
@@ -87,15 +101,25 @@ const ClientCompanyDetailPage = (props: any) => {
 
                             <Col span={24} md={8}>
                                 <div className={styles["company"]}>
-                                    <div>
+                                    <div style={{ textAlign: 'center' }}>
                                         <img
                                             width={200}
                                             alt="example"
                                             src={`${import.meta.env.VITE_BACKEND_URL}/storage/company/${companyDetail?.logo}`}
                                         />
                                     </div>
-                                    <div>
+                                    <div style={{ fontWeight: 'bold', margin: '12px 0', textAlign: 'center' }}>
                                         {companyDetail?.name}
+                                    </div>
+                                    <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                                        <Button 
+                                            type="primary"
+                                            icon={<MessageOutlined />}
+                                            style={{ backgroundColor: '#14372f', borderColor: '#14372f', borderRadius: 8, height: '40px' }}
+                                            onClick={handleChatWithEmployer}
+                                        >
+                                            Nhắn tin tuyển dụng
+                                        </Button>
                                     </div>
                                 </div>
                             </Col>

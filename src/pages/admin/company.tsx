@@ -3,20 +3,28 @@ import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchCompany } from "@/redux/slice/companySlide";
 import { ICompany } from "@/types/backend";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, CreditCardOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message, notification } from "antd";
-import { useState, useRef } from 'react';
+import { Button, Popconfirm, Space, message, notification, Modal, Table } from "antd";
+import { useState, useRef, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { callDeleteCompany } from "@/config/api";
+import { callDeleteCompany, callFetchPaidOrdersByCompany } from "@/config/api";
 import queryString from 'query-string';
 import Access from "@/components/share/access";
 import { ALL_PERMISSIONS } from "@/config/permissions";
 import { sfLike } from "spring-filter-query-builder";
+import ModalAllOrders from "@/components/admin/payment/modal.all-orders";
 
 const CompanyPage = () => {
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [dataInit, setDataInit] = useState<ICompany | null>(null);
+
+    const [openPackagesModal, setOpenPackagesModal] = useState<boolean>(false);
+    const [selectedCompanyForPackages, setSelectedCompanyForPackages] = useState<ICompany | null>(null);
+    const [companyOrders, setCompanyOrders] = useState<any[]>([]);
+    const [loadingOrders, setLoadingOrders] = useState<boolean>(false);
+
+    const [openAllOrdersModal, setOpenAllOrdersModal] = useState<boolean>(false);
 
     const tableRef = useRef<ActionType>();
 
@@ -24,6 +32,25 @@ const CompanyPage = () => {
     const meta = useAppSelector(state => state.company.meta);
     const companies = useAppSelector(state => state.company.result);
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            if (selectedCompanyForPackages?.id && openPackagesModal) {
+                setLoadingOrders(true);
+                try {
+                    const res = await callFetchPaidOrdersByCompany(selectedCompanyForPackages.id);
+                    if (res && res.data) {
+                        setCompanyOrders(res.data);
+                    }
+                } catch (error) {
+                    console.error("Error fetching company paid orders:", error);
+                } finally {
+                    setLoadingOrders(false);
+                }
+            }
+        };
+        fetchOrders();
+    }, [selectedCompanyForPackages, openPackagesModal]);
 
     const handleDeleteCompany = async (id: string | undefined) => {
         if (id) {
@@ -114,6 +141,18 @@ const CompanyPage = () => {
                             }}
                         />
                     </Access >
+                    <CreditCardOutlined
+                        style={{
+                            fontSize: 20,
+                            color: '#1677ff',
+                            cursor: 'pointer'
+                        }}
+                        title="Xem gói đã đăng ký & thanh toán"
+                        onClick={() => {
+                            setSelectedCompanyForPackages(entity);
+                            setOpenPackagesModal(true);
+                        }}
+                    />
                     <Access
                         permission={ALL_PERMISSIONS.COMPANIES.DELETE}
                         hideChildren
@@ -213,18 +252,27 @@ const CompanyPage = () => {
                     rowSelection={false}
                     toolBarRender={(_action, _rows): any => {
                         return (
-                            <Access
-                                permission={ALL_PERMISSIONS.COMPANIES.CREATE}
-                                hideChildren
-                            >
+                            <Space>
                                 <Button
-                                    icon={<PlusOutlined />}
-                                    type="primary"
-                                    onClick={() => setOpenModal(true)}
+                                    icon={<CreditCardOutlined />}
+                                    type="default"
+                                    onClick={() => setOpenAllOrdersModal(true)}
                                 >
-                                    Thêm mới
+                                    Các gói đã đăng ký
                                 </Button>
-                            </Access>
+                                <Access
+                                    permission={ALL_PERMISSIONS.COMPANIES.CREATE}
+                                    hideChildren
+                                >
+                                    <Button
+                                        icon={<PlusOutlined />}
+                                        type="primary"
+                                        onClick={() => setOpenModal(true)}
+                                    >
+                                        Thêm mới
+                                    </Button>
+                                </Access>
+                            </Space>
                         );
                     }}
                 />
@@ -235,6 +283,78 @@ const CompanyPage = () => {
                 reloadTable={reloadTable}
                 dataInit={dataInit}
                 setDataInit={setDataInit}
+            />
+            <Modal
+                title={`Lịch sử gói cước & thanh toán - ${selectedCompanyForPackages?.name}`}
+                open={openPackagesModal}
+                onCancel={() => {
+                    setOpenPackagesModal(false);
+                    setSelectedCompanyForPackages(null);
+                    setCompanyOrders([]);
+                }}
+                footer={null}
+                width={800}
+            >
+                <Table
+                    loading={loadingOrders}
+                    dataSource={companyOrders}
+                    rowKey="id"
+                    pagination={{ pageSize: 5 }}
+                    columns={[
+                        {
+                            title: 'Mã GD',
+                            dataIndex: 'paymentCode',
+                            key: 'paymentCode',
+                        },
+                        {
+                            title: 'Tên Gói / Mua lẻ',
+                            key: 'packageName',
+                            render: (_, record) => {
+                                return record.subscriptionPackage 
+                                    ? record.subscriptionPackage.name 
+                                    : "Mua lẻ giới hạn";
+                            }
+                        },
+                        {
+                            title: 'Bài đăng tuyển dụng',
+                            key: 'jobLimit',
+                            render: (_, record) => {
+                                const val = record.subscriptionPackage 
+                                    ? record.subscriptionPackage.jobLimit 
+                                    : record.jobLimit;
+                                return val > 0 ? `+${val}` : '0';
+                            }
+                        },
+                        {
+                            title: 'Hạn hiển thị (ngày)',
+                            key: 'jobDurationLimit',
+                            render: (_, record) => {
+                                const val = record.subscriptionPackage 
+                                    ? record.subscriptionPackage.jobDurationLimit 
+                                    : record.jobDurationLimit;
+                                return val > 0 ? `${val} ngày` : '0';
+                            }
+                        },
+                        {
+                            title: 'Số tiền thanh toán',
+                            dataIndex: 'amount',
+                            key: 'amount',
+                            render: (amount) => {
+                                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+                            }
+                        },
+                        {
+                            title: 'Ngày thanh toán',
+                            dataIndex: 'createdAt',
+                            key: 'createdAt',
+                            render: (date) => date ? dayjs(date).format('DD-MM-YYYY HH:mm:ss') : ''
+                        }
+                    ]}
+                />
+            </Modal>
+            <ModalAllOrders
+                open={openAllOrdersModal}
+                onClose={() => setOpenAllOrdersModal(false)}
             />
         </div >
     )

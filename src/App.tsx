@@ -18,6 +18,7 @@ import HomePage from 'pages/home';
 import styles from 'styles/app.module.scss';
 import DashboardPage from './pages/admin/dashboard';
 import CompanyPage from './pages/admin/company';
+import CompanyRegistrationPage from './pages/admin/CompanyRegistrationPage';
 import PermissionPage from './pages/admin/permission';
 import ResumePage from './pages/admin/resume';
 import RolePage from './pages/admin/role';
@@ -34,13 +35,23 @@ import JobTabs from './pages/admin/job/job.tabs';
 import ClientBlogPage from './pages/blog';
 import ClientBlogDetailPage from './pages/blog/detail';
 import ChatBot from 'components/client/chatbot/ChatBot';
+import GptChatBot from 'components/client/chatbot/GptChatBot';
 import ChatBotPage from 'pages/chatbot';
 import CVTemplatePage from './pages/admin/cv-template';
 import ViewUpsertCVTemplate from './components/admin/cv-template/upsert.cv-template';
 import ClientCVPage from './pages/cv';
 import ViewUpsertCV from './pages/cv/upsert';
 import ViewCV from './pages/cv/view';
+import ClientAppliedJobsPage from './pages/applied-jobs';
+import ClientChatPage from './pages/chat';
+import AdminChatPage from './pages/admin/chat';
 import AdminCVPage from './pages/admin/cv';
+import EditRequestPage from './pages/admin/edit-request';
+import SubscriptionPage from './pages/admin/subscription';
+import PaymentResultPage from './pages/admin/subscription/payment-result';
+import SubscriptionPackagePage from './pages/admin/subscription-package';
+import SubscriptionOrderPage from './pages/admin/subscription-order';
+
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
@@ -88,6 +99,7 @@ const LayoutClient = () => {
       {/* FOOTER */}
       <Footer />
       <ChatBot />
+      <GptChatBot />
     </div>
   );
 };
@@ -123,6 +135,22 @@ export default function App() {
         { path: "cv", element: <ClientCVPage /> },
         { path: "cv/upsert", element: <ViewUpsertCV /> },
         { path: "cv/view/:id", element: <ViewCV /> },
+        {
+          path: "applied-jobs",
+          element: (
+            <ProtectedRoute>
+              <ClientAppliedJobsPage />
+            </ProtectedRoute>
+          )
+        },
+        {
+          path: "chat",
+          element: (
+            <ProtectedRoute>
+              <ClientChatPage />
+            </ProtectedRoute>
+          )
+        },
         { path: "register-company", element: <ClientRegisterCompanyPage /> }
       ],
     },
@@ -143,6 +171,13 @@ export default function App() {
           element:
             <ProtectedRoute>
               <CompanyPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "company-registration",
+          element:
+            <ProtectedRoute>
+              <CompanyRegistrationPage />
             </ProtectedRoute>
         },
         {
@@ -207,6 +242,49 @@ export default function App() {
             <ProtectedRoute>
               <RolePage />
             </ProtectedRoute>
+        },
+        {
+          path: "edit-request",
+          element:
+            <ProtectedRoute>
+              <EditRequestPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "subscription",
+          element:
+            <ProtectedRoute>
+              <SubscriptionPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "payment-result",
+          element:
+            <ProtectedRoute>
+              <PaymentResultPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "subscription-package",
+          element:
+            <ProtectedRoute>
+              <SubscriptionPackagePage />
+            </ProtectedRoute>
+        },
+        {
+          path: "subscription-order",
+          element:
+            <ProtectedRoute>
+              <SubscriptionOrderPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "chat",
+          element: (
+            <ProtectedRoute>
+              <AdminChatPage />
+            </ProtectedRoute>
+          )
         }
       ],
     },

@@ -55,10 +55,24 @@ const ChatBot = () => {
     };
 
     useEffect(() => {
+        const handleOpenGpt = () => setIsOpen(false);
+        window.addEventListener('open-gpt-chatbot', handleOpenGpt);
+        return () => window.removeEventListener('open-gpt-chatbot', handleOpenGpt);
+    }, []);
+
+    useEffect(() => {
         if (isOpen) {
             scrollToBottom();
         }
     }, [messages, isOpen]);
+
+    const toggleOpen = () => {
+        const nextState = !isOpen;
+        setIsOpen(nextState);
+        if (nextState) {
+            window.dispatchEvent(new CustomEvent('open-qdrant-chatbot'));
+        }
+    };
 
     const handleSendMessage = async (msgText?: string) => {
         const textToSend = msgText || input.trim();
@@ -128,7 +142,7 @@ const ChatBot = () => {
                 icon={<RobotOutlined />}
                 type="primary"
                 style={{ right: 20, bottom: 20 }}
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={toggleOpen}
                 tooltip="Chat với JobHunter AI"
                 badge={{ dot: !isOpen && messages.length > 1 }}
             />

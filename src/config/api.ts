@@ -17,7 +17,10 @@ import {
     IProvince,
     IDistrict,
     IWard,
-    IAddress
+    IAddress,
+    ISubscriptionPackage,
+    ICvJobMatch,
+    IAiCheckLog
 } from '@/types/backend';
 
 import axios from 'config/axios-customize';
@@ -166,14 +169,24 @@ export const callSearchJob = (query: string) => {
 /**
  * Module Resume
  */
-export const callCreateResume = (url: string, jobId: any, email: string, userId: string | number, formatCvId?: number) => {
+export const callCreateResume = (
+    url: string, 
+    jobId: any, 
+    email: string, 
+    userId: string | number, 
+    formatCvId?: number,
+    matchScore?: number,
+    aiReport?: string
+) => {
     return axios.post<IBackendRes<IResume>>('/api/v1/resumes', {
         email,
         url: url || null,
         status: "PENDING",
         user: { id: userId },
         job: { id: jobId },
-        formatCv: formatCvId ? { id: formatCvId } : null
+        formatCv: formatCvId ? { id: formatCvId } : null,
+        matchScore: matchScore !== undefined ? matchScore : null,
+        aiReport: aiReport || null
     })
 }
 export const callUpdateResumeStatus = (id: any, status: string) => {
@@ -193,6 +206,12 @@ export const callFetchResumeByUser = () => {
 }
 export const callUpdateResumeById = (id: number | string, data: { status?: string; note?: string }) => {
     return axios.put<IBackendRes<IResume>>(`/api/v1/resumes`, { id, ...data });
+}
+export const callFetchCvJobMatches = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICvJobMatch>>>(`/api/v1/cv-job-matches?${query}`);
+}
+export const callFetchAiCheckLogs = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IAiCheckLog>>>(`/api/v1/ai-check-logs?${query}`);
 }
 
 /**
@@ -263,6 +282,21 @@ export const callFetchSubscriberById = (id: string) => {
 export const callFetchNotificationsLast24h = () => {
     return axios.get<IBackendRes<INotification[]>>('/api/notifications/last24h');
 }
+export const callMarkNotificationAsRead = (id: number) => {
+    return axios.post<IBackendRes<void>>(`/api/notifications/${id}/read`);
+}
+export const callMarkAllNotificationsAsRead = () => {
+    return axios.post<IBackendRes<void>>('/api/notifications/read-all');
+}
+export const callFetchChatRooms = () => {
+    return axios.get<IBackendRes<any[]>>('/api/v1/chat/rooms');
+}
+export const callCreateChatRoom = (companyId: number | null, candidateId?: number | null) => {
+    return axios.post<IBackendRes<any>>('/api/v1/chat/rooms', { companyId, candidateId });
+}
+export const callFetchChatMessages = (roomId: number) => {
+    return axios.get<IBackendRes<any[]>>(`/api/v1/chat/rooms/${roomId}/messages`);
+}
 
 /**
  * Module ChatBot
@@ -273,6 +307,10 @@ export const callChatBotSearch = (query: string) => {
 
 export const callChatBotSync = () => {
     return axios.post<IBackendRes<string>>('/api/v1/chatbot/sync');
+}
+
+export const callGptChat = (message: string, history: any[]) => {
+    return axios.post<IBackendRes<{ reply: string }>>('/api/v1/chatbot/gpt/chat', { message, history });
 }
 
 /**
@@ -332,5 +370,101 @@ export const callFetchDistricts = (provinceId: number) => {
 }
 export const callFetchWards = (districtId: number) => {
     return axios.get<IBackendRes<IWard[]>>(`/api/v1/wards?districtId=${districtId}`);
+}
+
+export const callGptGenerateCV = (inputText: string) => {
+    return axios.post<any>('/api/v1/chatbot/gpt/generate-cv', { inputText });
+}
+
+export const callGptEvaluateCV = (cvData: any) => {
+    return axios.post<{ evaluation: string }>('/api/v1/chatbot/gpt/evaluate-cv', cvData);
+}
+
+export const callEvaluateResume = (id: string | number) => {
+    return axios.post<IBackendRes<{ evaluation: string; matchScore?: number }>>(`/api/v1/chatbot/gpt/evaluate-resume/${id}`);
+}
+
+export const callEvaluateCompany = (id: string | number) => {
+    return axios.post<IBackendRes<{ evaluation: string }>>(`/api/v1/chatbot/gpt/evaluate-company/${id}`);
+}
+
+export const callEvaluateJob = (id: string | number) => {
+    return axios.post<IBackendRes<{ evaluation: string }>>(`/api/v1/chatbot/gpt/evaluate-job/${id}`);
+}
+
+export const callSuggestCandidates = (jobId: string | number) => {
+    return axios.post<IBackendRes<{ candidates: { cvId: number; candidateName: string; email: string; cvTitle: string; matchScore: number; matchReason: string; missingSkills: string[] }[] }>>(`/api/v1/chatbot/gpt/suggest-candidates/${jobId}`);
+}
+
+export const callSuggestJobsForCv = (cvId: string | number) => {
+    return axios.post<IBackendRes<{ jobs: { jobId: number; jobTitle: string; matchScore: number; matchReason: string; missingSkills: string[] }[] }>>(`/api/v1/chatbot/gpt/suggest-jobs-for-cv/${cvId}`);
+}
+
+/**
+ * Module Edit Request
+ */
+export const callFetchEditRequests = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<any>>>(`/api/v1/edit-requests?${query}`);
+}
+export const callApproveEditRequest = (id: number | string, notes?: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/edit-requests/${id}/approve`, { notes });
+}
+export const callRejectEditRequest = (id: number | string, notes?: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/edit-requests/${id}/reject`, { notes });
+}
+
+export const callRevisionEditRequest = (id: number | string, notes?: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/edit-requests/${id}/revision`, { notes });
+}
+
+/**
+ * Module Payment / Subscription
+ */
+export const callFetchPackages = () => {
+    return axios.get<IBackendRes<ISubscriptionPackage[]>>('/api/v1/payment/packages');
+}
+
+export const callFetchPurchasedPackages = () => {
+    return axios.get<IBackendRes<number[]>>('/api/v1/payment/packages/my-purchased');
+}
+
+export const callCreatePackage = (pkg: ISubscriptionPackage) => {
+    return axios.post<IBackendRes<ISubscriptionPackage>>('/api/v1/payment/packages', pkg);
+}
+
+export const callUpdatePackage = (pkg: ISubscriptionPackage) => {
+    return axios.put<IBackendRes<ISubscriptionPackage>>('/api/v1/payment/packages', pkg);
+}
+
+export const callDeletePackage = (id: number) => {
+    return axios.delete<IBackendRes<any>>(`/api/v1/payment/packages/${id}`);
+}
+
+export const callCreatePaymentOrder = (packageId: number) => {
+    return axios.post<string>(`/api/v1/payment/create-order?packageId=${packageId}`);
+}
+
+export const callFetchPaidOrdersByCompany = (companyId: string | number) => {
+    return axios.get<IBackendRes<any[]>>(`/api/v1/payment/orders/by-company/${companyId}`);
+}
+
+export const callUpdateCompanyJobLimit = (id: string | number, limit: number) => {
+    return axios.put<IBackendRes<any>>(`/api/v1/companies/${id}/job-limit?limit=${limit}`);
+}
+
+export const callUpdateCompanyJobDurationLimit = (id: string | number, limit: number) => {
+    return axios.put<IBackendRes<any>>(`/api/v1/companies/${id}/job-duration-limit?limit=${limit}`);
+}
+
+export const callCreateCustomPaymentOrder = (jobLimit: number, jobDurationLimit: number) => {
+    return axios.post<string>(`/api/v1/payment/create-custom-order?jobLimit=${jobLimit}&jobDurationLimit=${jobDurationLimit}`);
+}
+
+export const callCancelPackage = () => {
+    return axios.post<IBackendRes<any>>('/api/v1/payment/cancel-package');
+}
+
+export const callFetchAllPaidOrders = () => {
+    return axios.get<IBackendRes<any[]>>('/api/v1/payment/orders');
 }
 

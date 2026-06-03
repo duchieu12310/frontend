@@ -1,4 +1,4 @@
-import { Breadcrumb, Col, ConfigProvider, Divider, Form, Row, message, notification } from "antd";
+import { Breadcrumb, Col, ConfigProvider, Divider, Form, Row, message, notification, InputNumber, Button } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DebounceSelect } from "../user/debouce.select";
 import { FooterToolbar, ProForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormSwitch, ProFormText, ProFormList } from "@ant-design/pro-components";
@@ -6,13 +6,14 @@ import styles from 'styles/admin.module.scss';
 import { LOCATION_LIST, SKILLS_LIST } from "@/config/utils";
 import { ICompanySelect } from "../user/modal.user";
 import { useState, useEffect } from 'react';
-import { callCreateJob, callFetchAllSkill, callFetchCompany, callFetchJobById, callUpdateJob } from "@/config/api";
+import { callCreateJob, callFetchAllSkill, callFetchCompany, callFetchJobById, callUpdateJob, callFetchCompanyById, callFetchJob, callFetchPaidOrdersByCompany, callUpdateCompanyJobLimit, callUpdateCompanyJobDurationLimit } from "@/config/api";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { CheckSquareOutlined } from "@ant-design/icons";
 import enUS from 'antd/lib/locale/en_US';
 import dayjs from 'dayjs';
 import { IJob, ISkill } from "@/types/backend";
+import { useAppSelector } from "@/redux/hooks";
 
 interface ISkillSelect {
     label: string;
@@ -23,7 +24,18 @@ interface ISkillSelect {
 const ViewUpsertJob = (props: any) => {
     const [companies, setCompanies] = useState<ICompanySelect[]>([]);
     const [skills, setSkills] = useState<ISkillSelect[]>([]);
+    const [companyLimit, setCompanyLimit] = useState<{ 
+        jobLimit: number; 
+        jobDurationLimit: number; 
+        currentJobs: number;
+        purchasedPackages: { name: string; jobLimit: number; jobDurationLimit: number; amount: number }[]
+    } | null>(null);
 
+    const [adminJobLimit, setAdminJobLimit] = useState<number>(0);
+    const [adminJobDurationLimit, setAdminJobDurationLimit] = useState<number>(0);
+    const [updatingLimits, setUpdatingLimits] = useState<boolean>(false);
+
+    const user = useAppSelector(state => state.account.user);
     const navigate = useNavigate();
     const [value, setValue] = useState<string>("");
 
@@ -71,11 +83,140 @@ const ViewUpsertJob = (props: any) => {
                         benefits: res.data.benefits || []
                     })
                 }
+            } else if (user?.role?.name === 'EMPLOYER') {
+                const resComp = await callFetchCompany("page=1&size=1");
+                if (resComp && resComp.data && resComp.data.result.length > 0) {
+                    const comp = resComp.data.result[0];
+                    const defaultComp = {
+                        label: comp.name as string,
+                        value: `${comp.id}@#$${comp.logo}` as string,
+                        key: comp.id
+                    };
+                    setCompanies([defaultComp]);
+                    form.setFieldsValue({
+                        company: defaultComp
+                    });
+                }
             }
         }
         init();
         return () => form.resetFields()
-    }, [id])
+    }, [id, user])
+
+    useEffect(() => {
+        const fetchCompanyLimits = async () => {
+            if (companies && companies.length > 0) {
+                const cp = companies[0]?.value?.split('@#$');
+                const companyId = cp && cp.length > 0 ? cp[0] : null;
+                if (companyId) {
+                    try {
+                        const resCompany = await callFetchCompanyById(companyId);
+                        const resJobs = await callFetchJob(`page=1&size=1&filter=company.id:${companyId}`);
+                        const resOrders = await callFetchPaidOrdersByCompany(companyId);
+                        
+                        let purchasedPackagesList: any[] = [];
+                        if (resOrders && resOrders.data) {
+                            purchasedPackagesList = resOrders.data.map((order: any) => {
+                                if (order.subscriptionPackage) {
+                                    return {
+                                        name: order.subscriptionPackage.name,
+                                        jobLimit: order.subscriptionPackage.jobLimit ?? 0,
+                                        jobDurationLimit: order.subscriptionPackage.jobDurationLimit ?? 0,
+                                        amount: order.amount ?? 0
+                                    };
+                                } else {
+                                    return {
+                                        name: "Mua lẻ giới hạn",
+                                        jobLimit: order.jobLimit ?? 0,
+                                        jobDurationLimit: order.jobDurationLimit ?? 0,
+                                        amount: order.amount ?? 0
+                                    };
+                                }
+                            });
+                        }
+
+                        if (resCompany && resCompany.data) {
+                            let jobLimit = (resCompany.data as any).jobLimit ?? 15;
+                            let jobDurationLimit = (resCompany.data as any).jobDurationLimit ?? 30;
+                            const expireDate = (resCompany.data as any).packageExpireDate;
+                            
+                            if (expireDate && dayjs(expireDate).isBefore(dayjs())) {
+                                jobLimit = 0;
+                                jobDurationLimit = 0;
+                            }
+
+                            setCompanyLimit({
+                                jobLimit: jobLimit,
+                                jobDurationLimit: jobDurationLimit,
+                                currentJobs: resJobs?.data?.meta?.total ?? 0,
+                                purchasedPackages: purchasedPackagesList
+                            });
+
+                            setAdminJobLimit(jobLimit);
+                            setAdminJobDurationLimit(jobDurationLimit);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching company limits: ", error);
+                    }
+                }
+            } else {
+                setCompanyLimit(null);
+            }
+        }
+        fetchCompanyLimits();
+    }, [companies]);
+
+    const handleUpdateLimitsByAdmin = async () => {
+        if (companies && companies.length > 0) {
+            const cp = companies[0]?.value?.split('@#$');
+            const companyId = cp && cp.length > 0 ? cp[0] : null;
+            if (companyId) {
+                setUpdatingLimits(true);
+                try {
+                    await callUpdateCompanyJobLimit(companyId, adminJobLimit);
+                    await callUpdateCompanyJobDurationLimit(companyId, adminJobDurationLimit);
+                    message.success("Cập nhật giới hạn doanh nghiệp thành công!");
+                    
+                    // Refresh limits
+                    const resCompany = await callFetchCompanyById(companyId);
+                    const resJobs = await callFetchJob(`page=1&size=1&filter=company.id:${companyId}`);
+                    const resOrders = await callFetchPaidOrdersByCompany(companyId);
+                    let purchasedPackagesList: any[] = [];
+                    if (resOrders && resOrders.data) {
+                        purchasedPackagesList = resOrders.data.map((order: any) => ({
+                            name: order.subscriptionPackage?.name ?? "Gói cước",
+                            jobLimit: order.subscriptionPackage?.jobLimit ?? 0,
+                            jobDurationLimit: order.subscriptionPackage?.jobDurationLimit ?? 0
+                        }));
+                    }
+                    if (resCompany && resCompany.data) {
+                        let jobLimit = (resCompany.data as any).jobLimit ?? 15;
+                        let jobDurationLimit = (resCompany.data as any).jobDurationLimit ?? 30;
+                        const expireDate = (resCompany.data as any).packageExpireDate;
+                        if (expireDate && dayjs(expireDate).isBefore(dayjs())) {
+                            jobLimit = 0;
+                            jobDurationLimit = 0;
+                        }
+                        setCompanyLimit({
+                            jobLimit: jobLimit,
+                            jobDurationLimit: jobDurationLimit,
+                            currentJobs: resJobs?.data?.meta?.total ?? 0,
+                            purchasedPackages: purchasedPackagesList
+                        });
+                        setAdminJobLimit(jobLimit);
+                        setAdminJobDurationLimit(jobDurationLimit);
+                    }
+                } catch (error) {
+                    notification.error({
+                        message: "Lỗi cập nhật giới hạn",
+                        description: "Không thể cập nhật giới hạn của doanh nghiệp."
+                    });
+                } finally {
+                    setUpdatingLimits(false);
+                }
+            }
+        }
+    };
 
     // Usage of DebounceSelect
     async function fetchCompanyList(name: string): Promise<ICompanySelect[]> {
@@ -243,6 +384,99 @@ const ViewUpsertJob = (props: any) => {
                             }
                         }
                     >
+                        {companyLimit && (
+                            <div style={{
+                                background: '#e6f7ff',
+                                border: '1px solid #91d5ff',
+                                borderRadius: '8px',
+                                padding: '16px 20px',
+                                marginBottom: '20px',
+                                color: '#0050b3',
+                                fontSize: '14px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '12px'
+                            }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
+                                    <div>
+                                        <strong>Thông tin giới hạn tin đăng doanh nghiệp:</strong>
+                                    </div>
+                                    <div>
+                                        • Tổng số tin tuyển dụng: <strong style={{ color: '#cf1322' }}>{companyLimit.currentJobs}</strong> / <strong>{companyLimit.jobLimit}</strong> bài
+                                    </div>
+                                    <div>
+                                        • Thời hạn đăng tối đa hiện tại: <strong>{companyLimit.jobDurationLimit} ngày</strong>
+                                    </div>
+                                </div>
+                                {companyLimit.purchasedPackages && companyLimit.purchasedPackages.length > 0 && (
+                                    <>
+                                        <div style={{ borderTop: '1px dashed #91d5ff', paddingTop: '8px', marginTop: '4px' }}>
+                                            <strong>Chi tiết các gói cước đang sở hữu ({companyLimit.purchasedPackages.length}):</strong>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '12px' }}>
+                                            {companyLimit.purchasedPackages.map((pkg, idx) => (
+                                                <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                                                    <span>• Gói <strong>{pkg.name}</strong>:</span>
+                                                    {pkg.jobLimit > 0 && (
+                                                        <span>Số lượng bài đăng: <strong>+{pkg.jobLimit}</strong></span>
+                                                    )}
+                                                    {pkg.jobDurationLimit > 0 && (
+                                                        <span>Thời hạn đăng tối đa mỗi bài: <strong>{pkg.jobDurationLimit} ngày</strong></span>
+                                                    )}
+                                                    {pkg.jobLimit === 0 && pkg.jobDurationLimit === 0 && (
+                                                        <span style={{ color: '#8c8c8c' }}>Gói tính năng bổ trợ</span>
+                                                    )}
+                                                    {pkg.amount > 0 && (
+                                                        <span>Số tiền: <strong style={{ color: '#52c41a' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pkg.amount)}</strong></span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                                {user?.role?.name !== 'EMPLOYER' && (
+                                    <div style={{
+                                        borderTop: '1px dashed #91d5ff',
+                                        paddingTop: '12px',
+                                        marginTop: '4px',
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '16px',
+                                        alignItems: 'center'
+                                    }}>
+                                        <strong>Admin - Điều chỉnh giới hạn doanh nghiệp:</strong>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>Số tin tối đa:</span>
+                                            <InputNumber
+                                                size="small"
+                                                min={0}
+                                                value={adminJobLimit}
+                                                onChange={(val) => setAdminJobLimit(val ?? 0)}
+                                                style={{ width: '80px' }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>Số ngày tối đa:</span>
+                                            <InputNumber
+                                                size="small"
+                                                min={0}
+                                                value={adminJobDurationLimit}
+                                                onChange={(val) => setAdminJobDurationLimit(val ?? 0)}
+                                                style={{ width: '80px' }}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            onClick={handleUpdateLimitsByAdmin}
+                                            loading={updatingLimits}
+                                        >
+                                            Cập nhật
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <Row gutter={[20, 20]}>
                             <Col span={24} md={12}>
                                 <ProFormText

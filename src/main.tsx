@@ -13,7 +13,15 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId="296915052940-6elee6034cqlnvcr5eo1s3n5lo9v2jmu.apps.googleusercontent.com">
       <Provider store={store}>
-        <ConfigProvider locale={viVN}>
+        <ConfigProvider
+          locale={viVN}
+          theme={{
+            token: {
+              colorPrimary: '#14372f',
+              borderRadius: 8,
+            }
+          }}
+        >
           {/* @ts-ignore */}
           <ProConfigProvider intl={viVNIntl}>
             <App />

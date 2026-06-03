@@ -1,263 +1,467 @@
 @import '../styles/variables.scss';
 
-// HERO SECTION
-.hero-section {
-    position: relative;
-    height: 85vh;
-    width: 100%;
-    overflow: hidden;
-    background-color: $black;
-
-    .hero-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-        z-index: 1;
-
-        &.active {
-            opacity: 1;
-            z-index: 2;
-        }
-
-        .hero-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    }
-
-
+// TopCV inspired Employer Portal Landing Page Styles
+.topcv-landing {
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+.topcv-hero {
+    background: linear-gradient(135deg, #e8f2ee 0%, #ffffff 50%, #fcf7f0 100%);
+    padding: 80px 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-// SECTIONS GENERAL (Shared styles)
-.section-container {
-    padding: $spacing-xxl 0;
-    position: relative;
-}
-
-// INTRO SECTION
-.intro-section {
-    background-color: $white;
-
-    .intro-grid {
+    .hero-container {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: $spacing-xxl;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 48px;
         align-items: center;
-        max-width: 1200px;
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 0 $spacing-lg;
+        padding: 0 24px;
 
         @media (max-width: 992px) {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding: 0 20px;
+            gap: 40px;
+        }
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: rgba($primary-color, 0.08);
+        color: $primary-color;
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.5rem;
+    }
+
+    h1 {
+        font-size: 3.2rem;
+        line-height: 1.15;
+        font-weight: 800;
+        color: #0c241f;
+        margin-bottom: 1.5rem;
+        letter-spacing: -1px;
+
+        span {
+            color: $primary-color;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 2.25rem;
+        }
+    }
+
+    .hero-sub {
+        font-size: 1.125rem;
+        line-height: 1.7;
+        color: $gray-600;
+        margin-bottom: 2.5rem;
+        max-width: 580px;
+
+        @media (max-width: 992px) {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    .hero-ctas {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        @media (max-width: 992px) {
+            justify-content: center;
+        }
+
+        @media (max-width: 480px) {
+            flex-direction: column;
+            width: 100%;
+            
+            a {
+                width: 100%;
+            }
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: $primary-color;
+            border: 1px solid $primary-color;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 14px rgba(20, 55, 47, 0.2);
+            text-decoration: none;
+
+            &:hover {
+                background-color: $primary-hover;
+                border-color: $primary-hover;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(20, 55, 47, 0.25);
+            }
+            
+            &:active {
+                transform: translateY(0);
+            }
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: transparent;
+            border: 2px solid $primary-color;
+            color: $primary-color;
+            font-weight: 700;
+            padding: 12px 26px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+
+            &:hover {
+                background-color: rgba($primary-color, 0.05);
+                transform: translateY(-2px);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
+    }
+}
+
+// Decorative Mockup Dashboard for Hero Right Side
+.hero-mockup {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+
+    .mockup-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .mockup-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid rgba(226, 232, 240, 0.4);
+        margin-bottom: 12px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e6f0ec;
+            color: $primary-color;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .info {
+            flex: 1;
+            
+            h5 {
+                margin: 0 0 4px 0;
+                font-size: 14px;
+                font-weight: 700;
+                color: $gray-900;
+            }
+
+            p {
+                margin: 0;
+                font-size: 12px;
+                color: $gray-500;
+            }
+        }
+
+        .match-badge {
+            background: rgba($primary-color, 0.1);
+            color: $primary-color;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    }
+
+    // Floating badges for depth
+    .floating-badge-1 {
+        position: absolute;
+        top: -20px;
+        left: -30px;
+        background: #14372f;
+        color: #ffffff;
+        padding: 12px 18px;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(20, 55, 47, 0.2);
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 14px;
+
+        svg {
+            color: #fca311;
+        }
+
+        @media (max-width: 480px) {
+            left: 0;
+        }
+    }
+
+    .floating-badge-2 {
+        position: absolute;
+        bottom: -20px;
+        right: -20px;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 12px 18px;
+        border-radius: 12px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        span:first-child {
+            font-size: 20px;
+            font-weight: 800;
+            color: $primary-color;
+        }
+
+        span:last-child {
+            font-size: 11px;
+            font-weight: 600;
+            color: $gray-500;
+        }
+
+        @media (max-width: 480px) {
+            right: 0;
+        }
+    }
+}
+
+// Stats horizontal bar section
+.topcv-stats {
+    background-color: #14372f;
+    color: #ffffff;
+    padding: 40px 0;
+
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 24px;
+        gap: 24px;
+        text-align: center;
+
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        @media (max-width: 480px) {
             grid-template-columns: 1fr;
         }
     }
 
-    .intro-images {
-        position: relative;
-        height: 600px; // Adjust based on image layout
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
 
-        @media (max-width: 992px) {
-            height: 400px;
-        }
-
-        img {
-            position: absolute;
-            border-radius: $radius-lg;
-            box-shadow: $shadow-xl;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-
-            &:nth-child(1) {
-                width: 60%;
-                top: 0;
-                left: 0;
-                z-index: 1;
-            }
-
-            &:nth-child(2) {
-                width: 50%;
-                bottom: 20px;
-                right: 0;
-                z-index: 2;
-                border: 8px solid $white;
-            }
-
-            &:nth-child(3) {
-                width: 25%;
-                bottom: 15%;
-                left: 35%;
-                z-index: 3;
-                border: 8px solid $white;
-            }
-
-            &:nth-child(4) {
-                width: 40%;
-                top: 10%;
-                right: 15%;
-                z-index: 0;
-                filter: blur(2px);
-                opacity: 0.6;
-            }
-
-            &:hover {
-                transform: scale(1.02);
-                z-index: 10;
-            }
-        }
-    }
-
-    .intro-content {
-        h2 {
-            font-family: $font-family-heading;
-            font-size: 2.5rem;
-            color: $gray-900;
-            margin-bottom: $spacing-md;
-
-            span {
-                color: $primary-color;
-            }
+        h4 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
 
         p {
-            color: $gray-500;
-            line-height: 1.8;
-            margin-bottom: $spacing-lg;
-            font-size: 1.05rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            margin: 0;
+            max-width: 200px;
+        }
+    }
+}
+
+// Core Solutions/Features Section
+.topcv-features {
+    padding: 90px 0;
+    background-color: #f8fafc;
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+        padding: 0 20px;
+
+        h2 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #0c241f;
+            margin-bottom: 12px;
         }
 
-        .features-list {
-            margin-bottom: $spacing-lg;
+        p {
+            font-size: 1.05rem;
+            color: $gray-500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    }
 
-            .feature-item {
-                display: flex;
-                align-items: center;
-                margin-bottom: $spacing-md;
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 24px;
 
-                svg {
-                    color: $primary-color;
-                    margin-right: $spacing-md;
-                    font-size: 1.2rem;
-                }
+        @media (max-width: 1024px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
 
-                span {
-                    color: $gray-700;
-                    font-weight: 500;
-                }
+        @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .feature-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 32px 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background-color: rgba($primary-color, 0.08);
+            color: $primary-color;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0c241f;
+            margin: 0;
+        }
+
+        p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: $gray-500;
+            margin: 0;
+        }
+
+        &:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: rgba($primary-color, 0.2);
+
+            .icon-wrapper {
+                background-color: $primary-color;
+                color: #ffffff;
+                transform: scale(1.05) rotate(5deg);
             }
         }
     }
 }
 
-// TESTIMONIALS SECTION
-.testimonials-section {
-    background-color: $gray-50;
+// Trusted brand partners section
+.topcv-partners {
+    padding: 60px 0;
+    background-color: #ffffff;
+    border-top: 1px solid rgba(226, 232, 240, 0.5);
 
-    h2 {
-        text-align: center;
-        font-family: $font-family-heading;
-        font-size: 2.5rem;
-        margin-bottom: $spacing-xxl;
-
-        span {
-            position: relative;
-            z-index: 1;
-
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: -5px;
-                left: 0;
-                width: 100%;
-                height: 10px;
-                background-color: rgba($accent-color, 0.2);
-                z-index: -1;
-                border-radius: $radius-sm;
-            }
-        }
-    }
-
-    .testimonial-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: $spacing-lg;
-        max-width: 1200px;
+    .partners-container {
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 0 $spacing-lg;
-    }
+        padding: 0 24px;
+        text-align: center;
 
-    .testimonial-card {
-        background: $white;
-        border-radius: $radius-lg;
-        padding: $spacing-xl;
-        box-shadow: $shadow-md;
-        transition: $transition-base;
-        border: 1px solid transparent;
-        position: relative;
-        overflow: hidden;
-
-        &:hover {
-            transform: translateY(-8px);
-            box-shadow: $shadow-xl;
-            border-color: rgba($primary-color, 0.2);
+        p {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: $gray-400;
+            margin-bottom: 32px;
         }
 
-        .quote-icon {
-            font-size: 3rem;
-            color: rgba($primary-color, 0.1);
-            position: absolute;
-            top: $spacing-md;
-            right: $spacing-md;
-        }
-
-        .text {
-            color: $gray-600;
-            font-style: italic;
-            margin-bottom: $spacing-lg;
-            line-height: 1.6;
-            min-height: 80px;
-        }
-
-        .author {
+        .logos-grid {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: $spacing-md;
+            flex-wrap: wrap;
+            gap: 40px;
 
-            img {
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                object-fit: cover;
-                border: 3px solid $primary-light;
+            @media (max-width: 768px) {
+                justify-content: center;
             }
 
-            .info {
-                h5 {
-                    margin: 0;
-                    font-size: 1rem;
-                    font-weight: 700;
-                    color: $gray-900;
-                }
+            .logo-item {
+                font-size: 1.5rem;
+                font-weight: 800;
+                color: #cbd5e1;
+                user-select: none;
+                transition: color 0.2s;
 
-                small {
-                    color: $primary-color;
-                    font-weight: 500;
+                &:hover {
+                    color: $gray-500;
                 }
             }
         }

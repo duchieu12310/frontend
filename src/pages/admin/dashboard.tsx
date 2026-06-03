@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Card, Statistic, DatePicker, Row, Col, Spin } from "antd";
+import { Layout, Card, Statistic, DatePicker, Row, Col, Spin, Button } from "antd";
 import {
     UserOutlined,
     BankOutlined,
@@ -7,7 +7,9 @@ import {
     FileSearchOutlined,
     StarOutlined,
     TeamOutlined,
+    CreditCardOutlined,
 } from "@ant-design/icons";
+import ModalAllOrders from "@/components/admin/payment/modal.all-orders";
 import {
     LineChart,
     Line,
@@ -35,6 +37,7 @@ const { RangePicker } = DatePicker;
 export default function Dashboard() {
     const [filterType, setFilterType] = useState("month");
     const [loading, setLoading] = useState(false);
+    const [openOrdersModal, setOpenOrdersModal] = useState<boolean>(false);
 
     const [counts, setCounts] = useState({
         users: 0,
@@ -109,8 +112,15 @@ export default function Dashboard() {
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <Layout>
-                <Header style={{ background: "#fff", padding: "0 20px" }}>
-                    <h2>Hệ thống quản trị</h2>
+                <Header style={{ background: "#fff", padding: "0 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h2 style={{ margin: 0 }}>Hệ thống quản trị</h2>
+                    <Button 
+                        type="primary" 
+                        icon={<CreditCardOutlined />} 
+                        onClick={() => setOpenOrdersModal(true)}
+                    >
+                        Các gói đã đăng ký
+                    </Button>
                 </Header>
                 <Content style={{ margin: "20px" }}>
                     <Spin spinning={loading}>
@@ -268,6 +278,7 @@ export default function Dashboard() {
                     </Spin>
                 </Content>
             </Layout>
+            <ModalAllOrders open={openOrdersModal} onClose={() => setOpenOrdersModal(false)} />
         </Layout>
     );
 }

@@ -85,6 +85,13 @@ export interface ICompany {
     deletedAt?: boolean | null;
     createdAt?: string;
     updatedAt?: string;
+    packageExpireDate?: string;
+    jobLimit?: number;
+    jobDurationLimit?: number;
+    hasAiSuggestCandidates?: boolean;
+    hasAiEvaluateResume?: boolean;
+    hasAiEvaluateCv?: boolean;
+    hasAiFeatures?: boolean;
 }
 
 export interface ISkill {
@@ -138,6 +145,7 @@ export interface IJob {
     startDate: Date;
     endDate: Date;
     active: boolean;
+    status?: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED" | "REVISION_REQUIRED";
     requirements?: { id?: number; content: string }[];
     benefits?: { id?: number; content: string }[];
 
@@ -152,12 +160,14 @@ export interface IResume {
     id?: string;
     email: string;
     url?: string;
-    status: string; // Enum: PENDING, APPROVED, REJECTED
+    status: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED" | "REVISION_REQUIRED";
     note?: string;  // Ghi chú (ví dụ: lý do từ chối hoặc hướng dẫn liên hệ)
     formatCv?: {
         id: number;
         title: string;
     };
+    matchScore?: number;
+    aiReport?: string;
 
     createdBy?: string;
     updatedBy?: string;
@@ -367,6 +377,7 @@ export interface IFormatCV {
     id?: number;
     title: string;
     theme?: string;
+    status?: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED" | "REVISION_REQUIRED";
     layoutKey?: string;
     selectedTemplateIds?: number[];
     sectionLayouts?: ICVSectionLayout[];
@@ -395,4 +406,62 @@ export interface IFormatCV {
     activities?: IActivity[];
     languages?: ILanguage[];
     hobbies?: IHobby[];
+}
+
+export interface IEditRequest {
+    id?: number;
+    user?: IUser;
+    targetType: "COMPANY" | "CV" | "JOB" | "USER";
+    targetId: number;
+    data: string; // JSON string
+    status?: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED" | "REVISION_REQUIRED";
+    notes?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    updatedBy?: string;
+}
+
+export interface ISubscriptionPackage {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    durationDays: number;
+    jobLimit: number;
+    jobDurationLimit: number;
+    hasAiSuggestCandidates: boolean;
+    hasAiEvaluateResume: boolean;
+    hasAiEvaluateCv: boolean;
+}
+
+export interface ICvJobMatch {
+    id?: number;
+    matchScore?: number;
+    matchReason?: string;
+    missingSkills?: string;
+    createdAt?: string;
+    updatedAt?: string;
+
+    // Cv Info
+    cvId?: number;
+    cvTitle?: string;
+    candidateName?: string;
+
+    // Job Info
+    jobId?: number;
+    jobTitle?: string;
+    companyName?: string;
+}
+
+export interface IAiCheckLog {
+    id?: number;
+    cvId?: number;
+    cvTitle?: string;
+    candidateName?: string;
+    evaluationReport?: string;
+    isInvalid?: boolean;
+    createdBy?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }

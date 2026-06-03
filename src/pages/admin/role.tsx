@@ -23,7 +23,7 @@ const RolePage = () => {
     const roles = useAppSelector(state => state.role.result);
     const dispatch = useAppDispatch();
     const [isViewMode, setIsViewMode] = useState<boolean>(false);
-    const currentUserPermissions = useAppSelector(state => state.account.user.role.permissions) ?? [];
+    const currentUserPermissions = useAppSelector(state => state.account.user.role?.permissions) ?? [];
 
     // tất cả quyền từ backend (chỉ dùng để hiển thị trong ModalRole)
     const [listPermissions, setListPermissions] = useState<{

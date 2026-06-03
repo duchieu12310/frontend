@@ -1,42 +1,44 @@
-// src/components/admin/company-registration/CompanyRegistrationPage.tsx
 import { useRef, useState } from "react";
 import { ActionType, ProColumns } from "@ant-design/pro-components";
-import { Button, Popconfirm, Space, Tag, message, notification } from "antd";
+import { Button, Popconfirm, Space, Tag, message, notification, Modal, Progress, List, Collapse, Alert } from "antd";
 import {
     EyeOutlined,
     CheckOutlined,
     CloseOutlined,
     ReloadOutlined,
-    DeleteOutlined,
+    DeleteOutlined
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import queryString from "query-string";
 import DataTable from "@/components/client/data-table";
 import {
-    callFetchCompanyRegistration,
-    callUpdateCompanyRegistrationStatus,
-    callDeleteCompanyRegistration,
+    callFetchCompany,
+    callUpdateCompany,
+    callDeleteCompany,
 } from "@/config/api";
-import { ICompanyRegistration } from "@/types/backend";
+import { ICompany, IAddress } from "@/types/backend";
 import { sfLike } from "spring-filter-query-builder";
 import CompanyRegistrationDrawer from "@/components/admin/company/modal.company-registration";
 import Access from "@/components/share/access";
 import { ALL_PERMISSIONS } from "@/config/permissions";
+import MarkdownRenderer from "@/components/share/markdown-renderer";
+
+const { Panel } = Collapse;
 
 const CompanyRegistrationPage = () => {
-    const [data, setData] = useState<ICompanyRegistration[]>([]);
+    const [data, setData] = useState<ICompany[]>([]);
     const [meta, setMeta] = useState({ page: 1, pageSize: 10, total: 0 });
     const [loading, setLoading] = useState(false);
     const [openDrawer, setOpenDrawer] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState<ICompanyRegistration | null>(null);
+    const [selectedRecord, setSelectedRecord] = useState<ICompany | null>(null);
     const [buttonState, setButtonState] = useState<{ [key: string]: "APPROVED" | "REJECTED" | null }>({});
     const tableRef = useRef<ActionType>();
 
-    // 🔹 Lấy danh sách đăng ký công ty
+    // Lấy danh sách đăng ký công ty (các công ty có status = PENDING)
     const fetchData = async (query: string) => {
         setLoading(true);
         try {
-            const res = await callFetchCompanyRegistration(query);
+            const res = await callFetchCompany(query);
             if (res && res.data) {
                 setData(res.data.result);
                 setMeta(res.data.meta || { page: 1, pageSize: 10, total: 0 });
@@ -52,13 +54,19 @@ const CompanyRegistrationPage = () => {
         tableRef?.current?.reload();
     };
 
-    // ⚙️ Cập nhật trạng thái
-    const handleUpdateStatus = async (id: string | number, status: "APPROVED" | "REJECTED", reason?: string) => {
+    const handleUpdateStatus = async (company: ICompany, status: "APPROVED" | "REJECTED", reason?: string) => {
         try {
-            const res = await callUpdateCompanyRegistrationStatus(id, status, status === "REJECTED" ? reason : undefined);
+            const updatedCompany: ICompany = {
+                ...company,
+                status,
+                rejectReason: status === "REJECTED" ? reason : undefined,
+            };
+            const res = await callUpdateCompany(updatedCompany);
             if (res && res.data) {
                 message.success(status === "APPROVED" ? "✅ Duyệt công ty thành công!" : "❌ Từ chối công ty thành công!");
-                setButtonState((prev) => ({ ...prev, [id]: status }));
+                if (company.id) {
+                    setButtonState((prev) => ({ ...prev, [company.id!]: status }));
+                }
                 reloadTable();
             } else {
                 notification.error({
@@ -71,18 +79,18 @@ const CompanyRegistrationPage = () => {
         }
     };
 
-    const handleApprove = (id: string | number) => handleUpdateStatus(id, "APPROVED");
+    const handleApprove = (record: ICompany) => handleUpdateStatus(record, "APPROVED");
 
-    const handleReject = (id: string | number) => {
+    const handleReject = (record: ICompany) => {
         const reason = prompt("Nhập lý do từ chối:");
         if (!reason?.trim()) return message.warning("Vui lòng nhập lý do từ chối!");
-        handleUpdateStatus(id, "REJECTED", reason.trim());
+        handleUpdateStatus(record, "REJECTED", reason.trim());
     };
 
-    const handleDelete = async (id: string | number) => {
+    const handleDelete = async (id: string) => {
         try {
-            const res = await callDeleteCompanyRegistration(id);
-            if (res && res.data) {
+            const res = await callDeleteCompany(id);
+            if (res && +res.statusCode === 200) {
                 message.success("🗑️ Xóa đăng ký công ty thành công!");
                 reloadTable();
             } else {
@@ -96,49 +104,60 @@ const CompanyRegistrationPage = () => {
         }
     };
 
-    const handleViewDetail = (record: ICompanyRegistration) => {
+    const handleViewDetail = (record: ICompany) => {
         setSelectedRecord(record);
         setOpenDrawer(true);
     };
 
     const buildQuery = (params: any, sort: any, filter: any) => {
-        const q: any = { page: params.current, size: params.pageSize, filter: "" };
-        if (params.companyName) q.filter = `${sfLike("companyName", params.companyName)}`;
-        if (params.email)
-            q.filter = q.filter
-                ? `${q.filter} and ${sfLike("email", params.email)}`
-                : `${sfLike("email", params.email)}`;
-        if (!q.filter) delete q.filter;
+        const q: any = { page: params.current, size: params.pageSize, filter: "status = 'PENDING'" };
+        if (params.name) q.filter += ` and ${sfLike("name", params.name)}`;
         let temp = queryString.stringify(q);
         temp += "&sort=createdAt,desc";
         return temp;
     };
 
-    const columns: ProColumns<ICompanyRegistration>[] = [
+    const getFullAddress = (addr?: IAddress) => {
+        if (!addr) return "—";
+        return [
+            addr.line,
+            addr.ward?.name,
+            addr.district?.name,
+            addr.province?.name
+        ].filter(Boolean).join(", ");
+    };
+
+    const columns: ProColumns<ICompany>[] = [
         {
             title: "STT",
             key: "index",
             width: 60,
             align: "center",
-            render: (_, __, index) => <>{index + 1 + (meta.page - 1) * meta.pageSize}</>,
+            render: (dom, entity, index) => <>{index + 1 + (meta.page - 1) * meta.pageSize}</>,
             hideInSearch: true,
         },
         {
             title: "Tên công ty",
-            dataIndex: "companyName",
+            dataIndex: "name",
             sorter: true,
+        },
+        {
+            title: "Mã số thuế",
+            dataIndex: "taxCode",
+            hideInSearch: true,
         },
         {
             title: "Địa chỉ",
             dataIndex: "address",
             hideInSearch: true,
+            render: (dom, entity) => getFullAddress(entity.address),
         },
         {
             title: "Trạng thái",
             dataIndex: "status",
             hideInSearch: true,
-            render: (_, record) => {
-                const status = record.status;
+            render: (dom, entity) => {
+                const status = entity.status;
                 const color = status === "APPROVED" ? "green" : status === "REJECTED" ? "red" : "blue";
                 return <Tag color={color}>{status || "PENDING"}</Tag>;
             },
@@ -147,45 +166,41 @@ const CompanyRegistrationPage = () => {
             title: "Ngày đăng ký",
             dataIndex: "createdAt",
             hideInSearch: true,
-            render: (text: any) => (text ? dayjs(text).format("DD-MM-YYYY HH:mm") : ""),
+            render: (dom, entity) => (entity.createdAt ? dayjs(entity.createdAt).format("DD-MM-YYYY HH:mm") : ""),
         },
         {
             title: "Thao tác",
             hideInSearch: true,
             width: 300,
             align: "center",
-            render: (_, record) => {
-                const currentStatus = record.id ? (buttonState[record.id] || record.status) : record.status;
-                if (!record.id) return null;
+            render: (dom, entity) => {
+                const currentStatus = entity.id ? (buttonState[entity.id] || entity.status) : entity.status;
+                if (!entity.id) return null;
 
                 return (
                     <Space>
-                        {/* 👁️ Xem chi tiết */}
-                        <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.GET_BY_ID} hideChildren>
-                            <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(record)} />
+                        <Access permission={ALL_PERMISSIONS.COMPANIES.GET_PAGINATE} hideChildren>
+                            <Button icon={<EyeOutlined />} onClick={() => handleViewDetail(entity)} />
                         </Access>
 
-                        {/* ✅ Duyệt công ty */}
-                        <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.UPDATE_STATUS} hideChildren>
+                        <Access permission={ALL_PERMISSIONS.COMPANIES.UPDATE} hideChildren>
                             {(currentStatus === "PENDING" || currentStatus === "REJECTED") && (
-                                <Popconfirm title="Duyệt công ty này?" onConfirm={() => handleApprove(record.id!)}>
+                                <Popconfirm title="Duyệt công ty này?" onConfirm={() => handleApprove(entity)}>
                                     <Button icon={<CheckOutlined />} type="primary" />
                                 </Popconfirm>
                             )}
                         </Access>
 
-                        {/* ❌ Từ chối công ty */}
-                        <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.REJECT} hideChildren>
+                        <Access permission={ALL_PERMISSIONS.COMPANIES.UPDATE} hideChildren>
                             {(currentStatus === "PENDING" || currentStatus === "APPROVED") && (
-                                <Popconfirm title="Từ chối công ty này?" onConfirm={() => handleReject(record.id!)}>
+                                <Popconfirm title="Từ chối công ty này?" onConfirm={() => handleReject(entity)}>
                                     <Button icon={<CloseOutlined />} danger />
                                 </Popconfirm>
                             )}
                         </Access>
 
-                        {/* 🗑️ Xóa đăng ký */}
-                        <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.DELETE} hideChildren>
-                            <Popconfirm title="Xóa đăng ký này?" onConfirm={() => handleDelete(record.id!)}>
+                        <Access permission={ALL_PERMISSIONS.COMPANIES.DELETE} hideChildren>
+                            <Popconfirm title="Xóa đăng ký này?" onConfirm={() => handleDelete(entity.id!)}>
                                 <Button icon={<DeleteOutlined />} danger type="primary" />
                             </Popconfirm>
                         </Access>
@@ -197,8 +212,8 @@ const CompanyRegistrationPage = () => {
 
     return (
         <>
-            <Access permission={ALL_PERMISSIONS.COMPANY_REGISTRATIONS.GET_PAGINATE}>
-                <DataTable<ICompanyRegistration>
+            <Access permission={ALL_PERMISSIONS.COMPANIES.GET_PAGINATE}>
+                <DataTable<ICompany>
                     actionRef={tableRef}
                     headerTitle="Danh sách đăng ký công ty"
                     rowKey="id"

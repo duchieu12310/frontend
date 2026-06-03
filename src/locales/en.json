@@ -8,7 +8,8 @@
         "dashboard": "Dashboard",
         "logout": "Logout",
         "welcome": "Welcome",
-        "admin": "Admin Page"
+        "admin": "Admin Page",
+        "history": "Applied History"
     },
     "home": {
         "categories": {

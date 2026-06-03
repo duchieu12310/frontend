@@ -241,3 +241,131 @@ $shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0,
         }
     }
 }
+
+// New split screen auth layout (inspired by bookstore theme)
+.auth-card {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-width: 950px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    min-height: 550px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+
+    &.register-card {
+        max-width: 1100px;
+        min-height: 700px;
+    }
+}
+
+.auth-form-side {
+    flex: 1.1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .heading {
+        margin-bottom: 2rem;
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #14372f;
+            margin: 0;
+        }
+    }
+}
+
+.auth-decor-side {
+    flex: 0.9;
+    background: linear-gradient(135deg, #14372f 0%, #0c241f 100%);
+    color: #ffffff;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    .decor-bg {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 50%;
+        top: -50px;
+        right: -50px;
+    }
+
+    .decor-bg-2 {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 50%;
+        bottom: -50px;
+        left: -50px;
+    }
+
+    .decor-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+
+        .decor-icon {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h3 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 320px;
+            margin: 0;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        flex-direction: column;
+        
+        &.register-card {
+            min-height: auto;
+        }
+    }
+    
+    .auth-decor-side {
+        display: none;
+    }
+    
+    .auth-form-side {
+        padding: 30px 20px;
+    }
+}

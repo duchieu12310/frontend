@@ -236,14 +236,14 @@
                 &:hover {
                     border-color: $brand-purple;
                     color: $brand-purple;
-                    background-color: #f9f0ff;
+                    background-color: rgba($primary-color, 0.08);
                 }
 
                 &.active {
                     background: $brand-purple;
                     color: #fff;
                     border-color: $brand-purple;
-                    box-shadow: 0 4px 6px -1px rgba(105, 56, 198, 0.3); // Approximate purple shadow
+                    box-shadow: 0 4px 12px rgba(20, 55, 47, 0.25);
                 }
             }
         }
@@ -406,7 +406,7 @@
         }
 
         .view-all {
-            color: #4a1d96;
+            color: $primary-color;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
@@ -417,7 +417,7 @@
             transition: color 0.2s;
 
             &:hover {
-                color: #6938c6;
+                color: $primary-hover;
             }
         }
     }
@@ -663,8 +663,8 @@
         text-align: center;
 
         .btn-guide {
-            background-color: #f3f0ff;
-            color: #5b2ebd;
+            background-color: rgba($primary-color, 0.06);
+            color: $primary-color;
             border: none;
             height: 44px;
             padding: 0 30px;
@@ -673,8 +673,8 @@
             border-radius: 6px;
 
             &:hover {
-                background-color: #eaddff;
-                color: #4a1d96;
+                background-color: rgba($primary-color, 0.12);
+                color: $primary-hover;
             }
         }
     }

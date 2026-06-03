@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Form, message, notification, Spin, Tabs, ConfigProvider, Button, Tooltip, Avatar, Row, Col, Table, Checkbox, Select, InputNumber } from "antd";
+import { Form, message, notification, Spin, Tabs, ConfigProvider, Button, Tooltip, Avatar, Row, Col, Table, Checkbox, Select, InputNumber, Modal, Input } from "antd";
 import type { TabsProps } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LeftOutlined, SaveOutlined, PhoneOutlined, MailOutlined, HomeOutlined, GithubOutlined, LinkedinOutlined, CalendarOutlined, EyeOutlined } from "@ant-design/icons";
+import { LeftOutlined, SaveOutlined, PhoneOutlined, MailOutlined, HomeOutlined, GithubOutlined, LinkedinOutlined, CalendarOutlined, EyeOutlined, ThunderboltOutlined, RobotOutlined, AuditOutlined } from "@ant-design/icons";
 import { FooterToolbar, ProForm, ProFormSelect, ProFormList, ProFormGroup, ProFormText } from "@ant-design/pro-components";
 import viVN from "antd/lib/locale/vi_VN";
 import dayjs from "dayjs";
-import { callCreateFormatCV, callUpdateFormatCV, callFetchFormatCVById, callFetchCVTemplateById } from "@/config/api";
+import { callCreateFormatCV, callUpdateFormatCV, callFetchFormatCVById, callFetchCVTemplateById, callGptGenerateCV, callGptEvaluateCV } from "@/config/api";
 import { IFormatCV, IPersonalInformation } from "@/types/backend";
 import styles from "@/styles/cv.module.scss";
 
@@ -325,6 +325,184 @@ const LivePreviewCV = ({ form }: { form: any }) => {
     );
 };
 
+// Simple inline parser for **bold** text
+const parseInlineMarkdown = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={idx} style={{ color: '#000' }}>{part.slice(2, -2)}</strong>;
+        }
+        return part;
+    });
+};
+
+const MarkdownRenderer = ({ content }: { content: string }) => {
+    if (!content) return null;
+    
+    // Preprocess: remove empty lines that are sandwiched between table lines
+    const processedLines: string[] = [];
+    const rawLines = content.split('\n');
+    
+    const isTableLineRaw = (idx: number) => {
+        const trimmed = rawLines[idx]?.trim() || '';
+        if (!trimmed.includes('|')) return false;
+        if (trimmed.startsWith('|')) return true;
+        // Check if neighbors contain '|'
+        let hasNeighbor = false;
+        for (let j = idx - 1; j >= 0; j--) {
+            const t = rawLines[j].trim();
+            if (t !== '') {
+                hasNeighbor = t.includes('|');
+                break;
+            }
+        }
+        if (!hasNeighbor) {
+            for (let j = idx + 1; j < rawLines.length; j++) {
+                const t = rawLines[j].trim();
+                if (t !== '') {
+                    hasNeighbor = t.includes('|');
+                    break;
+                }
+            }
+        }
+        return hasNeighbor;
+    };
+
+    for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i];
+        const trimmed = line.trim();
+        if (trimmed === '') {
+            let prevTable = false;
+            for (let j = i - 1; j >= 0; j--) {
+                const prevTrimmed = rawLines[j].trim();
+                if (prevTrimmed !== '') {
+                    prevTable = isTableLineRaw(j);
+                    break;
+                }
+            }
+            let nextTable = false;
+            for (let j = i + 1; j < rawLines.length; j++) {
+                const nextTrimmed = rawLines[j].trim();
+                if (nextTrimmed !== '') {
+                    nextTable = isTableLineRaw(j);
+                    break;
+                }
+            }
+            if (prevTable && nextTable) {
+                continue; // Skip sandwiched empty line
+            }
+        }
+        processedLines.push(line);
+    }
+
+    const elements: React.ReactNode[] = [];
+    let inTable = false;
+    let tableRows: string[][] = [];
+    
+    const flushTable = (key: any) => {
+        if (tableRows.length === 0) return null;
+        
+        const hasSeparator = tableRows[1] && tableRows[1].every(cell => cell.trim().startsWith('-') || cell.trim() === '');
+        const headerRow = tableRows[0];
+        const bodyRows = hasSeparator ? tableRows.slice(2) : tableRows.slice(1);
+        
+        const renderedTable = (
+            <div key={key} style={{ overflowX: 'auto', margin: '16px 0', border: '1px solid #f0f0f0', borderRadius: '8px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#fafafa', borderBottom: '2px solid #f0f0f0' }}>
+                            {headerRow.map((cell, cIdx) => (
+                                <th key={cIdx} style={{ padding: '10px 12px', border: '1px solid #f0f0f0', textAlign: 'left', fontWeight: 600 }}>
+                                    {parseInlineMarkdown(cell.trim())}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {bodyRows.map((row, rIdx) => (
+                            <tr key={rIdx} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                {row.map((cell, cIdx) => (
+                                    <td key={cIdx} style={{ padding: '10px 12px', border: '1px solid #f0f0f0' }}>
+                                        {parseInlineMarkdown(cell.trim())}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+        
+        tableRows = [];
+        inTable = false;
+        return renderedTable;
+    };
+
+    const isTableLineProcessed = (idx: number) => {
+        const trimmed = processedLines[idx]?.trim() || '';
+        if (!trimmed.includes('|')) return false;
+        if (trimmed.startsWith('|')) return true;
+        const prev = processedLines[idx - 1]?.trim() || '';
+        const next = processedLines[idx + 1]?.trim() || '';
+        return prev.includes('|') || next.includes('|');
+    };
+
+    for (let i = 0; i < processedLines.length; i++) {
+        const line = processedLines[i];
+        const trimmed = line.trim();
+        
+        if (isTableLineProcessed(i)) {
+            inTable = true;
+            let cells = trimmed.split('|');
+            if (cells.length > 0 && cells[0] === '') cells.shift();
+            if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+            tableRows.push(cells);
+        } else {
+            if (inTable) {
+                const tbl = flushTable(`table-${i}`);
+                if (tbl) elements.push(tbl);
+            }
+            
+            if (trimmed.startsWith('###')) {
+                elements.push(<h4 key={i} style={{ marginTop: '20px', marginBottom: '8px', color: '#1f1f1f', fontWeight: 650, fontSize: '15px' }}>{trimmed.replace(/^###\s*/, '')}</h4>);
+            } else if (trimmed.startsWith('##')) {
+                elements.push(<h3 key={i} style={{ marginTop: '24px', marginBottom: '12px', color: '#111', fontWeight: 700, borderBottom: '1px solid #e8e8e8', paddingBottom: '4px', fontSize: '17px' }}>{trimmed.replace(/^##\s*/, '')}</h3>);
+            } else if (trimmed.startsWith('#')) {
+                elements.push(<h2 key={i} style={{ marginTop: '28px', marginBottom: '16px', color: '#111', fontWeight: 800, fontSize: '20px' }}>{trimmed.replace(/^#\s*/, '')}</h2>);
+            } else if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
+                const text = trimmed.replace(/^[-*]\s*/, '');
+                elements.push(
+                    <div key={i} style={{ paddingLeft: '12px', marginBottom: '6px', display: 'flex', alignItems: 'flex-start' }}>
+                        <span style={{ marginRight: '8px', color: '#fa541c', fontWeight: 'bold' }}>•</span>
+                        <span>{parseInlineMarkdown(text)}</span>
+                    </div>
+                );
+            } else if (/^\d+\.\s+/.test(trimmed)) {
+                const match = trimmed.match(/^(\d+\.)\s+(.*)/);
+                if (match) {
+                    elements.push(
+                        <div key={i} style={{ paddingLeft: '12px', marginBottom: '6px', display: 'flex', alignItems: 'flex-start' }}>
+                            <span style={{ marginRight: '8px', color: '#fa541c', fontWeight: 'bold' }}>{match[1]}</span>
+                            <span>{parseInlineMarkdown(match[2])}</span>
+                        </div>
+                    );
+                }
+            } else if (!trimmed) {
+                elements.push(<div key={i} style={{ height: '8px' }} />);
+            } else {
+                elements.push(<p key={i} style={{ marginBottom: '10px' }}>{parseInlineMarkdown(trimmed)}</p>);
+            }
+        }
+    }
+    
+    if (inTable) {
+        const tbl = flushTable(`table-eof`);
+        if (tbl) elements.push(tbl);
+    }
+    
+    return <div style={{ lineHeight: '1.7', fontSize: '14.5px', color: '#434343' }}>{elements}</div>;
+};
+
 const ViewUpsertCV = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -335,6 +513,144 @@ const ViewUpsertCV = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState<boolean>(true);
     const [cvData, setCvData] = useState<IFormatCV | null>(null);
+
+    // Modals state for AI
+    const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+    const [writeInputText, setWriteInputText] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const [isEvaluateModalOpen, setIsEvaluateModalOpen] = useState(false);
+    const [evaluationResult, setEvaluationResult] = useState("");
+    const [isEvaluating, setIsEvaluating] = useState(false);
+
+    // Load saved evaluation from localStorage
+    useEffect(() => {
+        const key = id ? `cv_evaluation_${id}` : `cv_evaluation_new`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            setEvaluationResult(saved);
+        } else {
+            setEvaluationResult("");
+        }
+    }, [id]);
+
+    const handleGenerateCV = async () => {
+        if (!writeInputText.trim()) {
+            message.warning("Vui lòng nhập thông tin thô của bạn!");
+            return;
+        }
+        setIsGenerating(true);
+        try {
+            const res = await callGptGenerateCV(writeInputText);
+            if (res && res.data) {
+                const data = res.data;
+                const parseDate = (dStr?: string) => {
+                    if (!dStr) return undefined;
+                    const d = dayjs(dStr);
+                    return d.isValid() ? d : undefined;
+                };
+
+                const mappedData = {
+                    title: data.title || form.getFieldValue("title") || "CV của tôi",
+                    theme: data.theme || form.getFieldValue("theme") || "brown",
+                    layoutKey: data.layoutKey || form.getFieldValue("layoutKey") || "two-column-right",
+                    sectionLayouts: form.getFieldValue("sectionLayouts") || defaultSections,
+                    cvTemplate: form.getFieldValue("cvTemplate"),
+                    personalInformations: data.personalInformations?.map((p: any) => ({
+                        ...p,
+                        dateOfBirth: parseDate(p.dateOfBirth)
+                    })) || [{}],
+                    careerObjectives: data.careerObjectives || [],
+                    educations: data.educations?.map((e: any) => ({
+                        ...e,
+                        startDate: parseDate(e.startDate),
+                        endDate: parseDate(e.endDate)
+                    })) || [],
+                    workExperiences: data.workExperiences?.map((w: any) => ({
+                        ...w,
+                        startDate: parseDate(w.startDate),
+                        endDate: parseDate(w.endDate)
+                    })) || [],
+                    technicalSkills: data.technicalSkills || [],
+                    softSkills: data.softSkills || [],
+                    projects: data.projects || [],
+                    certifications: data.certifications?.map((c: any) => ({
+                        ...c,
+                        issueDate: parseDate(c.issueDate)
+                    })) || [],
+                    activities: data.activities || [],
+                    languages: data.languages || [],
+                    hobbies: data.hobbies || []
+                };
+
+                form.setFieldsValue(mappedData);
+                message.success("AI đã điền thông tin CV thành công!");
+                setIsWriteModalOpen(false);
+                setWriteInputText("");
+            } else {
+                notification.error({
+                    message: "Lỗi sinh CV",
+                    description: "AI phản hồi không đúng cấu trúc"
+                });
+            }
+        } catch (error: any) {
+            notification.error({
+                message: "Lỗi AI",
+                description: error?.response?.data?.message || error.message || "Không thể sinh CV bằng AI"
+            });
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const handleEvaluateCV = async () => {
+        const currentValues = form.getFieldsValue();
+        const submitData = {
+            ...currentValues,
+            personalInformations: currentValues.personalInformations?.map((p: any) => ({
+                ...p,
+                dateOfBirth: p.dateOfBirth ? dayjs(p.dateOfBirth).format("YYYY-MM-DD") : null
+            })),
+            educations: currentValues.educations?.map((e: any) => ({
+                ...e,
+                startDate: e.startDate ? dayjs(e.startDate).format("YYYY-MM-DD") : null,
+                endDate: e.endDate ? dayjs(e.endDate).format("YYYY-MM-DD") : null
+            })),
+            workExperiences: currentValues.workExperiences?.map((w: any) => ({
+                ...w,
+                startDate: w.startDate ? dayjs(w.startDate).format("YYYY-MM-DD") : null,
+                endDate: w.endDate ? dayjs(w.endDate).format("YYYY-MM-DD") : null
+            })),
+            certifications: currentValues.certifications?.map((c: any) => ({
+                ...c,
+                issueDate: c.issueDate ? dayjs(c.issueDate).format("YYYY-MM-DD") : null
+            })),
+        };
+
+        setIsEvaluating(true);
+        setEvaluationResult("");
+        setIsEvaluateModalOpen(true);
+
+        try {
+            const res = await callGptEvaluateCV(submitData);
+            if (res && res.evaluation) {
+                const evalText = res.evaluation;
+                setEvaluationResult(evalText);
+                const key = id ? `cv_evaluation_${id}` : `cv_evaluation_new`;
+                localStorage.setItem(key, evalText);
+            } else {
+                setEvaluationResult("⚠️ Không nhận được kết quả đánh giá từ AI.");
+            }
+        } catch (error: any) {
+            setEvaluationResult("❌ Có lỗi xảy ra trong quá trình AI phân tích CV của bạn.");
+            notification.error({
+                message: "Lỗi đánh giá CV",
+                description: error?.response?.data?.message || error.message || "Không thể kết nối máy chủ AI"
+            });
+        } finally {
+            setIsEvaluating(false);
+        }
+    };
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -454,6 +770,11 @@ const ViewUpsertCV = () => {
                 const res = await callCreateFormatCV(submitData);
                 if (res.data) {
                     message.success("Tạo mới và lưu CV thành công");
+                    const tempEval = localStorage.getItem("cv_evaluation_new");
+                    if (tempEval && res.data.id) {
+                        localStorage.setItem(`cv_evaluation_${res.data.id}`, tempEval);
+                    }
+                    localStorage.removeItem("cv_evaluation_new");
                     navigate("/cv");
                 } else {
                     notification.error({
@@ -623,12 +944,46 @@ const ViewUpsertCV = () => {
 
     return (
         <div className={styles.upsertContainer}>
-            <div className={styles.editorHeader}>
+            <div className={styles.editorHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                     <div className={styles.backLink} onClick={() => navigate("/cv")}>
                         <LeftOutlined /> Quay lại danh sách CV
                     </div>
                     <h3>{id ? "Chỉnh sửa CV cá nhân" : "Viết CV mới từ mẫu"}</h3>
+                </div>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <Button
+                        type="default"
+                        icon={<ThunderboltOutlined style={{ color: "#389e0d" }} />}
+                        onClick={() => setIsWriteModalOpen(true)}
+                        style={{
+                            borderColor: "#389e0d",
+                            color: "#389e0d",
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            boxShadow: "0 2px 4px rgba(56, 158, 13, 0.1)"
+                        }}
+                    >
+                        AI Viết Nhanh
+                    </Button>
+                    <Button
+                        type="default"
+                        icon={<RobotOutlined style={{ color: "#fa541c" }} />}
+                        onClick={handleEvaluateCV}
+                        style={{
+                            borderColor: "#fa541c",
+                            color: "#fa541c",
+                            fontWeight: 500,
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            boxShadow: "0 2px 4px rgba(250, 84, 28, 0.1)"
+                        }}
+                    >
+                        AI Đánh Giá CV
+                    </Button>
                 </div>
             </div>
 
@@ -656,16 +1011,132 @@ const ViewUpsertCV = () => {
                         </div>
 
                         {/* Live Preview Column */}
-                        <div className={styles.rightPane}>
+                        <div className={styles.rightPane} style={{ overflowY: "auto", paddingRight: "4px" }}>
                             <div className={styles.previewTitle}>
                                 <EyeOutlined /> Bản xem trước Live Preview (Khổ A4)
                             </div>
-                            <div className={styles.scrollContainer}>
+                            <div className={styles.scrollContainer} style={{ flexGrow: 0, height: "550px", marginBottom: "12px" }}>
                                 <LivePreviewCV form={form} />
                             </div>
+
+                            {/* Persistent AI Evaluation Section */}
+                            {evaluationResult && (
+                                <div style={{ 
+                                    background: "#fff", 
+                                    border: "1px solid #fa541c", 
+                                    borderRadius: "8px", 
+                                    padding: "16px",
+                                    boxShadow: "0 4px 12px rgba(250, 84, 28, 0.08)",
+                                    marginBottom: "16px"
+                                }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f0f0f0", paddingBottom: "8px", marginBottom: "12px" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "14px", fontWeight: 600, color: "#fa541c" }}>
+                                            <RobotOutlined />
+                                            <span>Báo cáo đánh giá AI hiện tại</span>
+                                        </div>
+                                        <Button 
+                                            type="link" 
+                                            danger 
+                                            size="small" 
+                                            onClick={() => {
+                                                const key = id ? `cv_evaluation_${id}` : `cv_evaluation_new`;
+                                                localStorage.removeItem(key);
+                                                setEvaluationResult("");
+                                            }}
+                                            style={{ padding: 0, height: "auto" }}
+                                        >
+                                            Xóa
+                                        </Button>
+                                    </div>
+                                    <div style={{ fontSize: "13px" }}>
+                                        <MarkdownRenderer content={evaluationResult} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </ProForm>
+
+                {/* AI Modals */}
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "16px", color: "#389e0d" }}>
+                            <ThunderboltOutlined />
+                            <span>AI Hỗ Trợ Tạo CV Nhanh</span>
+                        </div>
+                    }
+                    open={isWriteModalOpen}
+                    onOk={handleGenerateCV}
+                    onCancel={() => {
+                        if (!isGenerating) {
+                            setIsWriteModalOpen(false);
+                            setWriteInputText("");
+                        }
+                    }}
+                    confirmLoading={isGenerating}
+                    okText="Sinh CV & Tự Điền"
+                    cancelText="Hủy bỏ"
+                    okButtonProps={{
+                        style: { backgroundColor: "#389e0d", borderColor: "#389e0d" }
+                    }}
+                    width={650}
+                >
+                    <div style={{ margin: "16px 0" }}>
+                        <p style={{ color: "#595959", fontSize: "13px", marginBottom: "12px" }}>
+                            Nhập các thông tin cá nhân, học vấn, kinh nghiệm làm việc và kỹ năng của bạn dưới dạng ngôn ngữ tự nhiên. AI sẽ tự động phân tích và điền vào các ô trong form biên tập CV.
+                        </p>
+                        <Input.TextArea
+                            rows={8}
+                            value={writeInputText}
+                            onChange={(e) => setWriteInputText(e.target.value)}
+                            placeholder="Ví dụ: tôi tên là Trần Văn Nam, sinh ngày 20/05/2001. Địa chỉ ở Cầu Giấy, Hà Nội. Số điện thoại: 0912345678, email namtv@gmail.com. Tôi đã học Đại học Công nghệ UET chuyên ngành Kỹ thuật phần mềm từ 2019 đến 2023, GPA 3.4. Có kinh nghiệm 1 năm làm Backend NodeJS Developer tại công ty ABC từ 06/2023 đến nay. Kỹ năng gồm: Javascript, Node.js, Express, MongoDB, Git. Có chứng chỉ IELTS 6.5 cấp năm 2023."
+                            disabled={isGenerating}
+                            style={{ borderRadius: "6px", fontSize: "13.5px" }}
+                        />
+                        <div style={{ marginTop: "10px", color: "#faad14", fontSize: "12px" }}>
+                            ⚠️ Lưu ý: Khi áp dụng, thông tin hiện tại trên form sẽ được thay thế bằng dữ liệu mới do AI sinh ra.
+                        </div>
+                    </div>
+                </Modal>
+
+                <Modal
+                    title={
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "16px", color: "#fa541c" }}>
+                            <AuditOutlined />
+                            <span>AI Đánh Giá & Chấm Điểm CV</span>
+                        </div>
+                    }
+                    open={isEvaluateModalOpen}
+                    onCancel={() => {
+                        if (!isEvaluating) {
+                            setIsEvaluateModalOpen(false);
+                        }
+                    }}
+                    footer={[
+                        <Button key="close" type="primary" onClick={() => setIsEvaluateModalOpen(false)} style={{ backgroundColor: "#fa541c", borderColor: "#fa541c" }}>
+                            Đóng báo cáo
+                        </Button>
+                    ]}
+                    width={800}
+                >
+                    <div style={{ margin: "20px 0", maxHeight: "60vh", overflowY: "auto", paddingRight: "8px" }}>
+                        {isEvaluating ? (
+                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "250px", gap: 16 }}>
+                                <Spin size="large" />
+                                <div style={{ color: "#595959", textAlign: "center" }}>
+                                    <p style={{ fontWeight: 500, color: "#fa541c", margin: 0 }}>AI đang tiến hành phân tích CV...</p>
+                                    <p style={{ fontSize: "12.5px", color: "#8c8c8c", marginTop: "4px" }}>
+                                        Đang đối chiếu thông tin kỹ năng của bạn với các tin tuyển dụng thực tế trong hệ thống (Qdrant Vector DB)...
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ background: "#fafafa", padding: "20px", borderRadius: "8px", border: "1px solid #f0f0f0" }}>
+                                <MarkdownRenderer content={evaluationResult} />
+                            </div>
+                        )}
+                    </div>
+                </Modal>
             </ConfigProvider>
         </div>
     );

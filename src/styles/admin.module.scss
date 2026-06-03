@@ -1,3 +1,5 @@
+@import 'variables.scss';
+
 .upsert-job-container {
     background-color: white;
     padding: 10px 30px;
@@ -7,5 +9,63 @@
 
     .title {
         padding: 10px 0 20px 0;
+    }
+}
+
+// Layout Admin styling overrides matching the target project
+:global(.layout-admin) {
+    .ant-layout-sider {
+        background-color: #ffffff !important;
+    }
+
+    .ant-menu-item-selected {
+        background: linear-gradient(90deg, rgba(20, 55, 47, 0.08) 0%, rgba(20, 55, 47, 0.01) 100%) !important;
+        color: #14372f !important;
+        position: relative;
+        font-weight: 600;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            background-color: #14372f;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        &::after {
+            display: none !important; // Hide Ant Design default right indicator
+        }
+
+        a {
+            color: #14372f !important;
+        }
+    }
+    
+    .ant-menu-item {
+        border-radius: 8px !important;
+        margin: 4px 12px !important;
+        width: calc(100% - 24px) !important;
+        transition: all 0.2s ease-in-out;
+        
+        &:hover {
+            background-color: rgba(20, 55, 47, 0.04) !important;
+            color: #14372f !important;
+        }
+
+        .ant-menu-item-icon {
+            font-size: 16px;
+        }
+
+        a:hover {
+            color: #14372f !important;
+        }
+    }
+
+    // Header styling
+    .admin-header {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
     }
 }

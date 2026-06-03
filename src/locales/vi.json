@@ -8,7 +8,8 @@
         "dashboard": "Quản Lý",
         "logout": "Đăng Xuất",
         "welcome": "Xin chào",
-        "admin": "Trang Quản Trị"
+        "admin": "Trang Quản Trị",
+        "history": "Lịch sử ứng tuyển"
     },
     "home": {
         "categories": {

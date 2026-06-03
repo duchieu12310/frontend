@@ -47,6 +47,13 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PUT", apiPath: '/api/v1/cv-templates', module: "CV_TEMPLATES" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/cv-templates/{id}', module: "CV_TEMPLATES" },
     },
+    EDIT_REQUESTS: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/edit-requests', module: "EDIT_REQUESTS" },
+        CREATE: { method: "POST", apiPath: '/api/v1/edit-requests', module: "EDIT_REQUESTS" },
+        APPROVE: { method: "POST", apiPath: '/api/v1/edit-requests/{id}/approve', module: "EDIT_REQUESTS" },
+        REJECT: { method: "POST", apiPath: '/api/v1/edit-requests/{id}/reject', module: "EDIT_REQUESTS" },
+        REVISION: { method: "POST", apiPath: '/api/v1/edit-requests/{id}/revision', module: "EDIT_REQUESTS" },
+    },
 }
 
 export const ALL_MODULES = {
@@ -59,5 +66,6 @@ export const ALL_MODULES = {
     USERS: 'USERS',
     SUBSCRIBERS: 'SUBSCRIBERS',
     FORMAT_CVS: 'FORMAT_CVS',
-    CV_TEMPLATES: 'CV_TEMPLATES'
+    CV_TEMPLATES: 'CV_TEMPLATES',
+    EDIT_REQUESTS: 'EDIT_REQUESTS'
 }
